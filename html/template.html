@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+
+    <title><%section name="pagetitle"%></title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!-- <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet"> -->
+
+    <!-- Custom styles for this template -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <!-- <script src="../../assets/js/ie-emulation-modes-warning.js"></script> -->
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <%section name="customCSS"%>
+  </head>
+
+  <body>
+
+    <nav class="main-nav navbar navbar-inverse hidden-print">
+      <div class="container">
+        <div class="navbar-header">
+          <a href='http://www.gla.ac.uk/'><img class="uog-logo hidden-xs" src="http://www.gla.ac.uk/0t4/generic/images/logo.gif" alt="UoG"/></a>
+          <a href='<%section name="homeURL"%>'><img src='<%section name="logoURL"%>' alt="GUSTTO"/></a>
+        </div>
+
+        <!-- User Settings btn-group pull-right -->
+        <div class="btn-group user-button-group pull-right">
+          <a role="button" class="btn btn-primary dropdown-toggle user-button header-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-user"></span><span class="header-user-name hidden-xs "> <%section name="userLoggedIn"%> </span><span class="caret"></span>
+          </a>
+          
+          <div class="dropdown-menu user-button-menu">
+            <ul>
+              <li class="logout-dropdown-item"><a class="dropdown-item" href="login.php?logout=1">Log out</a></li>              
+            </ul>
+          </div>
+            
+        </div>
+        <!-- end btn-group pull-right -->
+
+
+        <!-- Notifications  btn-group pull-right -->
+        <div class="btn-group notification-button-group">
+          <a role="button" class="btn btn-primary dropdown-toggle notification-button header-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-bullhorn"></span><span class="header-notificationNo"> (<%section name="notificationNo"%>) </span><span class="caret"></span>
+          </a>
+          
+          <div class="dropdown-menu notification-menu-wrapper">
+            <div class="arrow_box-up-notifications" style="right: 25px !important;"></div> 
+            <div class="notification-menu"> 
+            <%section name="notifications"%>
+            </div>
+            <a class="notification-view-all col-xs-12" href="notifications.php">View all notifications</a>
+          </div>
+          
+            
+        </div>
+        <!-- end btn-group pull-right -->
+
+      </div>
+    </nav>
+
+    <div class="nav-bar-xs container-fluid visible-xs hidden-print">
+      <div class="row navbar-wrapper">
+        <div class="nav-bar-xs-item nav-bar-xs-home col-xs-3"><a href="index.php" class="btn glyphicon glyphicon-home"></a></div>
+        <div class="nav-bar-xs-item nav-bar-xs-search col-xs-3"><a href="search.php" class="btn glyphicon glyphicon-search"></a></div>
+        <div class="nav-bar-xs-item nav-bar-xs-add col-xs-3"><a href="teaching_tip_add.php" class="btn glyphicon glyphicon-plus"></a></div>
+        <div class="nav-bar-xs-item nav-bar-xs-drop btn-group col-xs-3">
+          <a role="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphicon glyphicon-triangle-bottom"></span>
+          </a>
+          <div class="dropdown-menu user-button-menu-xs">
+            <ul>
+              <li>
+                <div class="nav-bar-xs-profile">
+                  <a href='<%section name="profileLink"%>'><span class="glyphicon glyphicon-user"></span> My profile</a>
+                </div>
+              </li>
+              <li>
+                <div class="nav-bar-xs-tts">
+                  <a href="myteachingtips.php"><span class="glyphicon glyphicon-blackboard"></span> My teaching tips</a>
+                </div>
+              </li>
+              <li>
+                <div class="nav-bar-xs-activity">
+                  <a href="myactivity.php"><span class="glyphicon glyphicon-thumbs-up"></span> My activity</a>
+                </div>
+              </li>
+              <li>
+                <div class="nav-bar-xs-settings">
+                  <a href="settings.php"><span class="glyphicon glyphicon-cog"></span> My settings</a>
+                </div>
+              </li>         
+             </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content container">
+      <div class="row">
+        <%section name="loginBox" div_id="loginBox"%>
+
+        <!-- content section -->
+        <%section name="content"%>
+        <!-- end content section -->
+
+        <!-- <%section name="sidebar"%> -->
+        <div class="sidebar-wrapper col-sm-3 hidden-xs hidden-print">
+          <div class="card sidebar">
+            <div class="sidebar-header">
+              <h4>Navigation</h4>
+            </div>
+            <ul>
+              <li class="<%section name="navHome"%>"><a href="index.php"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+              <li class="<%section name="navProfile"%>"><a href=<%section name="profileLink"%> ><span class="glyphicon glyphicon-user"></span> My profile</a></li>
+              <li class="<%section name="navTTs"%>"><a href="myteachingtips.php"><span class="glyphicon glyphicon-blackboard"></span> My teaching tips</a></li>
+              <li class="<%section name="navActivity"%>"><a href="myactivity.php"><span class="glyphicon glyphicon-thumbs-up"></span> My activity</a></li>
+              <li class="<%section name="navSettings"%>"><a href="settings.php"><span class="glyphicon glyphicon-cog"></span> My settings</a></li>
+            </ul>
+          </div> <!-- Navigation End -->
+          
+          <div class="card sidebar sidebar-search">
+            <div class="sidebar-header">
+              <h4>Search</h4>
+            </div>
+            <ul>
+              <li class="<%section name="navSearch"%>"><a href="search.php"><span class="glyphicon glyphicon-search"></span> Advanced search</a></li>
+              <li>
+                
+                <div class="sidebar-search-box">
+                  <div class="quick-search-header">Quick Search</div>
+                  <form action="search.php" method="get">
+                  <input type="text" class="sidebar-search-input form-control" id="tt-search-input" placeholder="Search for..." name="q" autocomplete="off">
+                  </form>
+                  <div id="tt-qsearch-results" role="menu">
+                    <ul id="tts_result">
+                              
+                    </ul>
+                    <ul id="users_result">
+                    </ul>
+                  </div>
+                </div><!-- /input-group -->
+                  
+              </li>
+            </ul>
+          </div> <!-- Search End -->
+          <div>
+            <a href="teaching_tip_add.php" type="button" id="addTTButton" class="btn btn-block btn-default"><span class="glyphicon glyphicon-plus"></span> New Teaching Tip</a>
+            <a href="what_is_a_tt.php" type="button" id="whatisaTTButton" class="btn btn-block btn-default">What is a Teaching Tip?</a>
+          </div>
+        </div>
+        
+
+        
+      </div>
+    </div><!-- /.container -->
+
+    <div class="footer-wrapper container-fluid hidden-print">
+      <div class="footer">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-6 footer-info">
+              <a id="homePage-link" href="index.php">Home</a>
+              <span class="footer-separator"> . </span>
+              <a id="aboutPage-link" href="about.php">About</a>
+              <span class="footer-separator"> . </span>
+              <a id="ethicsPage-link" href="ethics.php">Ethics</a>
+            </div>
+            <div class="col-xs-6 footer-info">
+              <%section name='logoutLink'%>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> -->
+
+    <script src="js/functions.js"></script>
+
+    <%section name="customJS"%>
+  </body>
+</html>
