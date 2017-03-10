@@ -19,6 +19,7 @@ else $url = "index.php";
 
 $uinfo = checkLoggedInUser();
 $dbUser = getUserRecord($uinfo, false);
+$_SESSION['last_visit'] = $dbUser->last_visit;
 
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online'; 
 $template->pageData['homeURL'] = 'index.php';

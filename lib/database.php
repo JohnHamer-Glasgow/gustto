@@ -266,9 +266,9 @@ class user
 		} else return false;
 	}
 
-	// get the number of new tts (published since the user last logged in)
-	function get_number_new_tts() {
-		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip as tt WHERE tt.time > '". dataConnection::time2db($this->last_visit) ."' AND tt.author_id <> '". dataConnection::safe($this->id) ."' AND archived = 0 AND draft = 0";
+	// get the number of new tts (published by someone else since a given timestamp)
+	function get_number_new_tts($since) {
+		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip as tt WHERE tt.time > '". dataConnection::time2db($since) ."' AND tt.author_id <> '". dataConnection::safe($this->id) ."' AND archived = 0 AND draft = 0";
 		$result = dataConnection::runQuery($query);
 		return $result[0]['number_tts'];
 	}

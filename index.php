@@ -25,8 +25,8 @@ if($uinfo==false)
 }
 else
 {
-
-	$username = $uinfo['uname'];
+  session_start();
+  $username = $uinfo['uname'];
   $givenname = $uinfo['gn'];
   $surname = $uinfo['sn'];
 
@@ -46,9 +46,9 @@ else
   $user = user::retrieve_user($loggedUserID);
 
   // get the last visit datetime in order to get the number of new TTs
-  $new_tts_number = $user->get_number_new_tts();
-//  $user->last_visit = time();
-//  $user->update();
+  $new_tts_number = $user->get_number_new_tts(isset($_SESSION['last_visit']) ? $_SESSION['last_visit'] : $user->last_visit);
+  // $user->last_visit = time();
+  // $user->update();
 
 	//Content
 
@@ -193,12 +193,14 @@ else
   }
 
 
+  $nUsers = user::get_number_users();
+  $nUsersSpan = $nUsers == 1 ? 'There is one user' : "There are $nUsers users";
+  $nTTs = teachingtip::get_number_tts();
+  $nTTsSpan = $nTTs == 1 ? 'one Teaching Tip' : "$nTTs Teaching Tips"; 
   $template->pageData['content'].= '          
             <div class="row feed-row">
-              <div class="col-xs-12 total-number-tts-users">
-                There are <span>'. user::get_number_users() .' Users</span> and <span>'. teachingtip::get_number_tts() .' Teaching Tips</span> ('. $new_tts_number .' new since your last visit)
-              </div>
-              
+              <div class="col-xs-12 total-number-tts-users"><span>' . $nUsersSpan . '<span> and <span>' . $nTTsSpan . '</span> (' . $new_tts_number . ' new since your last visit)
+              </div>              
               <div class="col-xs-12 feed-tts">';
   
   // Teaching Tips Printing
