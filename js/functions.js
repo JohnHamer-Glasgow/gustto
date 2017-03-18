@@ -811,7 +811,7 @@ $(document).ready(function () {
             $('.notification-menu').html(htmlDecode(notifications));
           
           })
-  },1000);
+  },1000 * 60);
 
   // Notification Mark all as read
   $('#allRead').click(function(){

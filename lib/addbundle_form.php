@@ -160,4 +160,3 @@ class addbundle_form extends nbform
 	}
 
 }
-

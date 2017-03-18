@@ -2,51 +2,48 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once(__DIR__.'/config.php');
-require_once(__DIR__.'/lib/database.php');
-require_once(__DIR__.'/lib/sharedfunctions.php');
-require_once(__DIR__.'/corelib/dataaccess.php');
-$template = new templateMerge($TEMPLATE);
-
-session_start();
+require_once(__DIR__ . '/config.php');
+require_once(__DIR__ . '/lib/database.php');
+require_once(__DIR__ . '/lib/sharedfunctions.php');
+require_once(__DIR__ . '/corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
-$dbUser = getUserRecord($uinfo);
-$loggedUserID = $dbUser->id;
+if ($uinfo == false) {
+  header("Location: login.php");
+  exit();
+}
 
+$template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
 
-$_SESSION['url'] = $_SERVER['REQUEST_URI']; // current location (used for redirecting after login if user is not logged in)
+session_start();
 
-if($uinfo==false){
-		header("Location: login.php");
-		exit();
-}else{
-    if (!isset($_SESSION['csrf_token'])) {
-      $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
-    }
-  
+$_SESSION['url'] = $_SERVER['REQUEST_URI'];
 
-  //Drop Down menu
-	
-  $user = user::retrieve_user($loggedUserID);
-	$loggedUserName =  $uinfo['gn'];
-	$loggedUserLastname = $uinfo['sn'];
-  
-	$template->pageData['userLoggedIn'] = $loggedUserName.' '.$loggedUserLastname ;
-	$template->pageData['profileLink'] = "profile.php?usrID=".$loggedUserID;
+if (!isset($_SESSION['csrf_token']))
+  $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
+ 
+$dbUser = getUserRecord($uinfo);
+$loggedUserID = $dbUser->id;
 
-  $template->pageData['navActivity'] = 'sidebar-current-page';
+$user = user::retrieve_user($loggedUserID);
+$loggedUserName = $uinfo['gn'];
+$loggedUserLastname = $uinfo['sn'];
 
-  //Notifications
-  if (notification::getNotifications($loggedUserID,false,0) == false) $notificationNo = 0;
-  else $notificationNo = sizeof(notification::getNotifications($loggedUserID,false,0));
-  $template->pageData['notificationNo'] = $notificationNo;
-  $template->pageData['notifications'] = notifications($dbUser);
+$template->pageData['userLoggedIn'] = $loggedUserName.' ' . $loggedUserLastname ;
+$template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
+$template->pageData['navActivity'] = 'sidebar-current-page';
 
-    $template->pageData['content'].='
+if (notification::getNotifications($loggedUserID, false, 0) == false)
+  $notificationNo = 0;
+else
+  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
+$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notifications'] = notifications($dbUser);
+
+$template->pageData['content'] .= '
     <div class="col-xs-12 col-sm-9">
       	<div class="card myactivity-card">
           	<div class="main-header">
@@ -81,148 +78,114 @@ if($uinfo==false){
                   <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-shared"></div>
     						</li>
     					  </ul>
-    					</div> <!-- end group -->
-    					</div> <!-- extra -->
+    					</div>
+    					</div>
     				</div>';
 
-      //Retrieve data based on the user for myactivity page
-      $myLikes = $user->getLikes();
-      $myComments = $user->getComments();
-      $myShares = $user->getShares();
-      //Pass all the data to a 2D Array
-      $activity = array();
-      if(is_array($myLikes)){
-        foreach($myLikes as $like){
-          $temp = [$like->time,$like];
-          array_push($activity, $temp);
-        }
-      }
-      if(is_array($myShares)){
-        foreach($myShares as $share){
-          $temp = [$share->time,$share];
-          array_push($activity, $temp);
-        }
-      }
-      if(is_array($myComments)){
-        foreach($myComments as $comment){
-          $temp = [commentTime($comment->comment_id),$comment];
-          array_push($activity, $temp);
-        }
-      }
+$myLikes = $user->getLikes();
+$myComments = $user->getComments();
+$myShares = $user->getShares();
+$activity = array();
+if (is_array($myLikes)) {
+  foreach ($myLikes as $like) {
+    $temp = [$like->time, $like];
+    array_push($activity, $temp);
+  }
+}
 
-      // User Defined Sort -- Sort data based on the time
-      function cmp($a,$b){
-        return $b[0] - $a[0];
-      }
-      usort($activity,"cmp");
+if (is_array($myShares)) {
+  foreach ($myShares as $share){
+    $temp = [$share->time, $share];
+    array_push($activity, $temp);
+  }
+}
 
-      //flags to print message
-      $likeMin = true;
-      $commentMin = true;
-      $shareMin = true;
-      //Check if there is an activity to print
-      if (sizeof($activity)==0){
-        $template->pageData['content'].='<div class="no-activity"><strong>There is no recent activity!</strong></div>';
-      }else{
-        //Loop the data and check the object type
-        foreach($activity as $act){
-          $activity_tt = teachingtip::retrieve_teachingtip($act[1]->teachingtip_id) ;
-          $activity_author = user::retrieve_user($activity_tt->author_id);
-          $activity_time = date('H:i d M y',$act[1]->time);  //conversion
-          if($act[1] instanceof user_likes_tt){
-            $likeMin = false; 
-            $like_id = $act[1]->id;
-            $template->pageData['content'].='
+if (is_array($myComments)) {
+  foreach($myComments as $comment){
+    $temp = [commentTime($comment->comment_id), $comment];
+    array_push($activity, $temp);
+  }
+}
+
+function cmp($a, $b) { return $b[0] - $a[0]; }
+usort($activity, "cmp");
+
+$likeMin = true;
+$commentMin = true;
+$shareMin = true;
+if (sizeof($activity) == 0)
+  $template->pageData['content'] .= '<div class="no-activity"><strong>There is no recent activity!</strong></div>';
+else {
+  foreach ($activity as $act) {
+    $activity_tt = teachingtip::retrieve_teachingtip($act[1]->teachingtip_id) ;
+    $activity_author = user::retrieve_user($activity_tt->author_id);
+    $activity_time = date('H:i d M y', $act[1]->time);  //conversion
+    if ($act[1] instanceof user_likes_tt) {
+      $likeMin = false; 
+      $like_id = $act[1]->id;
+      $template->pageData['content'] .= '
             <div class="row liked-row-wrapper activity like-activity">
               <div class="col-xs-12 activity-text-wrapper">
                 
                   <span class="glyphicon glyphicon-thumbs-up liked-like"></span>
                   You liked 
-                  <a class="liked-info-user" href="profile.php?usrID='.$activity_author->id.'">'.$activity_author->name.' '.$activity_author->lastname.'</a>\'s post, 
-                  <a class="liked-info-title" href="teaching_tip.php?ttID='.$activity_tt->id.'">'.$activity_tt->title.'</a>
-                  <span class="liked-info-time">'.$activity_time.'</span>
-                
+                  <a class="liked-info-user" href="profile.php?usrID=' . $activity_author->id . '">' . $activity_author->name . ' ' . $activity_author->lastname . '</a>\'s post, 
+                  <a class="liked-info-title" href="teaching_tip.php?ttID=' . $activity_tt->id . '">' . $activity_tt->title . '</a>
+                  <span class="liked-info-time">' . $activity_time . '</span>
               </div>
-            </div> <!-- END ROW -->';
+            </div>';
+    }
 
-          }
-
-
-          if($act[1] instanceof user_comments_tt){
-            $commentMin = false; 
-            //Different variable as it is stored in different table
-            $activity_time = date('H:i d M y',commentTime($act[1]->comment_id));
-            $comment_id = $act[1]->comment_id;
-            $comment = ttcomment::retrieve_ttcomment($comment_id);
-            $template->pageData['content'].='
+    if ($act[1] instanceof user_comments_tt) {
+      $commentMin = false; 
+      $activity_time = date('H:i d M y', commentTime($act[1]->comment_id));
+      $comment_id = $act[1]->comment_id;
+      $comment = ttcomment::retrieve_ttcomment($comment_id);
+      $template->pageData['content'] .= '
             <div class="row commented-row-wrapper activity comment-activity">
               <div class="col-xs-12 activity-text-wrapper">
-                
                   <span class="glyphicon glyphicon-comment liked-like"></span>
                   You commented 
-                  "<div class="activity-comment-text">'.$comment->comment.'</div>"
-                  on <a class="liked-info-user" href="profile.php?usrID='.$activity_author->id.'">'.$activity_author->name.' '.$activity_author->lastname.'</a>\'s post, 
-                  <a class="liked-info-title" href="teaching_tip.php?ttID='.$activity_tt->id.'">'.$activity_tt->title.'</a>
-                  <span class="liked-info-time">'.$activity_time.'</span>
+                  "<div class="activity-comment-text">' . $comment->comment . '</div>"
+                  on <a class="liked-info-user" href="profile.php?usrID=' . $activity_author->id . '">' . $activity_author->name . ' ' . $activity_author->lastname . '</a>\'s post, 
+                  <a class="liked-info-title" href="teaching_tip.php?ttID=' . $activity_tt->id . '">' . $activity_tt->title . '</a>
+                  <span class="liked-info-time">' . $activity_time . '</span>
                 
               </div>
-            </div> <!-- END ROW -->';
+            </div>';
+    }
 
-          }
-
-
-          if($act[1] instanceof user_shares_tt){
-            $shareMin = false; 
-            $share_id = $act[1]->id;
-            $template->pageData['content'].='
+    if ($act[1] instanceof user_shares_tt) {
+      $shareMin = false; 
+      $share_id = $act[1]->id;
+      $template->pageData['content'] .= '
           <div class="row shared-row-wrapper activity share-activity">
                   <div class="col-xs-12 activity-text-wrapper">
-                    
                       <span class="glyphicon glyphicon-share-alt liked-like"></span>
                       You shared 
-                      <a class="liked-info-user" href="profile.php?usrID='.$activity_author->id.'">'.$activity_author->name.' '.$activity_author->lastname.'</a>\'s post, 
-                      <a class="liked-info-title" href="teaching_tip.php?ttID='.$activity_tt->id.'">'.$activity_tt->title.'</a>
-                      <span class="liked-info-time">'.$activity_time.'</span>
-                    
-                    
+                      <a class="liked-info-user" href="profile.php?usrID=' . $activity_author->id . '">' . $activity_author->name . ' ' . $activity_author->lastname . '</a>\'s post, 
+                      <a class="liked-info-title" href="teaching_tip.php?ttID=' . $activity_tt->id . '">' . $activity_tt->title . '</a>
+                      <span class="liked-info-time">' . $activity_time . '</span>
                   </div>
-                </div> <!-- END ROW -->';
-
-          }
-        }
-      } // end of activity
-
-
-      //Checks for activity drop down messages
-      if ($likeMin){
-        $template->pageData['content'].='<div class="no-like-activity "><strong>There is no like activity!</strong></div>';
-      }
-
-      if ($commentMin){
-        $template->pageData['content'].='<div class="no-comment-activity"><strong>There is no comment activity!</strong></div>';
-      }
-
-      if ($shareMin){
-        $template->pageData['content'].='<div class="no-share-activity"><strong>There is no share activity!</strong></div>';
-      }
-
-
-
-
-    	$template->pageData['content'].='
-              	</div> <!-- end main-header -->
-              </div> <!-- end card -- >
-          </div>';
-
-
-      $template->pageData['logoutLink'] = loginBox($uinfo);
-
-
-
+                </div>';
+    }
+  }
 }
 
+if ($likeMin)
+  $template->pageData['content'] .= '<div class="no-like-activity "><strong>There is no like activity!</strong></div>';
+
+if ($commentMin)
+  $template->pageData['content'] .= '<div class="no-comment-activity"><strong>There is no comment activity!</strong></div>';
+
+if ($shareMin)
+  $template->pageData['content'] .= '<div class="no-share-activity"><strong>There is no share activity!</strong></div>';
+
+$template->pageData['content'] .= '
+              	</div>
+              </div>
+          </div>';
+
+$template->pageData['logoutLink'] = loginBox($uinfo);
 
 echo $template->render();
-
-
-?>

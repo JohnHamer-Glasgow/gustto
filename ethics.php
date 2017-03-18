@@ -36,10 +36,5 @@ $template->pageData['content'] .=
 		    </div>
 		</div>
 	</div>';
-    
-
 
 echo $template->render();
-
-
-?>

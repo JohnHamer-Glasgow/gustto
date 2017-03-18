@@ -1,49 +1,49 @@
 <?php
 
-// Get the user object for the database user record of a logged in user,
-// and create it if it doesn't exist.
+// Get the user object for the database user record of a logged in
+// user, and create it if it doesn't exist.
 function getUserRecord($uinfo)
 {
-    $dbUser = user::retrieve_by_username($uinfo['uname']);
-    if($dbUser == false && !empty($uinfo['uname']) && !empty($uinfo['gn']) && !empty($uinfo['sn']) && !empty($uinfo['email'])) // not found in database, so create a new record
-    {
-        $dbUser = new user();
-        $dbUser->username = $uinfo['uname'];
-        $dbUser->name = $uinfo['gn'];
-        $dbUser->lastname = $uinfo['sn'];
-        $dbUser->email = $uinfo['email'];
-        $dbUser->profile_picture = 'images/profile-placeholder.jpg';
-        $dbUser->esteem = 0;
-        $dbUser->engagement = 0;
-        $dbUser->joindate = time();
-        $dbUser->lastaccess = time();
-        $dbUser->last_visit = time();
-        $userID = $dbUser->insert();
+  $dbUser = user::retrieve_by_username($uinfo['uname']);
+  if($dbUser == false && !empty($uinfo['uname']) && !empty($uinfo['gn']) && !empty($uinfo['sn']) && !empty($uinfo['email'])) {
+    // User not found in database, so create a new record
+    $dbUser = new user();
+    $dbUser->username = $uinfo['uname'];
+    $dbUser->name = $uinfo['gn'];
+    $dbUser->lastname = $uinfo['sn'];
+    $dbUser->email = $uinfo['email'];
+    $dbUser->profile_picture = 'images/profile-placeholder.jpg';
+    $dbUser->esteem = 0;
+    $dbUser->engagement = 0;
+    $dbUser->joindate = time();
+    $dbUser->lastaccess = time();
+    $dbUser->last_visit = time();
+    $userID = $dbUser->insert();
 
-        // create an entry for the new user in user_settings table
-        // weekly digest for all by default
-        $user_settings = new user_settings();
-        $user_settings->user_id = $userID;
-        $user_settings->school_posts = 2;
-        $user_settings->tts_activity = 2;
-        $user_settings->followers_posts = 2;
-        $user_settings->awards = 2;
-        $user_settings->insert();
+    // create an entry for the new user in user_settings table
+    // weekly digest for all by default
+    $user_settings = new user_settings();
+    $user_settings->user_id = $userID;
+    $user_settings->school_posts = 2;
+    $user_settings->tts_activity = 2;
+    $user_settings->followers_posts = 2;
+    $user_settings->awards = 2;
+    $user_settings->insert();
 
-        // check if the new user is a contributor to any tts (added by email)
-        // if so, update the corresponding rows in the contributors table to include the user id
-        $contr = contributors::retrieve_contributors_matching('email', $uinfo['email']);
-        foreach ($contr as $c) {
-            $c->user_id = $userID;
-            $c->email = "";
-            $c->update();
-        }
-
-    } elseif($dbUser) {
-        $dbUser->lastaccess = time();
-        $dbUser->update();
+    // check if the new user is a contributor to any tts (added by email)
+    // if so, update the corresponding rows in the contributors table to include the user id
+    $contr = contributors::retrieve_contributors_matching('email', $uinfo['email']);
+    foreach ($contr as $c) {
+      $c->user_id = $userID;
+      $c->email = "";
+      $c->update();
     }
-    return $dbUser;
+  } elseif($dbUser) {
+    $dbUser->lastaccess = time();
+    $dbUser->update();
+  }
+
+  return $dbUser;
 }
 
 
@@ -1125,8 +1125,3 @@ function sendWeeklyDigest($notifications) {
     if(mail($to, $subject, $body, $headers)) return true;
     return false;
 }
-
-?>
-
-
-

@@ -154,4 +154,3 @@ class templateMerge {//start class
   }// end decodeParams()
 
 }// end class
-?>

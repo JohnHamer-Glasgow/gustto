@@ -112,5 +112,3 @@ $GLOBALS['ENGAGEMENT_COMMENT'] = $settings->engagement_comment;         // engag
 $GLOBALS['ENGAGEMENT_SHARE'] = $settings->engagement_share;             // engagement points when one of the user's TT is shared by other user
 $GLOBALS['ENGAGEMENT_VIEW'] = $settings->engagement_view;               // engagement points when user views another user's TT
 $GLOBALS['ENGAGEMENT_FOLLOW'] = $settings->engagement_follow;           // engagement points when user follows another user
-
-?>

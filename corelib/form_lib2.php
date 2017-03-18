@@ -472,5 +472,3 @@ abstract class nbform
 	    return strftime("%d/%m/%Y", $in);
 	}
 }
-
-?>

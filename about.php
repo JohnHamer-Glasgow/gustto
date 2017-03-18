@@ -29,7 +29,7 @@ $template->pageData['content'] .=
 		    </div>
 		    <div class="content-about col-xs-12">
 		    	<p style="font-size: 16px;"><strong>GUSTTO officially launched on Friday, 4<sup>th</sup> of November 2016. The current version is a Beta Release.</strong></p>
-		    	<p>The GUSTTO system was developed during a two-year project funded by the Glasgow University Learning and Teaching Development Fund. It allows staff to share their teaching practices, and to access and discuss those of their colleagues. </p>
+		    	<p>The GUSTTO system was developed during a two-year project funded by the Glasgow University Learning and Teaching Development Fund. It allows staff to share their teaching practices, and to access and discuss those of their colleagues.</p>
 
 		    	<p>There are three main aims to the project:</p>
 
@@ -46,15 +46,8 @@ $template->pageData['content'] .=
 		    	<p>The GUSTTO project started in August 2015, and is due to finish in June 2017, although the GUSTTO system itself will continue to be supported as an active system after the project concludes. The project has been led by Dr Helen Purchase (Computing Science), supported by the GUSTTO team:  Niall Barr (Learning Technology Unit), Dr Lisa Bradley (Politics), Dr Susan Deeley (Urban Studies), Kerr Gardiner (Learning Technology Unit),  Elina Koristashevskaya (Learning and Teaching Centre), Dr Chris Lindsay (Philosophy), Catherine Omand (Senate Office), and Dr Michelle Welsh (Life Sciences). The two students who developed the system are Adrian Musat and Panagiotis Antoniou.</p>
 
 		    	<p>[1] Finlay, J. Representing Teaching Practice: A book of bundles. University of Kent Press, 2012.</p>
-
-
 		    </div>
 		</div>
 	</div>';
-    
-
 
 echo $template->render();
-
-
-?>

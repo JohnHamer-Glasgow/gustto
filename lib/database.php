@@ -15,7 +15,7 @@ function initializeDataBase_()
 	dataConnection::runQuery($query);
 	$query = "CREATE TABLE user_earns_award(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, award_id INTEGER, time DATETIME, promoted INTEGER) ENGINE=MyISAM;";
 	dataConnection::runQuery($query);
-	$query = "CREATE TABLE teachingtip(id INTEGER PRIMARY KEY AUTO_INCREMENT, author_id INTEGER, title VARCHAR(128), time DATETIME, rationale TEXT, description TEXT, practice TEXT, worksbetter TEXT, doesntworkunless TEXT, essence TEXT, archived INTEGER, draft INTEGER, FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence)) ENGINE=MyISAM;";
+	$query = "CREATE TABLE teachingtip(id INTEGER PRIMARY KEY AUTO_INCREMENT, author_id INTEGER, title VARCHAR(128), whencreated timestamp default current_timestamp, time DATETIME, rationale TEXT, description TEXT, practice TEXT, worksbetter TEXT, doesntworkunless TEXT, essence TEXT, archived INTEGER, draft INTEGER, FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence)) ENGINE=MyISAM;";
 	dataConnection::runQuery($query);
 	$query = "CREATE TABLE ttcomment(id INTEGER PRIMARY KEY AUTO_INCREMENT, time DATETIME, comment TEXT, archived INTEGER) ENGINE=MyISAM;";
 	dataConnection::runQuery($query);
@@ -1507,6 +1507,7 @@ class teachingtip
 		$this->author_id = null; // foreign key, needs dealt with.
 		$this->title = "";
 		$this->time = time();
+		$this->whencreated = time();
 		$this->rationale = "";
 		$this->description = "";
 		$this->practice = "";
@@ -1525,6 +1526,7 @@ class teachingtip
 		$this->author_id = $asArray['author_id']; // foreign key, check code
 		$this->title = $asArray['title'];
 		$this->time = dataConnection::db2time($asArray['time']);
+		$this->whencreated = dataConnection::db2time($asArray['whencreated']);
 		$this->rationale = $asArray['rationale'];
 		$this->description = $asArray['description'];
 		$this->practice = $asArray['practice'];
@@ -3312,7 +3314,3 @@ class notification
 
 	//[[USERCODE_notification]] WEnd of custom class members.
 }
-
-?>
-
- 

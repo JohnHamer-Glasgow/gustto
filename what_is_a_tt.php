@@ -2,24 +2,21 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once(__DIR__.'/config.php');
-require_once(__DIR__.'/lib/database.php');
-require_once(__DIR__.'/lib/sharedfunctions.php');
-require_once(__DIR__.'/corelib/dataaccess.php');
-$template = new templateMerge($TEMPLATE);
+require_once(__DIR__ . '/config.php');
+require_once(__DIR__ . '/lib/database.php');
+require_once(__DIR__ . '/lib/sharedfunctions.php');
+require_once(__DIR__ . '/corelib/dataaccess.php');
 
+$template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online'; 
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
-
 
 $template->pageData['content'] = 
 '<style>
 	.nav-bar-xs {display: none !important;} 
 	.sidebar-wrapper {display: none !important;}
 	.main-nav .btn-group {display: none !important;}
-	
-	
 </style>';
 
 $template->pageData['content'] .= 
@@ -42,10 +39,5 @@ $template->pageData['content'] .=
 		    </div>
 		</div>
 	</div>';
-    
-
 
 echo $template->render();
-
-
-?>

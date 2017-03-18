@@ -156,7 +156,7 @@ else
 		$author = $tt->get_author();
 		$status = ($tt->archived == 1) ? 'Archived' : 'Active';
 		$action = ($tt->archived == 1) ? 'Republish' : 'Delete';
-		$time = date('d/m/Y H:i', $tt->time);
+		$time = date('y M d H:i', $tt->whencreated);
 		$template->pageData['content'] .= 
 				'<tr>
 					<td>'. $tt->id .'</td>

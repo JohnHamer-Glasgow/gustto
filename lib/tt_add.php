@@ -136,16 +136,3 @@ function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
 	return true;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
