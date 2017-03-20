@@ -299,7 +299,7 @@ $template->pageData['content'] .= '
               </div>
               <div class="clearfix visible-xs-block"></div>';
 
-if ($topThreeTT != false) {
+if (!empty($topThreeTT)) {
   foreach ($topThreeTT as $tt) {
     $number_likes = $tt->get_number_likes();
     $number_comments = $tt->get_number_comments();

@@ -16,6 +16,7 @@ function teachingtip_add($ttdata, $userID, $draft=false) {
   $tt->worksbetter = $ttdata['cond1'];
   $tt->doesntworkunless = $ttdata['cond2'];
   $tt->essence = $ttdata['essence'];
+  $tt->school = $ttdata['school'];
 
   if ($draft)
     $tt->draft = 1;
@@ -96,6 +97,7 @@ function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
   $tt->worksbetter = $ttdata['cond1'];
   $tt->doesntworkunless = $ttdata['cond2'];
   $tt->essence = $ttdata['essence'];
+  $tt->school = $ttdata['school'];
 
   if ($draft)
     $tt->draft = 1;
@@ -151,7 +153,7 @@ function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
     dataConnection::runQuery($query);
   }
 
-  $filtersNew = array_merge($ttdata['class_size'], $ttdata['environment'], array($ttdata['suitable_ol']), $ttdata['it_competency'z]);
+  $filtersNew = array_merge($ttdata['class_size'], $ttdata['environment'], array($ttdata['suitable_ol']), $ttdata['it_competency']);
   $filtersOld = array();
   $ttfilters = $tt->get_all_filters();
 

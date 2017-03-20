@@ -58,6 +58,28 @@ $errors = array();
 $title = $rationale = $description = $practice = $cond1 = $cond2 = $essence = $kwsString = ''; 
 $class_size = $environment = $suitable_ol = $it_competency = array(); 
 $keywords = array();
+$schoolList = array('',
+		    'Adam Smith Business School',
+		    'Chemistry',
+		    'Computing Science',
+		    'Critical Studies',
+		    'Culture and Creative Arts',
+		    'Education',
+		    'Engineering',
+		    'Geographical and Earth Sciences',
+		    'Humanities | Sgoil nan Daonnachdan',
+		    'Interdisciplinary Studies',
+		    'Law',
+		    'LEADS',
+		    'Life Sciences',
+		    'Mathematics and Statistics',
+		    'Medicine, Dentistry and Nursing',
+		    'Modern Languages and Cultures',
+		    'Physics and Astronomy',
+		    'Psychology',
+		    'Social and Political Sciences',
+		    'Veterinary Medicine',
+		    'Other');
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
   if (isset($_GET['ttID']) && is_numeric($_GET['ttID']) && $_GET['ttID'] >= 0){
@@ -73,11 +95,11 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     
     $contrTTs = $user->get_contr_teaching_tips();
     $contr = false; // check if the logged user is contributor to display
-      foreach($contrTTs as $cTT)
-	if ($ttID == $cTT->id) {
-	  $contr = true;
-	  break;
-	}
+    foreach($contrTTs as $cTT)
+      if ($ttID == $cTT->id) {
+	$contr = true;
+	break;
+      }
             
       $isAuthor = $loggedUserID == $author->id;
       if ($isAuthor || $contr || $user->isadmin) {
@@ -91,6 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	$cond1 = $tt->worksbetter;
 	$cond2 = $tt->doesntworkunless;
 	$essence = $tt->essence;
+	$ttSchool = $tt->school;
 	$kws = $tt->get_keywords();
 	$class_size = $tt->get_filters("class_size");
 	$environment = $tt->get_filters("environment");
@@ -117,11 +140,12 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	header("Location: teaching_tip_add.php");
 	exit();
       }
-  }
+  } else
+    $ttSchool = $user->get_school_for_tt($schoolList);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (!isset($_POST['csrf_token'] || $_POST['csrf_token'] !== $_SESSION['csrf_token']))
+  if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
     exit();
 
   $update = false;
@@ -204,6 +228,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   else
     $essence = sanitize_input($_POST['essence']);
 
+  $ttSchool = sanitize_input($_POST['school']);
+  
   if (empty($_POST['keywords']) && !$draft) { 
     $errors['keywords'] = 'Please provide at least one keyword for this Teaching Tip. This will facilitate searching and will make your Teaching Tip easier to find';
   } else if (!empty($_POST['keywords'])) {
@@ -266,6 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		    'cond1' => $cond1,
 		    'cond2' => $cond2,
 		    'essence' => $essence,
+		    'school' => $ttSchool,
 		    'keywords' => $keywords,
 		    'contributors' => $contributorsIDs,
 		    'contributorsEmails' => $contributorsEmails,
@@ -276,8 +303,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($update) {
       if ($saved_as_draft) {
 	if ($draft) {
-	  if (teachingtip_update($ttdata, $ttID, $loggedUserID, true))
+	  if (teachingtip_update($ttdata, $ttID, $loggedUserID, true)) {
 	    header("Location: myteachingtips.php");
+	    exit();
+	  }
 	}
 	else {
 	  if (teachingtip_update($ttdata, $ttID, $loggedUserID)) {
@@ -297,16 +326,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	    }
 
 	    header("Location: index.php");
+	    exit();
 	  } 
 	}
       } else {
-	if (teachingtip_update($ttdata, $ttID, $loggedUserID))
+	if (teachingtip_update($ttdata, $ttID, $loggedUserID)) {
 	  header("Location: index.php");
+	  exit();
+	}
       }
     } else {
       if ($draft) {
-	if (teachingtip_add($ttdata, $loggedUserID, true))
-	  header("Location: myteachingtips.php"); 
+	if (teachingtip_add($ttdata, $loggedUserID, true)) {
+	  header("Location: myteachingtips.php");
+	  exit();
+	}
       } else {
 	$tt = teachingtip_add($ttdata, $loggedUserID);
 	if ($tt) {
@@ -325,6 +359,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	  }
 
 	  header("Location: index.php");
+	  exit();
 	}
       }
     }
@@ -476,33 +511,35 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTSuitableOnlineLearning" class="control-label"><span class="mandatory">*</span>Suitable for online learning</label>';
+     <label for="inputTTSuitableOnlineLearning" class="control-label"><span class="mandatory">*</span>Suitable for online learning</label>';
 if ($errors['suitable_ol'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['suitable_ol'] . '</span>';
 $template->pageData['content'] .= 
-  '<select class="form-control" id="inputTTSuitableOnlineLearning" name="suitable_ol">
-                                  <option value="" disabled selected>Select an option</option>
-                                  <option value="yes" ' . ($suitable_ol[0] == "yes" ? "selected" : "") . '>Yes</option>
-                                  <option value="no" ' . ($suitable_ol[0] == "no" ? "selected" : "") . '>No</option>
-                                </select>';
+  '<div class="radio">
+     <label><input type="radio" value="yes" ' . ($suitable_ol[0] == "yes" ? 'checked="checked"' : '') . ' name="suitable_ol" />Yes</label>
+     <label><input type="radio" value="no" '  . ($suitable_ol[0] == "no" ? 'checked="checked"' : '') . ' name="suitable_ol" />No</label>
+   </div>';
 
 $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTITCompetency" class="control-label"><span class="mandatory">*</span>IT competency required</label>';
+     <label for="inputTTITCompetency" class="control-label"><span class="mandatory">*</span>IT competency required</label>';
 if ($errors['it_competency'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['it_competency'] . '</span>';
 
 foreach ($ITC as $key => $val)
-  $template->pageData['content'] .= 
-  '<div class="checkbox">
-                                  <label>
-                                    <input type="checkbox" value="' . $key . '" name="it_competency[]" ' . (in_array($key, $it_competency) ? "checked" : "") . '>
-                                    ' . $val . '
-                                  </label>
-                                </div>';
+  $template->pageData['content'] .=
+  '<div class="radio">
+     <label><input type="radio" value="' . $key . '" name="it_competency[]" ' . (in_array($key, $it_competency) ? "checked" : "") . '>' . $val . '</label>
+   </div>';
 $template->pageData['content'] .= '</div>';
+
+$template->pageData['content'] .= '<div class="form-group"><label for="inputTTschool" class="control-label">Attach your Teaching Tip to a school, for easier search</label>';
+$template->pageData['content'] .= '<select class="form-control" id="inputTTschool" name="school">';
+foreach ($schoolList as $s)
+  $template->pageData['content'] .= '<option value="' . $s . '"' . ($s == $ttSchool ? " selected='selected'" : '') . '>' . $s . '</option>';
+$template->pageData['content'] .= '</select></div>';
 
 $template->pageData['content'] .= '<h4 class="tt-add-form-subtitle">Co-authors</h4>';
 
@@ -551,7 +588,7 @@ $template->pageData['content'] .= '<a href="index.php" id="cancelTTForm" class="
 
 $template->pageData['content'] .= '</form>
                 <br />
-                <span class="mandatory">*Mandatory Fields</span>
+                <span class="mandatory">*Mandatory fields</span>
             </div>
         </div>';
 

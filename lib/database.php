@@ -1,852 +1,750 @@
 <?php
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
-function initializeDataBase_()
-{
-	$query = "CREATE TABLE user(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(30), lastname VARCHAR(30), phonenumber VARCHAR(20), username VARCHAR(20), email VARCHAR(50), profile_picture VARCHAR(50), college VARCHAR(50), school VARCHAR(50), esteem INTEGER, engagement INTEGER, lastaccess DATE, joindate DATE, last_visit DATETIME, isadmin INTEGER, FULLTEXT(name,lastname)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, school_posts INTEGER, tts_activity INTEGER, followers_posts INTEGER, awards INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE admin(id INTEGER PRIMARY KEY AUTO_INCREMENT, role VARCHAR(20)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE admin_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, esteem_like INTEGER, esteem_comment INTEGER, esteem_share INTEGER, esteem_view INTEGER, esteem_follow INTEGER, engagement_like INTEGER, engagement_comment INTEGER, engagement_share INTEGER, engagement_view INTEGER, engagement_follow INTEGER, log_actions INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE award(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), url VARCHAR(50), category VARCHAR(20), type VARCHAR(20), rank INTEGER, about VARCHAR(128)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_earns_award(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, award_id INTEGER, time DATETIME, promoted INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE teachingtip(id INTEGER PRIMARY KEY AUTO_INCREMENT, author_id INTEGER, title VARCHAR(128), whencreated timestamp default current_timestamp, time DATETIME, rationale TEXT, description TEXT, practice TEXT, worksbetter TEXT, doesntworkunless TEXT, essence TEXT, archived INTEGER, draft INTEGER, FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE ttcomment(id INTEGER PRIMARY KEY AUTO_INCREMENT, time DATETIME, comment TEXT, archived INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE ttkeyword(id INTEGER PRIMARY KEY AUTO_INCREMENT, ttid_id INTEGER, keyword VARCHAR(30), archived INTEGER, FULLTEXT(keyword)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE ttfilter(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, category VARCHAR(30), opt VARCHAR(30)) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE ttview(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE contributors(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, email VARCHAR(50), seen INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_comments_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, comment_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_likes_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_shares_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, sender VARCHAR(50), recipient VARCHAR(50), teachingtip_id INTEGER, time DATETIME, message TEXT, archived INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE user_follows_user(id INTEGER PRIMARY KEY AUTO_INCREMENT, follower_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
-	$query = "CREATE TABLE notification(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, activity_id INTEGER, activity_type VARCHAR(10), category VARCHAR(20), time DATETIME, seen INTEGER) ENGINE=MyISAM;";
-	dataConnection::runQuery($query);
+function initializeDataBase_() {
+  $query = "CREATE TABLE user(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(30), lastname VARCHAR(30), phonenumber VARCHAR(20), username VARCHAR(20), email VARCHAR(50), profile_picture VARCHAR(50), college VARCHAR(50), school VARCHAR(50), esteem INTEGER, engagement INTEGER, lastaccess DATE, joindate DATE, last_visit DATETIME, isadmin INTEGER, FULLTEXT(name,lastname)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, school_posts INTEGER, tts_activity INTEGER, followers_posts INTEGER, awards INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE admin(id INTEGER PRIMARY KEY AUTO_INCREMENT, role VARCHAR(20)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE admin_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, esteem_like INTEGER, esteem_comment INTEGER, esteem_share INTEGER, esteem_view INTEGER, esteem_follow INTEGER, engagement_like INTEGER, engagement_comment INTEGER, engagement_share INTEGER, engagement_view INTEGER, engagement_follow INTEGER, log_actions INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE award(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), url VARCHAR(50), category VARCHAR(20), type VARCHAR(20), rank INTEGER, about VARCHAR(128)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_earns_award(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, award_id INTEGER, time DATETIME, promoted INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE teachingtip(id INTEGER PRIMARY KEY AUTO_INCREMENT, author_id INTEGER, title VARCHAR(128), whencreated timestamp default current_timestamp, time DATETIME, rationale TEXT, description TEXT, practice TEXT, worksbetter TEXT, doesntworkunless TEXT, essence TEXT, school text, archived INTEGER, draft INTEGER, FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE ttcomment(id INTEGER PRIMARY KEY AUTO_INCREMENT, time DATETIME, comment TEXT, archived INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE ttkeyword(id INTEGER PRIMARY KEY AUTO_INCREMENT, ttid_id INTEGER, keyword VARCHAR(30), archived INTEGER, FULLTEXT(keyword)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE ttfilter(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, category VARCHAR(30), opt VARCHAR(30)) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE ttview(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE contributors(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, email VARCHAR(50), seen INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_comments_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, comment_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_likes_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_shares_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, sender VARCHAR(50), recipient VARCHAR(50), teachingtip_id INTEGER, time DATETIME, message TEXT, archived INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE user_follows_user(id INTEGER PRIMARY KEY AUTO_INCREMENT, follower_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
+  $query = "CREATE TABLE notification(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, activity_id INTEGER, activity_type VARCHAR(10), category VARCHAR(20), time DATETIME, seen INTEGER) ENGINE=MyISAM;";
+  dataConnection::runQuery($query);
 }
 
-//Skeleton PHP classes for data tables
+class user {
+  var $id;
+  var $name;
+  var $lastname;
+  var $phonenumber;
+  var $username;
+  var $email;
+  var $profile_picture;
+  var $college;
+  var $school;
+  var $esteem;
+  var $engagement;
+  var $lastaccess;
+  var $joindate;
+  var $last_visit;
+  var $isadmin;
+  
+  function user($asArray=null) {
+    $this->id = null;
+    $this->name = "";
+    $this->lastname = "";
+    $this->phonenumber = "";
+    $this->username = "";
+    $this->email = "";
+    $this->profile_picture = "";
+    $this->college = "";
+    $this->school = "";
+    $this->esteem = "0";
+    $this->engagement = "0";
+    $this->lastaccess = time();
+    $this->joindate = time();
+    $this->last_visit = time();
+    $this->isadmin = false;
+    if ($asArray !== null)
+      $this->fromArray($asArray);
+  }
 
-class user
-{
-	var $id; //primary key
-	var $name;
-	var $lastname;
-	var $phonenumber;
-	var $username;
-	var $email;
-	var $profile_picture;
-	var $college;
-	var $school;
-	var $esteem;
-	var $engagement;
-	var $lastaccess;
-	var $joindate;
-	var $last_visit;
-	var $isadmin;
+  function fromArray($asArray) {
+    $this->id = $asArray['id'];
+    $this->name = $asArray['name'];
+    $this->lastname = $asArray['lastname'];
+    $this->phonenumber = $asArray['phonenumber'];
+    $this->username = $asArray['username'];
+    $this->email = $asArray['email'];
+    $this->profile_picture = $asArray['profile_picture'];
+    $this->college = $asArray['college'];
+    $this->school = $asArray['school'];
+    $this->esteem = $asArray['esteem'];
+    $this->engagement = $asArray['engagement'];
+    $this->lastaccess = dataConnection::db2date($asArray['lastaccess']);
+    $this->joindate = dataConnection::db2date($asArray['joindate']);
+    $this->last_visit = dataConnection::db2time($asArray['last_visit']);
+    $this->isadmin = ($asArray['isadmin']==0)?false:true;
+  }
+  
+  static function retrieve_user($id) {
+    $query = "SELECT * FROM user WHERE id='".dataConnection::safe($id)."';";
+    $result = dataConnection::runQuery($query);
+    if(sizeof($result)!=0)
+      return new user($result[0]);
+    else
+      return false;
+  }
 
-	function user($asArray=null)
-	{
-		$this->id = null; //primary key
-		$this->name = "";
-		$this->lastname = "";
-		$this->phonenumber = "";
-		$this->username = "";
-		$this->email = "";
-		$this->profile_picture = "";
-		$this->college = "";
-		$this->school = "";
-		$this->esteem = "0";
-		$this->engagement = "0";
-		$this->lastaccess = time();
-		$this->joindate = time();
-		$this->last_visit = time();
-		$this->isadmin = false;
-		if($asArray!==null)
-			$this->fromArray($asArray);
-	}
-
-	function fromArray($asArray)
-	{
-		$this->id = $asArray['id'];
-		$this->name = $asArray['name'];
-		$this->lastname = $asArray['lastname'];
-		$this->phonenumber = $asArray['phonenumber'];
-		$this->username = $asArray['username'];
-		$this->email = $asArray['email'];
-		$this->profile_picture = $asArray['profile_picture'];
-		$this->college = $asArray['college'];
-		$this->school = $asArray['school'];
-		$this->esteem = $asArray['esteem'];
-		$this->engagement = $asArray['engagement'];
-		$this->lastaccess = dataConnection::db2date($asArray['lastaccess']);
-		$this->joindate = dataConnection::db2date($asArray['joindate']);
-		$this->last_visit = dataConnection::db2time($asArray['last_visit']);
-		$this->isadmin = ($asArray['isadmin']==0)?false:true;
-	}
-
-	static function retrieve_user($id)
-	{
-		$query = "SELECT * FROM user WHERE id='".dataConnection::safe($id)."';";
-		$result = dataConnection::runQuery($query);
-		if(sizeof($result)!=0)
-		{
-			return new user($result[0]);
-		}
-		else
-			return false;
-	}
-
-	static function retrieve_user_matching($field, $value, $from=0, $count=-1, $sort=null)
-	{
-	    if(preg_replace('/\W/','',$field)!== $field)
-	        return false; // not a permitted field name;
-	    $query = "SELECT * FROM user WHERE $field='".dataConnection::safe($value)."'";
-	    if(($sort !== null)&&(preg_replace('/\W/','',$sort)!== $sort))
-	        $query .= " ORDER BY ".$sort;
-	    if(($count != -1)&&(is_int($count))&&(is_int($from)))
-	        $query .= " LIMIT ".$count." OFFSET ".$from;
-	    $query .= ';';
-	    $result = dataConnection::runQuery($query);
-	    if(sizeof($result)!=0)
-	    {
-	        $output = array();
-	        foreach($result as $r)
-	            $output[] = new user($r);
-	        return $output;
-	    }
-	    else
-	        return false;
-	}
+  static function retrieve_user_matching($field, $value, $from = 0, $count = -1, $sort = null) {
+    if (preg_replace('/\W/','',$field)!== $field)
+      return false; // not a permitted field name;
+    $query = "SELECT * FROM user WHERE $field='" . dataConnection::safe($value) . "'";
+    if ($sort !== null && preg_replace('/\W/','',$sort)!== $sort)
+      $query .= " ORDER BY ".$sort;
+    if ($count != -1 && is_int($count) && is_int($from))
+      $query .= " LIMIT " . $count . " OFFSET " . $from;
+    $query .= ';';
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $output = array();
+      foreach ($result as $r)
+	$output[] = new user($r);
+      return $output;
+    } else
+      return false;
+  }
 	
-	function insert()
-	{
-		//#Any required insert methods for foreign keys need to be called here.
-		$query = "INSERT INTO user(name, lastname, phonenumber, username, email, profile_picture, college, school, esteem, engagement, lastaccess, joindate, last_visit, isadmin) VALUES(";
-		$query .= "'".dataConnection::safe($this->name)."', ";
-		$query .= "'".dataConnection::safe($this->lastname)."', ";
-		$query .= "'".dataConnection::safe($this->phonenumber)."', ";
-		$query .= "'".dataConnection::safe($this->username)."', ";
-		$query .= "'".dataConnection::safe($this->email)."', ";
-		$query .= "'".dataConnection::safe($this->profile_picture)."', ";
-		$query .= "'".dataConnection::safe($this->college)."', ";
-		$query .= "'".dataConnection::safe($this->school)."', ";
-		$query .= "'".dataConnection::safe($this->esteem)."', ";
-		$query .= "'".dataConnection::safe($this->engagement)."', ";
-		$query .= "'".dataConnection::date2db($this->lastaccess)."', ";
-		$query .= "'".dataConnection::date2db($this->joindate)."', ";
-		$query .= "'".dataConnection::time2db($this->last_visit)."', ";
-		$query .= "'".(($this->isadmin===false)?0:1)."');";
-		dataConnection::runQuery("BEGIN;");
-		$result = dataConnection::runQuery($query);
-		$result2 = dataConnection::runQuery("SELECT LAST_INSERT_ID() AS id;");
-		dataConnection::runQuery("COMMIT;");
-		$this->id = $result2[0]['id'];
-		return $this->id;
-	}
+  function insert() {
+    //#Any required insert methods for foreign keys need to be called here.
+    $query = "INSERT INTO user(name, lastname, phonenumber, username, email, profile_picture, college, school, esteem, engagement, lastaccess, joindate, last_visit, isadmin) VALUES(";
+    $query .= "'".dataConnection::safe($this->name)."', ";
+    $query .= "'".dataConnection::safe($this->lastname)."', ";
+    $query .= "'".dataConnection::safe($this->phonenumber)."', ";
+    $query .= "'".dataConnection::safe($this->username)."', ";
+    $query .= "'".dataConnection::safe($this->email)."', ";
+    $query .= "'".dataConnection::safe($this->profile_picture)."', ";
+    $query .= "'".dataConnection::safe($this->college)."', ";
+    $query .= "'".dataConnection::safe($this->school)."', ";
+    $query .= "'".dataConnection::safe($this->esteem)."', ";
+    $query .= "'".dataConnection::safe($this->engagement)."', ";
+    $query .= "'".dataConnection::date2db($this->lastaccess)."', ";
+    $query .= "'".dataConnection::date2db($this->joindate)."', ";
+    $query .= "'".dataConnection::time2db($this->last_visit)."', ";
+    $query .= "'".(($this->isadmin===false)?0:1)."');";
+    dataConnection::runQuery("BEGIN;");
+    $result = dataConnection::runQuery($query);
+    $result2 = dataConnection::runQuery("SELECT LAST_INSERT_ID() AS id;");
+    dataConnection::runQuery("COMMIT;");
+    $this->id = $result2[0]['id'];
+    return $this->id;
+  }
+  
+  function update() {
+    $query = "UPDATE user ";
+    $query .= "SET name='".dataConnection::safe($this->name)."' ";
+    $query .= ", lastname='".dataConnection::safe($this->lastname)."' ";
+    $query .= ", phonenumber='".dataConnection::safe($this->phonenumber)."' ";
+    $query .= ", username='".dataConnection::safe($this->username)."' ";
+    $query .= ", email='".dataConnection::safe($this->email)."' ";
+    $query .= ", profile_picture='".dataConnection::safe($this->profile_picture)."' ";
+    $query .= ", college='".dataConnection::safe($this->college)."' ";
+    $query .= ", school='".dataConnection::safe($this->school)."' ";
+    $query .= ", esteem='".dataConnection::safe($this->esteem)."' ";
+    $query .= ", engagement='".dataConnection::safe($this->engagement)."' ";
+    $query .= ", lastaccess='".dataConnection::date2db($this->lastaccess)."' ";
+    $query .= ", joindate='".dataConnection::date2db($this->joindate)."' ";
+    $query .= ", last_visit='".dataConnection::time2db($this->last_visit)."' ";
+    $query .= ", isadmin='".(($this->isadmin===false)?0:1)."' ";
+    $query .= "WHERE id='".dataConnection::safe($this->id)."';";
+    return dataConnection::runQuery($query);
+  }
+  
+  static function count($where_name=null, $equals_value=null) {
+    $query = "SELECT COUNT(*) AS count FROM user WHERE ";
+    if($where_name==null)
+      $query .= '1;';
+    else
+      $query .= "$where_name='".dataConnection::safe($equals_value)."';";
+    $result = dataConnection::runQuery($query);
+    if($result == false)
+      return 0;
+    else
+      return $result['0']['count'];
+  }
 
-	function update()
-	{
-		$query = "UPDATE user ";
-		$query .= "SET name='".dataConnection::safe($this->name)."' ";
-		$query .= ", lastname='".dataConnection::safe($this->lastname)."' ";
-		$query .= ", phonenumber='".dataConnection::safe($this->phonenumber)."' ";
-		$query .= ", username='".dataConnection::safe($this->username)."' ";
-		$query .= ", email='".dataConnection::safe($this->email)."' ";
-		$query .= ", profile_picture='".dataConnection::safe($this->profile_picture)."' ";
-		$query .= ", college='".dataConnection::safe($this->college)."' ";
-		$query .= ", school='".dataConnection::safe($this->school)."' ";
-		$query .= ", esteem='".dataConnection::safe($this->esteem)."' ";
-		$query .= ", engagement='".dataConnection::safe($this->engagement)."' ";
-		$query .= ", lastaccess='".dataConnection::date2db($this->lastaccess)."' ";
-		$query .= ", joindate='".dataConnection::date2db($this->joindate)."' ";
-		$query .= ", last_visit='".dataConnection::time2db($this->last_visit)."' ";
-		$query .= ", isadmin='".(($this->isadmin===false)?0:1)."' ";
-		$query .= "WHERE id='".dataConnection::safe($this->id)."';";
-		return dataConnection::runQuery($query);
-	}
+  function toXML() {
+    $out = "<user>\n";
+    $out .= '<id>'.htmlentities($this->id)."</id>\n";
+    $out .= '<name>'.htmlentities($this->name)."</name>\n";
+    $out .= '<lastname>'.htmlentities($this->lastname)."</lastname>\n";
+    $out .= '<phonenumber>'.htmlentities($this->phonenumber)."</phonenumber>\n";
+    $out .= '<username>'.htmlentities($this->username)."</username>\n";
+    $out .= '<email>'.htmlentities($this->email)."</email>\n";
+    $out .= '<profile_picture>'.htmlentities($this->profile_picture)."</profile_picture>\n";
+    $out .= '<college>'.htmlentities($this->college)."</college>\n";
+    $out .= '<school>'.htmlentities($this->school)."</school>\n";
+    $out .= '<esteem>'.htmlentities($this->esteem)."</esteem>\n";
+    $out .= '<engagement>'.htmlentities($this->engagement)."</engagement>\n";
+    $out .= '<lastaccess>'.htmlentities($this->lastaccess)."</lastaccess>\n";
+    $out .= '<joindate>'.htmlentities($this->joindate)."</joindate>\n";
+    $out .= '<last_visit>'.htmlentities($this->last_visit)."</last_visit>\n";
+    $out .= '<isadmin>'.htmlentities($this->isadmin)."</isadmin>\n";
+    $out .= "</user>\n";
+    return $out;
+  }
+  //[[USERCODE_user]] Put code for custom class members in this block.
+  
+  static function get_number_users() {
+    $result = dataConnection::runQuery("select count(id) as number_users from user");
+    return $result[0]['number_users'];
+  }
+  
+  static function retrieve_by_username($username) {
+    $result = dataConnection::runQuery("select * from user where username = '" . dataConnection::safe($username) . "';");
+    if (sizeof($result) != 0)
+      return new user($result[0]);
+    else
+      return false;
+  }
 
-	static function count($where_name=null, $equals_value=null)
-	{
-		$query = "SELECT COUNT(*) AS count FROM user WHERE ";
-		if($where_name==null)
-			$query .= '1;';
-		else
-			$query .= "$where_name='".dataConnection::safe($equals_value)."';";
-		$result = dataConnection::runQuery($query);
-		if($result == false)
-			return 0;
-		else
-			return $result['0']['count'];
-	}
+  static function get_all_users() {
+    $output = array();
+    foreach (dataConnection::runQuery("select * from user order by id asc") as $r)
+      $output[] = new user($r);
+    return $output;
+  }
 
-	function toXML()
-	{
-		$out = "<user>\n";
-		$out .= '<id>'.htmlentities($this->id)."</id>\n";
-		$out .= '<name>'.htmlentities($this->name)."</name>\n";
-		$out .= '<lastname>'.htmlentities($this->lastname)."</lastname>\n";
-		$out .= '<phonenumber>'.htmlentities($this->phonenumber)."</phonenumber>\n";
-		$out .= '<username>'.htmlentities($this->username)."</username>\n";
-		$out .= '<email>'.htmlentities($this->email)."</email>\n";
-		$out .= '<profile_picture>'.htmlentities($this->profile_picture)."</profile_picture>\n";
-		$out .= '<college>'.htmlentities($this->college)."</college>\n";
-		$out .= '<school>'.htmlentities($this->school)."</school>\n";
-		$out .= '<esteem>'.htmlentities($this->esteem)."</esteem>\n";
-		$out .= '<engagement>'.htmlentities($this->engagement)."</engagement>\n";
-		$out .= '<lastaccess>'.htmlentities($this->lastaccess)."</lastaccess>\n";
-		$out .= '<joindate>'.htmlentities($this->joindate)."</joindate>\n";
-		$out .= '<last_visit>'.htmlentities($this->last_visit)."</last_visit>\n";
-		$out .= '<isadmin>'.htmlentities($this->isadmin)."</isadmin>\n";
-		$out .= "</user>\n";
-		return $out;
-	}
-	//[[USERCODE_user]] Put code for custom class members in this block.
+  static function get_most_tts() {
+    $query = "select u.*, count(tt.id) as number_tts from user as u inner join teachingtip as tt on u.id = tt.author_id where tt.draft = 0 and tt.archived = 0 group by u.id order by number_tts desc, u.id";
+    $users = array();
+    foreach (dataConnection::runQuery($query) as $r)
+      array_push($users, array(new user($r), $r['number_tts']));
+    return $users;
+  }
 
-	// get the number of users in the system
-	static function get_number_users() {
-		$query = "SELECT COUNT(id) AS number_users FROM user";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_users'];
-	}
+  function get_school_for_tt($schoolList) {
+    foreach (dataConnection::runQuery("select school from teachingtip where author_id = " . dataConnection::safe($this->id) . ' order by whencreated desc') as $row)
+      if (in_array($row['school'], $schoolList))
+	return $row['school'];
 
-	static function retrieve_by_username($username)
-	{
-		$query = "SELECT * FROM user WHERE username='".dataConnection::safe($username)."';";
-		$result = dataConnection::runQuery($query);
-		if(sizeof($result)!=0)
-		{
-			return new user($result[0]);
-		}
-		else
-			return false;
-	}
+    $closest = '';
+    foreach ($schoolList as $school) {
+      $score = levenshtein(strtoupper($this->school), strtoupper($school), 5, 5, 1);
+      if (!isset($bestscore) || $score < $bestscore) {
+	$bestscore = $score;
+	$closest = $school;
+      }
+    }
 
-	// get all users in the db
-	static function get_all_users() {
-		$query = "SELECT * FROM user ORDER BY id ASC";
-		$result = dataConnection::runQuery($query);
-		if(sizeof($result)!=0)
-	    {
-	        $output = array();
-	        foreach($result as $r)
-	            $output[] = new user($r);
-	        return $output;
-	    }
-	    else
-	        return false;
+    return $closest;
+  }
+  
+  function get_number_new_tts($since) {
+    $query = "SELECT COUNT(id) AS number_tts FROM teachingtip as tt WHERE tt.time > '". dataConnection::time2db($since) ."' AND tt.author_id <> '". dataConnection::safe($this->id) ."' AND archived = 0 AND draft = 0";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_tts'];
+  }
 
-	}
+  function getLikes() {
+    $query = "SELECT * FROM user_likes_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $likes = array();
+      foreach ($result as $r)
+	array_push($likes, new user_likes_tt($r));
+      return $likes;
+    } else
+      return false;
+  }
 
-	// get a list of all users ordered by the number of tts they have published
-	static function get_most_tts() {
-		$query = "SELECT u.*, COUNT(tt.id) as number_tts FROM user as u INNER JOIN teachingtip as tt ON u.id = tt.author_id WHERE tt.draft = 0 AND tt.archived = 0 GROUP BY u.id ORDER BY number_tts DESC, u.id";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$users = array();
-			foreach($result as $r){
-				$user = new user($r);
-				array_push($users, array($user, $r['number_tts']));
-			}
-			return $users;
-		} else return false;
-	}
+  function getComments() {
+    $query = "SELECT * FROM user_comments_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $comments = array();
+      foreach ($result as $r)
+	array_push($comments, new user_comments_tt($r));
+      return $comments;
+    } else
+      return false;
+  }
 
-	// get the number of new tts (published by someone else since a given timestamp)
-	function get_number_new_tts($since) {
-		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip as tt WHERE tt.time > '". dataConnection::time2db($since) ."' AND tt.author_id <> '". dataConnection::safe($this->id) ."' AND archived = 0 AND draft = 0";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_tts'];
-	}
+  function getShares() {
+    $query = "SELECT * FROM user_shares_tt WHERE sender ='".dataConnection::safe($this->email)."' AND archived='0' ";
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $shares = array();
+      foreach($result as $r)
+	array_push($shares, new user_shares_tt($r));
+      return $shares;
+    } else
+      return false;
+  }
 
-	//get the likes of the user (INCLUDING own likes)
-	function getLikes() {
-		$query = "SELECT * FROM user_likes_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$likes = array();
-			foreach($result as $r){
-				$like = new user_likes_tt($r);
-				array_push($likes, $like);
-			}
-			return $likes;
-		}else return false;
-	}
+  function get_number_tts() {
+    $query = "SELECT COUNT(id) AS number_tts FROM teachingtip WHERE archived = 0 AND draft = 0 AND author_id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_tts'];
+  }
 
-	//get the comments of the user (INCLUDING own comments)
-	function getComments() {
-		$query = "SELECT * FROM user_comments_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$comments = array();
-			foreach($result as $r){
-				$comment = new user_comments_tt($r);
-				array_push($comments, $comment);
-			}
-			return $comments;
-		}else return false;
-	}
+  function get_number_received_likes() {
+    $query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ultt.user_id <> '".dataConnection::safe($this->id). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_likes'];
+  }
 
-	//get the shares of the user (INCLUDING own shares)
-	function getShares() {
-		$query = "SELECT * FROM user_shares_tt WHERE sender ='".dataConnection::safe($this->email)."' AND archived='0' ";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$shares = array();
-			foreach($result as $r){
-				$share = new user_shares_tt($r);
-				array_push($shares, $share);
-			}
-			return $shares;
-		}else return false;
-	}
+  function get_number_received_comments() {
+    $query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND uctt.user_id <> '".dataConnection::safe($this->id). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_comments'];
+  }
 
-	// get the number of TTs this user has posted
-	function get_number_tts() {
-		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip WHERE archived = 0 AND draft = 0 AND author_id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_tts'];
-	}
+  function get_number_shares_of_tts() {
+    $query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ustt.sender <> '".dataConnection::safe($this->email). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_shares'];
+  }
 
-	// get the number of likes this user received on their teaching tips (EXCLUDING own likes)
-	function get_number_received_likes() {
-		$query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ultt.user_id <> '".dataConnection::safe($this->id). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_likes'];
-	}
+  function get_number_received_views_tts() {
+    $query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '" .dataConnection::safe($this->id) . "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_views'];
+  }
 
-	// get the number of comments this user received on their teaching tips (EXCLUDING comments posted by themselves)
-	function get_number_received_comments() {
-		$query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND uctt.user_id <> '".dataConnection::safe($this->id). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_comments'];
-	}
+  function get_number_followers() {
+    $query = "SELECT COUNT(*) AS number_followers FROM user_follows_user WHERE user_id = '" .dataConnection::safe($this->id) . "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_followers'];
+  }
 
-	// get the number of times this user's tts have been shared (EXCLUDING own shares)
-	function get_number_shares_of_tts() {
-		$query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ustt.sender <> '".dataConnection::safe($this->email). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_shares'];
-	}
+  function get_number_given_likes() {
+    $query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ultt.user_id = '".dataConnection::safe($this->id). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_likes'];
+  }
 
-	// get the number of views this user has on all their TTs
-	function get_number_received_views_tts() {
-		$query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '" .dataConnection::safe($this->id) . "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_views'];
-	}
+  function get_number_given_views() {
+    $query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND ttv.user_id = '".dataConnection::safe($this->id). "' AND tt.author_id <> '".dataConnection::safe($this->id). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_views'];
+  }
+  
+  function get_number_given_shares() {
+    $query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ustt.sender = '".dataConnection::safe($this->email). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_shares'];
+  }
+  
+  function get_number_given_comments() {
+    $query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND uctt.user_id = '".dataConnection::safe($this->id). "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_comments'];
+  }
 
-	// get the number of followers this user has
-	function get_number_followers() {
-		$query = "SELECT COUNT(*) AS number_followers FROM user_follows_user WHERE user_id = '" .dataConnection::safe($this->id) . "'";
-	    $result = dataConnection::runQuery($query);
-	    return $result[0]['number_followers'];
-	}
+  function get_number_following() {
+    $query = "SELECT COUNT(*) AS number_following FROM user_follows_user WHERE follower_id = '" .dataConnection::safe($this->id) . "'";
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_following'];
+  }
 
-	// get the number of likes this user has given to other users' TTs
-	function get_number_given_likes() {
-		$query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ultt.user_id = '".dataConnection::safe($this->id). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_likes'];
-	}
+  function get_teaching_tips() {
+    $tts = array();
+    foreach(dataConnection::runQuery("select * from teachingtip where author_id = '".dataConnection::safe($this->id) . "' and archived = '0'") as $r)
+      array_push($tts, new teachingtip($r));
+    return $tts;
+  }
 
-	// get the number of TTs that this user has viewed
-	function get_number_given_views() {
-		$query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND ttv.user_id = '".dataConnection::safe($this->id). "' AND tt.author_id <> '".dataConnection::safe($this->id). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_views'];
-	}
+  function get_contr_teaching_tips(){
+    $tts = array();
+    foreach (dataConnection::runQuery("select teachingtip_id from contributors where user_id is not null and user_id = '".dataConnection::safe($this->id) . "' ") as $r)
+      array_push($tts, teachingtip::retrieve_teachingtip($r['teachingtip_id']));
+    return $tts;
+  }
+  
+  function get_top_teaching_tips($limit = false) {
+    $query = "select tt.*, count(ultt.id) as count_likes from teachingtip as tt left join user_likes_tt as ultt on tt.id = ultt.teachingtip_id where tt.author_id = '"
+      . dataConnection::safe($this->id)
+      . "' and tt.archived = '0' and tt.draft = '0' group by tt.id order by count_likes desc";
+    if ($limit)
+      $query .= " limit ". dataConnection::safe($limit);
+    $tts = array();
+    foreach(dataConnection::runQuery($query) as $r)
+      array_push($tts, new teachingtip($r));
+    return $tts;
+  }
 
-	// get the number of times this user has shared other users' TTs
-	function get_number_given_shares() {
-		$query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ustt.sender = '".dataConnection::safe($this->email). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_shares'];
-	}
+  /* REPUTATION FUNCTIONS */
 
-	// get the number of comments posted by this user on other users' TTs
-	function get_number_given_comments() {
-		$query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND uctt.user_id = '".dataConnection::safe($this->id). "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_comments'];
-	}
+  // ESTEEM
 
-	// get the number of people this user follows
-	function get_number_following() {
-		$query = "SELECT COUNT(*) AS number_following FROM user_follows_user WHERE follower_id = '" .dataConnection::safe($this->id) . "'";
-	    $result = dataConnection::runQuery($query);
-	    return $result[0]['number_following'];
-	}
+  // +ESTEEM_POST esteem for posting a new tt
+  // function esteem_new_tt() {
+  // 	$delta = $GLOBALS['ESTEEM_POST'];
+  // 	$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+  // 	$result = dataConnection::runQuery($query);
+  // 	return $result;
+  // }
 
-	// get the teaching tips posted by this user
-	function get_teaching_tips() {
-		$query = "SELECT * FROM teachingtip WHERE author_id = '".dataConnection::safe($this->id) . "' AND archived='0'";
-	    $result = dataConnection::runQuery($query);
-	    if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
-	    
-	}
+  // -ESTEEM_POST esteem for deleting a TT (points for like/comments/shares remain)
+  // function esteem_delete_tt() {
+  // 	$delta = $GLOBALS['ESTEEM_POST'];
+  // 	$query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+  // 	$result = dataConnection::runQuery($query);
+  // 	return $result;
+  // }
 
-	// get the teaching tips that the user contributed  -- Return Objects
-	function get_contr_teaching_tips(){
-		$query = "SELECT * FROM contributors WHERE user_id IS NOT NULL AND user_id = '".dataConnection::safe($this->id) . "' ";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = teachingtip::retrieve_teachingtip($r['teachingtip_id']);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
-	}
+  // +ESTEEM_LIKE esteem when user receives a like on one of their TTs
+  function esteem_like_tt() {
+    $delta = $GLOBALS['ESTEEM_LIKE'];
+    $query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// get the $limit top teaching tips for this user based on number of likes
-	function get_top_teaching_tips($limit=false) {
-		$query = "SELECT tt.*, COUNT(ultt.id) as count_likes FROM teachingtip as tt LEFT JOIN user_likes_tt as ultt ON tt.id = ultt.teachingtip_id WHERE tt.author_id = '".dataConnection::safe($this->id)."' AND tt.archived = '0' AND tt.draft = '0' GROUP BY tt.id ORDER BY count_likes DESC";
-		if ($limit) $query .= " LIMIT ". dataConnection::safe($limit);
-    	$result = dataConnection::runQuery($query);
-    	if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
-	}
+  function esteem_unlike_tt() {
+    $delta = $GLOBALS['ESTEEM_LIKE'];
+    $query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	static function findUser($namepart)
-	{
-	    $query = "SELECT * FROM user WHERE name LIKE '%".dataConnection::safe($namepart)."%'";
-	    $query .= ';';
-	    $result = dataConnection::runQuery($query);
-	    if(sizeof($result)!=0)
-	    {
-	        $output = array();
-	        foreach($result as $r)
-	            $output[] = new user($r);
-	        return $output;
-	    }
-	    else
-	        return false;
-	}
+  // +ESTEEM_SHARE esteem when someone shares one of the user's TTs
+  function esteem_share_tt() {
+    $delta = $GLOBALS['ESTEEM_SHARE'];
+    $query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	/* REPUTATION FUNCTIONS */
+  // +ESTEEM_COMMENT esteem when user receives a comment on one of their TTS
+  function esteem_comment_tt() {
+    $delta = $GLOBALS['ESTEEM_COMMENT'];
+    $query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// ESTEEM
+  function esteem_delete_comment_tt() {
+    $delta = $GLOBALS['ESTEEM_COMMENT'];
+    $query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// +ESTEEM_POST esteem for posting a new tt
-	// function esteem_new_tt() {
-	// 	$delta = $GLOBALS['ESTEEM_POST'];
-	// 	$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-	// 	$result = dataConnection::runQuery($query);
-	// 	return $result;
-	// }
+  // update esteem based on the number of views a SINGLE TT has
+  function esteem_views_tt($number_views) {
+    $delta = $GLOBALS['ESTEEM_VIEW'];
+    $query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// -ESTEEM_POST esteem for deleting a TT (points for like/comments/shares remain)
-	// function esteem_delete_tt() {
-	// 	$delta = $GLOBALS['ESTEEM_POST'];
-	// 	$query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-	// 	$result = dataConnection::runQuery($query);
-	// 	return $result;
+  // update esteem when another user follows this user
+  function esteem_follow() {
+    $delta = 1;
+    $query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// }
-
-	// +ESTEEM_LIKE esteem when user receives a like on one of their TTs
-	function esteem_like_tt() {
-		$delta = $GLOBALS['ESTEEM_LIKE'];
-		$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	function esteem_unlike_tt() {
-		$delta = $GLOBALS['ESTEEM_LIKE'];
-		$query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// +ESTEEM_SHARE esteem when someone shares one of the user's TTs
-	function esteem_share_tt() {
-		$delta = $GLOBALS['ESTEEM_SHARE'];
-		$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// +ESTEEM_COMMENT esteem when user receives a comment on one of their TTS
-	function esteem_comment_tt() {
-		$delta = $GLOBALS['ESTEEM_COMMENT'];
-		$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	function esteem_delete_comment_tt() {
-		$delta = $GLOBALS['ESTEEM_COMMENT'];
-		$query = "UPDATE user SET esteem = esteem - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// update esteem based on the number of views a SINGLE TT has
-	function esteem_views_tt($number_views) {
-		$delta = $GLOBALS['ESTEEM_VIEW'];
-		$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// update esteem when another user follows this user
-	function esteem_follow() {
-		$delta = 1;
-		$query = "UPDATE user SET esteem = esteem + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// get the notifications settings for this user
-	function get_settings() {
-		$user_settings = user_settings::retrieve_user_settings($this->id);
-		return $user_settings;
-	}
+  // get the notifications settings for this user
+  function get_settings() {
+    $user_settings = user_settings::retrieve_user_settings($this->id);
+    return $user_settings;
+  }
 
 
-	// ENGAGEMENT
+  // ENGAGEMENT
+  
+  // +ENGAGEMENT_LIKE engagement when user likes other user's TT
+  function engagement_like_tt() {
+    $delta = $GLOBALS['ENGAGEMENT_LIKE'];
+    $query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// +ENGAGEMENT_LIKE engagement when user likes other user's TT
-	function engagement_like_tt() {
-		$delta = $GLOBALS['ENGAGEMENT_LIKE'];
-		$query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  function engagement_unlike_tt() {
+    $delta = $GLOBALS['ENGAGEMENT_LIKE'];
+    $query = "UPDATE user SET engagement = engagement - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	function engagement_unlike_tt() {
-		$delta = $GLOBALS['ENGAGEMENT_LIKE'];
-		$query = "UPDATE user SET engagement = engagement - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  // +ENGAGEMENT_SHARE engagement when user shares other user's TT
+  function engagement_share_tt() {
+    $delta = $GLOBALS['ENGAGEMENT_SHARE'];
+    $query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// +ENGAGEMENT_SHARE engagement when user shares other user's TT
-	function engagement_share_tt() {
-		$delta = $GLOBALS['ENGAGEMENT_SHARE'];
-		$query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  // +ENGAGEMENT_COMMENT engagement when user comments on other user's TT
+  function engagement_comment_tt() {
+    $delta = $GLOBALS['ENGAGEMENT_COMMENT'];
+    $query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// +ENGAGEMENT_COMMENT engagement when user comments on other user's TT
-	function engagement_comment_tt() {
-		$delta = $GLOBALS['ENGAGEMENT_COMMENT'];
-		$query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  function engagement_delete_comment_tt() {
+    $delta = $GLOBALS['ENGAGEMENT_COMMENT'];
+    $query = "UPDATE user SET engagement = engagement - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	function engagement_delete_comment_tt() {
-		$delta = $GLOBALS['ENGAGEMENT_COMMENT'];
-		$query = "UPDATE user SET engagement = engagement - $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  // update engagement based on the number of views this user has on other users' TTs
+  function engagement_views_tt($number_views) {
+    $delta = $GLOBALS['ENGAGEMENT_VIEW'];
+    $query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
-	// update engagement based on the number of views this user has on other users' TTs
-	function engagement_views_tt($number_views) {
-		$delta = $GLOBALS['ENGAGEMENT_VIEW'];
-		$query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
-	// update engagement when this user follows another user
-	function engagement_follow() {
-		$delta = 1;
-		$query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
+  // update engagement when this user follows another user
+  function engagement_follow() {
+    $delta = 1;
+    $query = "UPDATE user SET engagement = engagement + $delta WHERE id = '" . dataConnection::safe($this->id) ."'";
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
 
 
-	/* AWARDS */
+  /* AWARDS */
 
-	// get all the awards for this user in category $cat of type $type ordered by rank
-	function get_awards($cat, $type) {
-		$query = "SELECT a.* FROM user_earns_award as uea
+  // get all the awards for this user in category $cat of type $type ordered by rank
+  function get_awards($cat, $type) {
+    $query = "SELECT a.* FROM user_earns_award as uea
 			INNER JOIN award as a ON uea.award_id = a.id
 			WHERE uea.user_id = '".dataConnection::safe($this->id)."' AND uea.promoted = 0 AND a.category = '".dataConnection::safe($cat)."' AND a.type = '".dataConnection::safe($type)."'
 			ORDER BY a.rank";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$awards = array();
-			foreach($result as $r){
-				$a = new award($r);
-				array_push($awards, $a);
-			}
-			return $awards;
-		} else return false;
-	}
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $awards = array();
+      foreach ($result as $r)
+	array_push($awards, new award($r));
+      return $awards;
+    } else
+      return false;
+  }
 
-	// get the number of active (unpromoted) $rank awards in category $cat of type $type for this user
-	function get_number_awards($cat, $type, $rank) {
-		$query = "SELECT COUNT(uea.id) AS number_awards FROM user_earns_award as uea
+  // get the number of active (unpromoted) $rank awards in category $cat of type $type for this user
+  function get_number_awards($cat, $type, $rank) {
+    $query = "SELECT COUNT(uea.id) AS number_awards FROM user_earns_award as uea
 			INNER JOIN award as a ON uea.award_id = a.id
 			WHERE uea.user_id= '".dataConnection::safe($this->id)."' AND uea.promoted = 0 AND a.category = '".dataConnection::safe($cat)."' AND a.type = '".dataConnection::safe($type)."' AND a.rank = '".dataConnection::safe($rank)."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_awards'];
-	}
+    $result = dataConnection::runQuery($query);
+    return $result[0]['number_awards'];
+  }
 
-	// promote all active (unpromoted) $rank awards in category $cat of type $type for this user
-	function promote_awards($cat, $type, $rank) {
-		$query = "UPDATE user_earns_award as uea
+  // promote all active (unpromoted) $rank awards in category $cat of type $type for this user
+  function promote_awards($cat, $type, $rank) {
+    $query = "UPDATE user_earns_award as uea
 			INNER JOIN award as a ON uea.award_id = a.id
 			SET uea.promoted = 1 
 			WHERE uea.user_id = '".dataConnection::safe($this->id)."' AND uea.promoted = 0 AND a.category = '".dataConnection::safe($cat)."' AND a.type = '".dataConnection::safe($type)."' AND a.rank = '".dataConnection::safe($rank)."'";
-		$result = dataConnection::runQuery($query);
-		return $result;
-	}
-
+    $result = dataConnection::runQuery($query);
+    return $result;
+  }
+  
 	// get the highest rank award for this user in $cat category
-	function get_highest_award($cat, $type) {
-		$query = "SELECT DISTINCT uea.* FROM user_earns_award as uea
+  function get_highest_award($cat, $type) {
+    $query = "SELECT DISTINCT uea.* FROM user_earns_award as uea
 			INNER JOIN award as a ON uea.award_id = a.id
 			WHERE uea.user_id = '". dataConnection::safe($this->id) ."' AND uea.promoted = 0 AND a.category = '". dataConnection::safe($cat) ."' AND a.type = '". dataConnection::safe($type) ."' ORDER BY a.rank DESC";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) return new user_earns_award($result[0]);
-		return false;
-	}
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0)
+      return new user_earns_award($result[0]);
+    return false;
+  }
+  
+  // update this user's awards if needed
+  function update_awards($cat, $type) {
+    if ($type == 'esteem') {
+      switch ($cat) {
+      case 'likes':
+	$count = $this->get_number_received_likes();
+	break;
+      case 'views':
+	$count = $this->get_number_received_views_tts();
+	break;
+      case 'comments':
+	$count = $this->get_number_received_comments();
+	break;
+      case 'shares':
+	$count = $this->get_number_shares_of_tts();
+	break;
+      case 'follows':
+	$count = $this->get_number_followers();
+	break;
+      }
+    } elseif ($type == 'engagement') {
+      switch ($cat) {
+      case 'likes':
+	$count = $this->get_number_given_likes();
+	break;
+      case 'views':
+	$count = $this->get_number_given_views();
+	break;
+      case 'comments':
+	$count = $this->get_number_given_comments();
+	break;
+      case 'shares':
+	$count = $this->get_number_given_shares();
+	break;	
+      case 'follows':
+	$count = $this->get_number_following();
+	break;
+      }
+    }
+    
+    /* 
+     * A STAR award is given when the user reaches 5, 15 or 25 points in category $cat.
+     *
+     * A BRONZE award is given when the user reaches 10 points in category $cat.
+     *
+     * A SILVER award is given when the user reaches 20 points in category $cat.
+     *
+     * A GOLD award is given when the user reaches 30 points in category $cat.
+     */
+    
+    $give_award = false;
+    switch ($count) {
+    case 0:
+      return false;
+    case 5:
+      $rank = 1;
+      break;
+    case 10:
+      $rank = 2;
+      $this->promote_awards($cat, $type, 1);
+      break;
+    case 15:
+      $rank = 3;
+      break;
+    case 20:
+      $rank = 4;
+      $this->promote_awards($cat, $type, 2);
+      $this->promote_awards($cat, $type, 3);
+      break;
+    case 25:
+      $rank = 5;
+      break;
+    case 30:
+      $rank = 6;
+      $this->promote_awards($cat, $type, 4);
+      $this->promote_awards($cat, $type, 5);
+      break;
+    default:
+      return false;
+    }
+    
+    // new award is needed - create new award matching $cat, $type, $rank
+    $uea = new user_earns_award();
+    $uea->user_id = $this->id;
+    $uea->award_id = award::get_award_matching($cat, $type, $rank);
+    $uea->promoted = 0;
+    $aid = $uea->insert();
+    return $aid;
+  }
+  
+  // update this user's overall $type awards if needed
+  function update_overall_awards($type) {
+    $hul = $this->get_highest_award('likes', $type);
+    $huv = $this->get_highest_award('views', $type);
+    $hus = $this->get_highest_award('shares', $type);
+    $huc = $this->get_highest_award('comments', $type);
+    $huf = $this->get_highest_award('follows', $type);
+    
+    $hl = award::retrieve_award($hul->award_id)->rank;
+    $hv = award::retrieve_award($huv->award_id)->rank;
+    $hs = award::retrieve_award($hus->award_id)->rank;
+    $hc = award::retrieve_award($huc->award_id)->rank;
+    $hf = award::retrieve_award($huf->award_id)->rank;
 
-	// update this user's awards if needed
-	function update_awards($cat, $type) {
-		if ($type == 'esteem') {
+    $ranks = array($hl, $hv, $hs, $hc, $hf);
+    $min_rank = min($ranks);
 
-			switch ($cat) {
-				case 'likes':
-					$count = $this->get_number_received_likes();
-					break;
+    // check if award has already been given
+    $huo = $this->get_highest_award('overall', $type);
+    $ho = award::retrieve_award($huo->award_id)->rank;
+    
+    if ($ho == $min_rank) return false;
 
-				case 'views':
-					$count = $this->get_number_received_views_tts();
-					break;
+    // new overall award needed
+    $uea = new user_earns_award();
+    $uea->user_id = $this->id;
+    $uea->award_id = award::get_award_matching('overall', $type, $min_rank);
+    $uea->promoted = 0;
+    $aid = $uea->insert();
 
-				case 'comments':
-					$count = $this->get_number_received_comments();
-					break;
+    // promote the other overall awards (if necessary)
+    if ($min_rank == 2) $this->promote_awards('overall', $type, 1);
+    elseif ($min_rank == 4) {
+      $this->promote_awards('overall', $type, 2);
+      $this->promote_awards('overall', $type, 3);
+    } elseif ($min_rank == 6) {
+      $this->promote_awards($cat, $type, 4);
+      $this->promote_awards($cat, $type, 5);
+    }
+    
+    return $aid;
+  }
 
-				case 'shares':
-					$count = $this->get_number_shares_of_tts();
-					break;
-
-				case 'follows':
-					$count = $this->get_number_followers();
-					break;
-
-			}
-
-		} elseif ($type == 'engagement') {
-			switch ($cat) {
-				case 'likes':
-					$count = $this->get_number_given_likes();
-					break;
-
-				case 'views':
-					$count = $this->get_number_given_views();
-					break;
-
-				case 'comments':
-					$count = $this->get_number_given_comments();
-					break;
-
-				case 'shares':
-					$count = $this->get_number_given_shares();
-					break;
-
-				case 'follows':
-					$count = $this->get_number_following();
-					break;
-			}
-		}
-
-		/* 
-		 * A STAR award is given when the user reaches 5, 15 or 25 points in category $cat.
-		 *
-		 * A BRONZE award is given when the user reaches 10 points in category $cat.
-		 *
-		 * A SILVER award is given when the user reaches 20 points in category $cat.
-		 *
-		 * A GOLD award is given when the user reaches 30 points in category $cat.
-		 */
-
-		$give_award = false;
-
-		switch ($count) {
-			case 0:
-				return false;
-				break;
-
-			case 5:
-				$rank = 1;
-				break;
-
-			case 10:
-				$rank = 2;
-				$this->promote_awards($cat, $type, 1);
-				break;
-
-			case 15:
-				$rank = 3;
-				break;
-
-			case 20:
-				$rank = 4;
-				$this->promote_awards($cat, $type, 2);
-				$this->promote_awards($cat, $type, 3);
-				break;
-
-			case 25:
-				$rank = 5;
-				break;
-
-			case 30:
-				$rank = 6;
-				$this->promote_awards($cat, $type, 4);
-				$this->promote_awards($cat, $type, 5);
-				break;
-
-			default:
-				return false;
-				break;
-		}
-
-		// new award is needed - create new award matching $cat, $type, $rank
-		$uea = new user_earns_award();
-		$uea->user_id = $this->id;
-		$uea->award_id = award::get_award_matching($cat, $type, $rank);
-		$uea->promoted = 0;
-		$aid = $uea->insert();
-
-		return $aid;
-	}
-
-	// update this user's overall $type awards if needed
-	function update_overall_awards($type) {
-		$hul = $this->get_highest_award('likes', $type);
-		$huv = $this->get_highest_award('views', $type);
-		$hus = $this->get_highest_award('shares', $type);
-		$huc = $this->get_highest_award('comments', $type);
-		$huf = $this->get_highest_award('follows', $type);
-
-		$hl = award::retrieve_award($hul->award_id)->rank;
-		$hv = award::retrieve_award($huv->award_id)->rank;
-		$hs = award::retrieve_award($hus->award_id)->rank;
-		$hc = award::retrieve_award($huc->award_id)->rank;
-		$hf = award::retrieve_award($huf->award_id)->rank;
-
-		$ranks = array($hl, $hv, $hs, $hc, $hf);
-		$min_rank = min($ranks);
-
-		// check if award has already been given
-		$huo = $this->get_highest_award('overall', $type);
-		$ho = award::retrieve_award($huo->award_id)->rank;
-
-		if($ho == $min_rank) return false;
-
-		// new overall award needed
-		$uea = new user_earns_award();
-		$uea->user_id = $this->id;
-		$uea->award_id = award::get_award_matching('overall', $type, $min_rank);
-		$uea->promoted = 0;
-		$aid = $uea->insert();
-
-		// promote the other overall awards (if necessary)
-		if ($min_rank == 2) $this->promote_awards('overall', $type, 1);
-		elseif ($min_rank == 4) {
-			$this->promote_awards('overall', $type, 2);
-			$this->promote_awards('overall', $type, 3);
-		}
-		elseif ($min_rank == 6) {
-			$this->promote_awards($cat, $type, 4);
-			$this->promote_awards($cat, $type, 5);
-		}
-
-		return $aid;
-	}
-
-	/* EMAIL NOTIFICATIONS */
-
-	// get this user's notifications in $cats categories for the past week
-	// if $cats = false, get notifications in all categories
-	function get_past_week_notifications($cats=false) {
-		$interval = 7;             // number of days
-		$query = "SELECT * FROM notification WHERE user_id = '".dataConnection::safe($this->id)."'";
-		if ($cats) {
-			$query .= " AND (category = '$cats[0]'";
-			if (sizeof($cats) > 1)
-				foreach (array_slice($cats, 1) as $c) $query .= "OR category = '$c'";
-			$query .= ")";
-		}
-		$query .= " AND DATEDIFF(NOW(), time) <= {$interval} ORDER BY time";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$notifications = array();
-			foreach($result as $r){
-				$n = new notification($r);
-				array_push($notifications, $n);
-			}
-			return $notifications;
-		} else return false;
-		
-
-	}
-
-	//[[USERCODE_user]] WEnd of custom class members.
+  /* EMAIL NOTIFICATIONS */
+  
+  // get this user's notifications in $cats categories for the past week
+  // if $cats = false, get notifications in all categories
+  function get_past_week_notifications($cats=false) {
+    $interval = 7;             // number of days
+    $query = "SELECT * FROM notification WHERE user_id = '".dataConnection::safe($this->id)."'";
+    if ($cats) {
+      $query .= " AND (category = '$cats[0]'";
+      if (sizeof($cats) > 1)
+	foreach (array_slice($cats, 1) as $c) $query .= "OR category = '$c'";
+      $query .= ")";
+    }
+    
+    $query .= " AND DATEDIFF(NOW(), time) <= {$interval} ORDER BY time";
+    $result = dataConnection::runQuery($query);
+    if (sizeof($result) != 0) {
+      $notifications = array();
+      foreach($result as $r)
+	array_push($notifications, new notification($r));
+      return $notifications;
+    } else
+      return false;
+  }
 }
 
-class user_settings
-{
-	var $id; //primary key
-	var $user_id; //foreign key
-	var $school_posts;
-	var $tts_activity;
-	var $followers_posts;
-	var $awards;
-
-	function user_settings($asArray=null)
-	{
-		$this->id = null; //primary key
-		$this->user_id = null; // foreign key, needs dealt with.
-		$this->school_posts = "0";
-		$this->tts_activity = "0";
-		$this->followers_posts = "0";
-		$this->awards = "0";
-		if($asArray!==null)
-			$this->fromArray($asArray);
-	}
-
-	function fromArray($asArray)
+class user_settings {
+  var $id; //primary key
+  var $user_id; //foreign key
+  var $school_posts;
+  var $tts_activity;
+  var $followers_posts;
+  var $awards;
+  
+  function user_settings($asArray=null) {
+    $this->id = null; //primary key
+    $this->user_id = null; // foreign key, needs dealt with.
+    $this->school_posts = "0";
+    $this->tts_activity = "0";
+    $this->followers_posts = "0";
+    $this->awards = "0";
+    if($asArray!==null)
+      $this->fromArray($asArray);
+  }
+  
+  function fromArray($asArray)
 	{
 		$this->id = $asArray['id'];
 		$this->user_id = $asArray['user_id']; // foreign key, check code
@@ -1498,6 +1396,7 @@ class teachingtip
 	var $worksbetter;
 	var $doesntworkunless;
 	var $essence;
+	var $school;
 	var $archived;
 	var $draft;
 
@@ -1514,6 +1413,7 @@ class teachingtip
 		$this->worksbetter = "";
 		$this->doesntworkunless = "";
 		$this->essence = "";
+		$this->school = '';
 		$this->archived = "0";
 		$this->draft = "0";
 		if($asArray!==null)
@@ -1533,6 +1433,7 @@ class teachingtip
 		$this->worksbetter = $asArray['worksbetter'];
 		$this->doesntworkunless = $asArray['doesntworkunless'];
 		$this->essence = $asArray['essence'];
+		$this->school = $asArray['school'];
 		$this->archived = $asArray['archived'];
 		$this->draft = $asArray['draft'];
 	}
@@ -1574,7 +1475,7 @@ class teachingtip
 	function insert()
 	{
 		//#Any required insert methods for foreign keys need to be called here.
-		$query = "INSERT INTO teachingtip(author_id, title, time, rationale, description, practice, worksbetter, doesntworkunless, essence, archived, draft) VALUES(";
+		$query = "INSERT INTO teachingtip(author_id, title, time, rationale, description, practice, worksbetter, doesntworkunless, essence, school, archived, draft) VALUES(";
 		if($this->author_id!==null)
 			$query .= "'".dataConnection::safe($this->author_id)."', ";
 		else
@@ -1587,6 +1488,7 @@ class teachingtip
 		$query .= "'".dataConnection::safe($this->worksbetter)."', ";
 		$query .= "'".dataConnection::safe($this->doesntworkunless)."', ";
 		$query .= "'".dataConnection::safe($this->essence)."', ";
+		$query .= "'".dataConnection::safe($this->school)."', ";
 		$query .= "'".dataConnection::safe($this->archived)."', ";
 		$query .= "'".dataConnection::safe($this->draft)."');";
 		dataConnection::runQuery("BEGIN;");
@@ -1609,6 +1511,7 @@ class teachingtip
 		$query .= ", worksbetter='".dataConnection::safe($this->worksbetter)."' ";
 		$query .= ", doesntworkunless='".dataConnection::safe($this->doesntworkunless)."' ";
 		$query .= ", essence='".dataConnection::safe($this->essence)."' ";
+		$query .= ", school='".dataConnection::safe($this->school)."' ";
 		$query .= ", archived='".dataConnection::safe($this->archived)."' ";
 		$query .= ", draft='".dataConnection::safe($this->draft)."' ";
 		$query .= "WHERE id='".dataConnection::safe($this->id)."';";
@@ -1642,6 +1545,7 @@ class teachingtip
 		$out .= '<worksbetter>'.htmlentities($this->worksbetter)."</worksbetter>\n";
 		$out .= '<doesntworkunless>'.htmlentities($this->doesntworkunless)."</doesntworkunless>\n";
 		$out .= '<essence>'.htmlentities($this->essence)."</essence>\n";
+		$out .= '<school>'.htmlentities($this->school)."</school>\n";
 		$out .= '<archived>'.htmlentities($this->archived)."</archived>\n";
 		$out .= '<draft>'.htmlentities($this->draft)."</draft>\n";
 		$out .= "</teachingtip>\n";

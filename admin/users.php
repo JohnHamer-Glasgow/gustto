@@ -109,7 +109,7 @@ else
               <li role="presentation" class="active"><a href="users.php">Users</a></li>
             </ul>';
 
-    if ($users) {
+  if (!empty($users)) {
         $template->pageData['content'] .= 
             '<table> <!-- bootstrap classes added by the uitheme widget -->
                 <thead>
