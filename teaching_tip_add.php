@@ -58,28 +58,6 @@ $errors = array();
 $title = $rationale = $description = $practice = $cond1 = $cond2 = $essence = $kwsString = ''; 
 $class_size = $environment = $suitable_ol = $it_competency = array(); 
 $keywords = array();
-$schoolList = array('',
-		    'Adam Smith Business School',
-		    'Chemistry',
-		    'Computing Science',
-		    'Critical Studies',
-		    'Culture and Creative Arts',
-		    'Education',
-		    'Engineering',
-		    'Geographical and Earth Sciences',
-		    'Humanities | Sgoil nan Daonnachdan',
-		    'Interdisciplinary Studies',
-		    'Law',
-		    'LEADS',
-		    'Life Sciences',
-		    'Mathematics and Statistics',
-		    'Medicine, Dentistry and Nursing',
-		    'Modern Languages and Cultures',
-		    'Physics and Astronomy',
-		    'Psychology',
-		    'Social and Political Sciences',
-		    'Veterinary Medicine',
-		    'Other');
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
   if (isset($_GET['ttID']) && is_numeric($_GET['ttID']) && $_GET['ttID'] >= 0){
@@ -141,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	exit();
       }
   } else
-    $ttSchool = $user->get_school_for_tt($schoolList);
+    $ttSchool = $user->get_school_for_tt($SCHOOLS);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -318,11 +296,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                               
 	    $followers = getFollowers($loggedUserID);
 	    $userSchool = $user->school;
-	    if ($followers) {
-	      foreach ($followers as $follower) {
-		if ($follower->school != $userSchool)
-		  createNotification($follower->id, $ttID, 'post', 'followers_posts');
-	      }
+	    foreach ($followers as $follower) {
+	      if ($follower->school != $userSchool)
+		createNotification($follower->id, $ttID, 'post', 'followers_posts');
 	    }
 
 	    header("Location: index.php");
@@ -350,12 +326,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	    createNotification($userId['id'], $tt->id, 'post', 'school_posts');
                         
 	  $followers = getFollowers($loggedUserID);
-	  if ($followers) {
 	    $userSchool = $user->school;
 	    foreach ($followers as $follower) {
 	      if ($follower->school != $userSchool) 
 		createNotification($follower->id, $tt->id, 'post', 'followers_posts');
-	    }
 	  }
 
 	  header("Location: index.php");
@@ -537,7 +511,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= '<div class="form-group"><label for="inputTTschool" class="control-label">Attach your Teaching Tip to a school, for easier search</label>';
 $template->pageData['content'] .= '<select class="form-control" id="inputTTschool" name="school">';
-foreach ($schoolList as $s)
+foreach ($SCHOOLS as $s)
   $template->pageData['content'] .= '<option value="' . $s . '"' . ($s == $ttSchool ? " selected='selected'" : '') . '>' . $s . '</option>';
 $template->pageData['content'] .= '</select></div>';
 

@@ -98,18 +98,6 @@ foreach($top_users as $tu) {
   $u = $tu[0];
   $tts_number = $tu[1];
 
-  foreach ($COLLEGES as $key=>$college)
-    if ($u->college == 'College of ' . $college) {
-      $user_college = $key;
-      break;
-    }
-
-  if ($u->school != 'Adam Smith Business School') {
-    $school = explode(' ', $u->school, 3);
-    $user_school = $school[2];
-  } else
-    $user_school = $u->school;
-  
   $tts_string = "Teaching Tips";
   if ($tts_number == 1) $tts_string = "Teaching Tip";
 
@@ -126,12 +114,12 @@ foreach($top_users as $tu) {
                       </div>
                       <div class='col-xs-10'>
                         <h4 class='feed-tt-title'><a href='profile.php?usrID={$u->id}'>{$u->name} {$u->lastname}</a></h4>
-                        <a href='search.php?college={$user_college}&school={$user_school}' class='feed-tt-profile-school'>{$u->school}</a>
+                        <div class='feed-tt-profile-school'>{$u->school}</div>
                       </div>
                     </div>
                     <div class='feed-title hidden-xs'>
                       <h4 class='feed-tt-title'><a href='profile.php?usrID={$u->id}'>{$u->name} {$u->lastname}</a></h4>
-                      <a href='search.php?college={$user_college}&school={$user_school}' class='feed-tt-profile-school'>{$u->school}</a>
+                      <div class='feed-tt-profile-school'>{$u->school}</div>
                     </div>
                     <div class='feed-text-wrapper'>
                       <strong>{$tts_number} {$tts_string}</strong>

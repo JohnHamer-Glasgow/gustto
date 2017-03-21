@@ -744,35 +744,6 @@ $(document).ready(function () {
   });
 
 
-  // get a list of schools for a college (used for school select on search page)
-  $(document).on('change', '.search-select-college', function () {
-    var college = $(this).val();
-    var schoolSelect = $('.search-select-school');
-    var collegeSelect = $(this);
-
-    if (college != '') {
-      $.get("ajax/select_options.php",{college: college}, null, 'json')
-      .done(function(data){
-        schoolSelect.prop('disabled', false);
-        schoolSelect.prop('title', '');
-        schoolSelect.html('');
-        schoolSelect.append('<option value="">School</option>');
-        data.forEach(function(s) {
-          schoolSelect.append('<option value="' + s + '">' + s + '</option>');
-        });
-
-      })
-    } else {
-      schoolSelect.val('');
-      schoolSelect.prop('disabled', true);
-      schoolSelect.prop('title', 'Please select a College first');
-    }
-  });
-    
-  
-  // NOTIFICATIONS 
-
-
   // Notifications coloring
   function colorChange(){
   var notificationNo = $('.header-notificationNo').html();

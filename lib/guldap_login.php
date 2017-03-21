@@ -61,8 +61,6 @@ function uinfoFromGULDAP($record) {
     $uinfo['category'] = 'staff';
   else
     $uinfo['category'] = 'guest';
-  if (isset($record['city'][0]))
-    $uinfo['college'] = $record['city'][0];
   if (isset($record['costcenterdescription'][0])) {
     if (strpos($record['costcenterdescription'][0], '-')) {
       list($cd, $nm) = explode('-', $record['costcenterdescription'][0]);

@@ -1,104 +1,61 @@
 <?php
+// Used for filtering on search page
+$SCHOOLS =
+    array('',
+	  'Adam Smith Business School',
+	  'Chemistry',
+	  'Computing Science',
+	  'Critical Studies',
+	  'Culture and Creative Arts',
+	  'Education',
+	  'Engineering',
+	  'Geographical and Earth Sciences',
+	  'Humanities | Sgoil nan Daonnachdan',
+	  'Interdisciplinary Studies',
+	  'Law',
+	  'LEADS',
+	  'Life Sciences',
+	  'Mathematics and Statistics',
+	  'Medicine, Dentistry and Nursing',
+	  'Modern Languages and Cultures',
+	  'Physics and Astronomy',
+	  'Psychology',
+	  'Social and Political Sciences',
+	  'Veterinary Medicine',
+	  'Other');
 
-/* USED FOR FILTERING ON SEARCH PAGE */
-$COLLEGES = array(
-  'arts' => 'Arts',
-  'mvls' => 'Medical, Veterinary and Life Sciences',
-  'se'   => 'Science and Engineering',
-  'ss'   => 'Social Sciences'
-  );
+$CLASS_SIZES =
+  array('small' => 'Small (<25)',
+	'medium' => 'Medium (25-150)',
+	'large' => 'Large (>150)');
 
-$SCHOOLS = array(
-  'Critical Studies' => 'arts',
-  'Culture and Creative Arts' => 'arts',
-  'Humanities | Sgoil nan Daonnachdan' => 'arts',
-  'Modern Languages and Cultures' => 'arts',
+$ENVS =
+  array('lecture' => 'Lecture',
+	'seminar' => 'Seminar/Tutorial',
+	'lab' => 'Lab',
+	'field' => 'Field',
+	'other' => 'Other');
 
-  'Life Sciences' => 'mvls',
-  'Medicine, Dentistry and Nursing' => 'mvls',
-  'Veterinary Medicine' => 'mvls',
+$SOL =
+  array('yes' => 'Yes',
+	'no' => 'No');
 
-  'Chemistry' => 'se',
-  'Computing Science' => 'se',
-  'Engineering' => 'se',
-  'Geographical and Earth Sciences' => 'se',
-  'Mathematics and Statistics' => 'se',
-  'Physics and Astronomy' => 'se',
-  'Psychology' => 'se',
+$ITC =
+  array('none' => 'None',
+	'basic' => 'Basic',
+	'moderate' => 'Moderate',
+	'advanced' => 'Advanced');
 
-  'Adam Smith Business School' => 'ss',
-  'Education' => 'ss',
-  'Interdisciplinary Studies' => 'ss',
-  'Law' => 'ss',
-  'Social and Political Sciences' => 'ss',
-  );
-
-$COLLEGES_SCHOOLS = array(
-  'arts' => array(
-    'School of Critical Studies',
-    'School of Culture and Creative Arts',
-    'School of Humanities | Sgoil nan Daonnachdan',
-    'School of Modern Languages and Cultures',
-    ),
-  'mvls' => array(
-    'School of Life Sciences',
-    'School of Medicine, Dentistry and Nursing',
-    'School of Veterinary Medicine',
-    ),
-  'se' => array(
-    'School of Chemistry',
-    'School of Computing Science',
-    'School of Engineering',
-    'School of Geographical and Earth Sciences',
-    'School of Mathematics and Statistics',
-    'School of Physics and Astronomy',
-    'School of Psychology',
-    ),
-  'ss' => array(
-    'Adam Smith Business School',
-    'School of Education',
-    'School of Interdisciplinary Studies',
-    'School of Law',
-    'School of Social and Political Sciences',
-    ),
-  );
-
-$CLASS_SIZES = array(
-  'small' => 'Small (<25)',
-  'medium' => 'Medium (25-150)',
-  'large' => 'Large (>150)'
-  );
-
-$ENVS = array(
-  'lecture' => 'Lecture',
-  'seminar' => 'Seminar/Tutorial',
-  'lab' => 'Lab',
-  'field' => 'Field',
-  'other' => 'Other',
-  );
-
-$SOL = array(
-  'yes' => 'Yes',
-  'no' => 'No',
-  );
-
-$ITC = array(
-  'none' => 'None',
-  'basic' => 'Basic',
-  'moderate' => 'Moderate',
-  'advanced' => 'Advanced',
-  );
-
+$GLOBALS['SCHOOLS'] = $SCHOOLS;
 $GLOBALS['CLASS_SIZES'] = $CLASS_SIZES;
 $GLOBALS['ENVS'] = $ENVS;
 $GLOBALS['SOL'] = $SOL;
 $GLOBALS['ITS'] = $ITC;
 
-/* REPUTATION points */
+// REPUTATION points
 $settings = admin_settings::get_settings();
 
 // ESTEEM
-
 $GLOBALS['ESTEEM_LIKE'] = $settings->esteem_like;                        // esteem points when user receives a like
 $GLOBALS['ESTEEM_COMMENT'] = $settings->esteem_comment;                  // esteem points when user receives a comment
 $GLOBALS['ESTEEM_SHARE'] = $settings->esteem_share;                      // esteem points when one of the user's TT is shared by other user

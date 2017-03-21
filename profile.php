@@ -124,8 +124,7 @@ $template->pageData['content'] .=
            '</form>
             <div class="row profile-info">
               <div class="profile-details col-xs-12">
-                <div class="profile-details-college"><span class="glyphicon glyphicon-education"></span> '.$user->college.'</div>
-                <div class="profile-details-school">'.$user->school.'</div>
+                <div class="profile-details-college"><span class="glyphicon glyphicon-education"></span> '.$user->school.'</div>
                 <div class="profile-details-email"><span class="glyphicon glyphicon-envelope"></span> '.$user->email.'</div>
               </div>
               <div class="profile-stats-header-wrapper col-xs-12">

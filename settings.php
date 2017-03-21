@@ -219,7 +219,7 @@ $template->pageData['content'] .= '
  
 $followers = getFollowers($loggedUserId);
 
-if ($followers) {
+if (!empty($followers)) {
   $template->pageData['content'] .= '<ul>';
   foreach ($followers as $f) {
     $name = $f->name;

@@ -64,7 +64,7 @@ if (isset($_GET['filterType']) &&  $_GET['filterType'] == "like"){
     $most_liked = teachingtip::getPopularTeachingTips(5, 0, true, '>', time() - (60 * 60 * 24 * 7));
     $checkedWeek = "checked";
   }
-} elseif (isset($_GET['filterType']) &&  $_GET['filterType'] == "comment"){
+} elseif (isset($_GET['filterType']) &&  $_GET['filterType'] == "comment") {
     // PERIOD FILTERING
   if (isset($_GET['period']) &&  $_GET['period'] == "alltime"){
     $most_commented = teachingtip::getPopularTeachingTips(5, 0, false);
@@ -96,9 +96,7 @@ $template->pageData['content'] .=
               <h4>Teaching Tip Feed</h4>
             </div>
 
-            <!-- Dropdown options -->
             <div class="col-xs-3 activity-options main-header">
-              <!-- Single button -->
                 <div class="btn-group">
                   <button type="button" class="btn btn-default dropdown-toggle visible-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Feed
@@ -185,21 +183,7 @@ if ($teachingTipsListToUse) {
     $number_shares = $tt->get_number_shares();
     $keywords = $tt->get_keywords();
     $author = $tt->get_author();
-    $author_college = '';
-    $author_school = '';
-
-    foreach ($COLLEGES as $key=>$college) {
-      if ($author->college == 'College of ' . $college) {
-	$author_college = $key;
-	break;
-      }
-    }
-    
-    if ($author->school != 'Adam Smith Business School') {
-      $school = explode(' ', $author->school, 3);
-      $author_school = $school[2];
-    } else
-      $author_school = $author->school;
+    $school = $tt->school;
 
     $template->pageData['content'] .= 
                 "<div class='feed-tt'>
@@ -217,12 +201,12 @@ if ($teachingTipsListToUse) {
                         </div>
                         <div class='col-xs-10'>
                           <h4 class='feed-tt-title'><a href='teaching_tip.php?ttID={$tt->id}'>{$tt->title}</a></h4>
-                          <span class='feed-tt-time'>{$tt_time}</span>. <a href='search.php?college={$author_college}&school={$author_school}' class='feed-tt-profile-school'>{$author->school}</a>
+                          <span class='feed-tt-time'>{$tt_time}</span>. <a href='search.php?school={$school}' class='feed-tt-profile-school'>{$author->school}</a>
                         </div>
                       </div>
                       <div class='feed-title hidden-xs'>
                         <h4 class='feed-tt-title'><a href='teaching_tip.php?ttID={$tt->id}'>{$tt->title}</a></h4>
-                        <a href='search.php?college={$author_college}&school={$author_school}' class='feed-tt-profile-school'>{$author->school}</a>
+                        <a href='search.php?school={$school}' class='feed-tt-profile-school'>{$author->school}</a>
                       </div>
                       <div class='feed-text-wrapper'>
                         <p class='feed-text'>{$tt->description}</p>

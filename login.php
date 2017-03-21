@@ -21,8 +21,6 @@ if ($uinfo) {
   $dbUser = getUserRecord($uinfo, false);
 
   $_SESSION['last_visit'] = $dbUser->last_visit;
-  if ($dbUser->college == '' && isset($uinfo['college']))
-    $dbUser->college = $uinfo['college'];
   if ($dbUser->school == '' && isset($uinfo['school']))
     $dbUser->school = $uinfo['school'];
   $dbUser->update();

@@ -2,7 +2,7 @@
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
 function initializeDataBase_() {
-  $query = "CREATE TABLE user(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(30), lastname VARCHAR(30), phonenumber VARCHAR(20), username VARCHAR(20), email VARCHAR(50), profile_picture VARCHAR(50), college VARCHAR(50), school VARCHAR(50), esteem INTEGER, engagement INTEGER, lastaccess DATE, joindate DATE, last_visit DATETIME, isadmin INTEGER, FULLTEXT(name,lastname)) ENGINE=MyISAM;";
+  $query = "CREATE TABLE user(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(30), lastname VARCHAR(30), phonenumber VARCHAR(20), username VARCHAR(20), email VARCHAR(50), profile_picture VARCHAR(50), school VARCHAR(50), esteem INTEGER, engagement INTEGER, lastaccess DATE, joindate DATE, last_visit DATETIME, isadmin INTEGER, FULLTEXT(name,lastname)) ENGINE=MyISAM;";
   dataConnection::runQuery($query);
   $query = "CREATE TABLE user_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, school_posts INTEGER, tts_activity INTEGER, followers_posts INTEGER, awards INTEGER) ENGINE=MyISAM;";
   dataConnection::runQuery($query);
@@ -46,7 +46,6 @@ class user {
   var $username;
   var $email;
   var $profile_picture;
-  var $college;
   var $school;
   var $esteem;
   var $engagement;
@@ -63,7 +62,6 @@ class user {
     $this->username = "";
     $this->email = "";
     $this->profile_picture = "";
-    $this->college = "";
     $this->school = "";
     $this->esteem = "0";
     $this->engagement = "0";
@@ -83,7 +81,6 @@ class user {
     $this->username = $asArray['username'];
     $this->email = $asArray['email'];
     $this->profile_picture = $asArray['profile_picture'];
-    $this->college = $asArray['college'];
     $this->school = $asArray['school'];
     $this->esteem = $asArray['esteem'];
     $this->engagement = $asArray['engagement'];
@@ -123,14 +120,13 @@ class user {
 	
   function insert() {
     //#Any required insert methods for foreign keys need to be called here.
-    $query = "INSERT INTO user(name, lastname, phonenumber, username, email, profile_picture, college, school, esteem, engagement, lastaccess, joindate, last_visit, isadmin) VALUES(";
+    $query = "INSERT INTO user(name, lastname, phonenumber, username, email, profile_picture, school, esteem, engagement, lastaccess, joindate, last_visit, isadmin) VALUES(";
     $query .= "'".dataConnection::safe($this->name)."', ";
     $query .= "'".dataConnection::safe($this->lastname)."', ";
     $query .= "'".dataConnection::safe($this->phonenumber)."', ";
     $query .= "'".dataConnection::safe($this->username)."', ";
     $query .= "'".dataConnection::safe($this->email)."', ";
     $query .= "'".dataConnection::safe($this->profile_picture)."', ";
-    $query .= "'".dataConnection::safe($this->college)."', ";
     $query .= "'".dataConnection::safe($this->school)."', ";
     $query .= "'".dataConnection::safe($this->esteem)."', ";
     $query .= "'".dataConnection::safe($this->engagement)."', ";
@@ -154,7 +150,6 @@ class user {
     $query .= ", username='".dataConnection::safe($this->username)."' ";
     $query .= ", email='".dataConnection::safe($this->email)."' ";
     $query .= ", profile_picture='".dataConnection::safe($this->profile_picture)."' ";
-    $query .= ", college='".dataConnection::safe($this->college)."' ";
     $query .= ", school='".dataConnection::safe($this->school)."' ";
     $query .= ", esteem='".dataConnection::safe($this->esteem)."' ";
     $query .= ", engagement='".dataConnection::safe($this->engagement)."' ";
@@ -188,7 +183,6 @@ class user {
     $out .= '<username>'.htmlentities($this->username)."</username>\n";
     $out .= '<email>'.htmlentities($this->email)."</email>\n";
     $out .= '<profile_picture>'.htmlentities($this->profile_picture)."</profile_picture>\n";
-    $out .= '<college>'.htmlentities($this->college)."</college>\n";
     $out .= '<school>'.htmlentities($this->school)."</school>\n";
     $out .= '<esteem>'.htmlentities($this->esteem)."</esteem>\n";
     $out .= '<engagement>'.htmlentities($this->engagement)."</engagement>\n";
@@ -1769,146 +1763,78 @@ class teachingtip
 		return $schools;
 	}
 
-	// get the schools (for which there is at least one TT in the db) that belong to colleges specified in $colleges array 
-	// if $colleges argument not given -> get all the schools in the db
-	static function get_schools_for_colleges($colleges=false) {
-		$query = "SELECT DISTINCT u.school, COUNT(u.school) as school_count FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0";
-		if ($colleges) {
-			$query .= " AND (u.college = '$colleges[0]'";
-			if (sizeof($colleges) > 1)
-				foreach (array_slice($colleges, 1) as $college) $query .= "OR college = '$college'";
-			$query .= ")";
-		}
-		$query .= " GROUP BY u.school ORDER BY u.college, u.school";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$schools = array();
-			foreach ($result as $r) {
-				$schools[] = array('school' => $r['school'], 'count' => $r['school_count']);
-			}
-		}
-		return $schools;
-
-	}
-
-	// get the TTs from all colleges in $colleges array
-	static function get_tts_from_colleges($colleges) {
-		$query = "SELECT tt.* FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0 AND (u.college = '$colleges[0]'";
-		if (sizeof($colleges > 1)) {
-			foreach (array_slice($colleges, 1) as $college) $query .= " OR u.college = '$college'";
-		}
-		$query .= ") ORDER BY time DESC";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
-	}
-
-	// get the TTs from all schools in $schools array
 	static function get_tts_from_schools($schools) {
-		$query = "SELECT tt.* FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0 AND (u.school = '$schools[0]'";
-		if (sizeof($schools > 1)) {
-			foreach (array_slice($schools, 1) as $school) $query .= " OR u.school = '$school'";
-		}
-		$query .= ") ORDER BY time DESC";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
+	  $query = "SELECT tt.* FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0 AND (tt.school = '$schools[0]'";
+	  if (sizeof($schools > 1)) {
+	    foreach (array_slice($schools, 1) as $school)
+	      $query .= " OR tt.school = '$school'";
+	  }
+	  
+	  $query .= ") ORDER BY time DESC";
+	  $result = dataConnection::runQuery($query);
+	  if (sizeof($result) != 0) {
+	    $tts = array();
+	    foreach($result as $r)
+	      array_push($tts, new teachingtip($r));
+	    return $tts;
+	  } else
+	    return false;
 	}
 
-	// get the TTs for all the filters applied by the user
 	static function get_tts_from_filters($schools, $sizes, $envs, $sol, $itc) {
-		$list = array();
+	  $list = array();
+	  if ($schools) {
+	    $schools_map = array_map(function($s) { return 'tt.school = ' . "'" . $s . "'"; }, $schools);
+	    if (!empty($schools_map)) {
+	      $schools_string = implode(' or ', $schools_map);
+	      $query = "select distinct tt.* from teachingtip as tt inner join user as u on tt.author_id = u.id where archived = 0 and draft = 0 and (" . $schools_string . ") order by time desc";
+	      $result = dataConnection::runQuery($query);
+	      if (sizeof($result) != 0) {
+		$r1 = array();
+		foreach($result as $r)
+		  array_push($r1, new teachingtip($r));
+		$list[] = $r1;
+	      }	      
+	    }
+	  }
+	  
+	  if ($sizes) {
+	    $sizes_map = array_map(function($cs) { return 'f.opt='."'".$cs."'"; }, $sizes);
+	    if (!empty($sizes_map)) {
+	      $sizes_string = "f.category = 'class_size' AND (".implode(' OR ', $sizes_map).") ";
+	      $r2 = getTTsWithFilters($sizes_string);
+	      $list[] = $r2;
+	    }
+	  }
+	  
+	  if ($envs) {
+	    $envs_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $envs );
+	    if (!empty($envs_map))
+	      $list[] = getTTsWithFilters("f.category = 'environment' AND (".implode(' OR ', $envs_map).") ");
+	  }
 
-		if ($schools) {
-			$schools_map = array_map(
-				function($s) { return 'u.school='."'".$s."'"; }, 
-				$schools
-			);
-			if (!empty($schools_map)) {
-				$schools_string = implode(' OR ', $schools_map);
-				$query = "SELECT DISTINCT tt.* FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0 AND " . $schools_string . "ORDER BY time DESC";
-				$result = dataConnection::runQuery($query);
+	  if ($sol) {
+	    $sol_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $sol );
+	    if (!empty($sol_map))
+	      $list[] = getTTsWithFilters("f.category = 'suitable_ol' AND (".implode(' OR ', $sol_map).") ");
+	  }
+	  
+	  if ($itc) {
+	    $itc_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $itc);
+	    if (!empty($itc_map))
+	      $list[] = getTTsWithFilters("f.category = 'it_competency' AND (".implode(' OR ', $itc_map).") ");
+	  }
+	  
+	  if (sizeof($list) > 1)
+	    $results = call_user_func_array('array_intersect', $list);
+	  else
+	    $results = $list[0];
 
-				if (sizeof($result) != 0) {
-					$r1 = array();
-					foreach($result as $r){
-						$tt = new teachingtip($r);
-						array_push($r1, $tt);
-					}
-					$list[] = $r1;
-				} 
-
-			}
-		}
-		
-		if ($sizes) {
-			$sizes_map = array_map(
-				function($cs) { return 'f.opt='."'".$cs."'"; }, 
-				$sizes
-			);
-			if (!empty($sizes_map)) {
-				$sizes_string = "f.category = 'class_size' AND (".implode(' OR ', $sizes_map).") ";
-				$r2 = getTTsWithFilters($sizes_string);
-				$list[] = $r2;
-			}
-		}
-		
-		if ($envs) {
-			$envs_map = array_map(
-				function($e) { return 'f.opt='."'".$e."'"; }, 
-				$envs
-			);
-			if (!empty($envs_map)) {
-				$envs_string = "f.category = 'environment' AND (".implode(' OR ', $envs_map).") ";
-				$r3 = getTTsWithFilters($envs_string);
-				$list[] = $r3;
-			}
-		}
-
-		if ($sol) {
-			$sol_map = array_map(
-				function($e) { return 'f.opt='."'".$e."'"; }, 
-				$sol
-			);
-			if (!empty($sol_map)) {
-				$sol_string = "f.category = 'suitable_ol' AND (".implode(' OR ', $sol_map).") ";
-				$r4 = getTTsWithFilters($sol_string);
-				$list[] = $r4;
-			}
-		}
-
-		if ($itc) {
-			$itc_map = array_map(
-				function($e) { return 'f.opt='."'".$e."'"; }, 
-				$itc
-			);
-			if (!empty($itc_map)) {
-				$itc_string = "f.category = 'it_competency' AND (".implode(' OR ', $itc_map).") ";
-				$r5 = getTTsWithFilters($itc_string);
-				$list[] = $r5;
-			}	
-		}
-		
-		if (sizeof($list) > 1) $results = call_user_func_array('array_intersect', $list);
-		else $results = $list[0];
-
-		if (sizeof($results) != 0) return $results;
-		else return false;
+	  if (sizeof($results) != 0)
+	    return $results;
+	  else
+	    return false;
 	}
-
-	//[[USERCODE_teachingtip]] WEnd of custom class members.
 }
 
 class ttcomment

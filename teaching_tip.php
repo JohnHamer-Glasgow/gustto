@@ -129,22 +129,6 @@ if ($class_size_f) foreach ($class_size_f as $cs) $class_size[] = $CLASS_SIZES[$
 if ($environment_f) foreach ($environment_f as $env) $environment[] = $ENVS[$env];
 if ($it_competency_f) foreach ($it_competency_f as $itc) $it_competency[] = $ITC[$itc];
 
-$author_college = '';
-$author_school = '';
-
-foreach ($COLLEGES as $key => $college) {
-  if ($author->college == 'College of ' . $college) {
-    $author_college = $key;
-    break;
-  }
-}
-
-if ($author->school != 'Adam Smith Business School') {
-  $school = explode(' ', $author->school, 3);
-  $author_school = $school[2];
-} else
-  $author_school = $author->school;
-
 $template->pageData['content'] .= 
   '<div class="col-sm-9 col-xs-12">
           <div class="card teaching-tip">';
@@ -193,7 +177,7 @@ $template->pageData['content'].=
                   </div>
                   <div class='tt-profile-details col-sm-12 col-xs-11'>
                     <h4 class='tt-profile-name'><a href='profile.php?usrID={$author->id}'>{$author->name} {$author->lastname}</a></h4>
-                    <div class='tt-school'><a href='search.php?college={$author_college}&school={$author_school}'>{$author->school}</a></div>
+                    <div class='tt-school'>$author->school</div>
                     <div class='tt-datetime'>
                       <p class='tt-date'>".date('d M y',$tt->whencreated)."</p>
                     </div>

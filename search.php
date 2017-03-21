@@ -43,7 +43,6 @@ $sol_filter_array = array();
 $itc_filter_string = '';
 $itc_filter_array = array();
 
-$college_filter = false;
 $school_filter = false;
 $class_size_filter = false;
 $env_filter = false;
@@ -61,12 +60,8 @@ if (isset($_GET['school']) && !empty($_GET['school'])) {
   $schools_filter_array = explode('_', $schools_filter_string);
 
   $schools_for_query = array();
-  foreach ($schools_filter_array as $s) {
-    if ($s != 'Adam Smith Business School')
-      $schools_for_query[] = 'School of ' . $s;
-    else
+  foreach ($schools_filter_array as $s)
       $schools_for_query[] = $s;
-  }
 
   $school_filter = true;
 }
@@ -99,7 +94,6 @@ if (isset($_GET['itc']) && !empty($_GET['itc'])) {
   $itc_filter = true;
 }
     
-$search_college = '';
 $search_school = '';
 $search_input = '';
 
@@ -128,13 +122,12 @@ if (isset($_GET['q'])) {
 
 if ($display_filter) {      
   $schools = array();
-
-  foreach ($SCHOOLS as $s => $c) {
-    if ($s != 'Adam Smith Business School')
-      $schools[] = array('school' =>'School of ' . $s, 'count'=>get_number_tts_from_school('School of ' . $s));
-    else
-      $schools[] = array('school' =>$s, 'count'=>get_number_tts_from_school($s));
-  }
+  foreach ($SCHOOLS as $s)
+    if ($s != '') {
+      $n = get_number_tts_from_school($s);
+      if ($n > 0)
+	$schools[] = array('school' => $s, 'count' => $n);
+    }
       
   if ($school_filter || $class_size_filter || $env_filter || $sol_filter || $itc_filter)
     $results = teachingtip::get_tts_from_filters($schools_for_query, $sizes_for_query, $envs_for_query, $sol_for_query, $itc_for_query);
@@ -142,11 +135,11 @@ if ($display_filter) {
     $results = teachingtip::get_latest_teaching_tips();
 } else {
   if ($byAuthor)
-    $results = searchTTsByAuthor($search_input, $search_college, $search_school);
+    $results = searchTTsByAuthor($search_input, $search_school);
   elseif ($byKeyword)
-    $results = searchTTsByKeyword($search_input, $search_college, $search_school);
+    $results = searchTTsByKeyword($search_input, $search_school);
   else
-    $results = searchTTs($search_input, $search_college, $search_school);
+    $results = searchTTs($search_input, $search_school);
 }
 
 $user = user::retrieve_user($loggedUserID);
@@ -175,16 +168,6 @@ $template->pageData['content'] .=
 							
 								<div class="search-box">
                   <form class="form-inline search-form" action="" method="get">
-                    <!--<select class="form-control search-select search-select-college" name="c">
-                      <option value="">College</option>
-                      <option value="arts">Arts</option>
-                      <option value="mvls">Medical, Veterinary and Life Sciences</option>
-                      <option value="se">Science and Engineering</option>
-                      <option value="ss">Social Sciences</option>
-                    </select>
-                    <select class="form-control search-select search-select-school" name="s" disabled title="Please select a College first">
-                      <option value="">School</option>
-                    </select>-->
                     <div class="search-input-wrapper">
                       <input type="text" class="search-input form-control" aria-label="..." placeholder="Search..." name="q" value="' . $search_input . '">
                       <div class="search-options">
@@ -387,18 +370,12 @@ if ($display_filter) {
   }
                     
   $template->pageData['content'] .= 
-    '<h4 class="filter-sub-header">School of</h4>';
+    '<h4 class="filter-sub-header">School</h4>';
       if ($schools) {
         foreach ($schools as $s) {
-          if ($s['school'] != 'Adam Smith Business School') {
-            $school = explode(' ', $s['school'], 3);
-            $school = $school[2];
-          } else
-	    $school = $s['school'];
+	  $school = $s['school'];
            
-          $template->pageData['content'] .= 
-                  '<div class="checkbox">
-                    <label>';
+          $template->pageData['content'] .= '<div class="checkbox"><label>';
 
           $cfs = '';
           $cfa = array();
@@ -407,7 +384,7 @@ if ($display_filter) {
           if (!empty($sol_filter_string)) $cfa[] = 'sol=' . $sol_filter_string;
           if (!empty($itc_filter_string)) $cfa[] = 'itc=' . $itc_filter_string;
           $cfs = implode('&', $cfa);
-          $schar = (empty($cfs) ? '':'&');
+          $schar = empty($cfs) ? '': '&';
 
           if (!in_array($school, $schools_filter_array)) {
             if (empty($schools_filter_string))
@@ -429,7 +406,6 @@ if ($display_filter) {
 	  
           $template->pageData['content'] .= '<input type="checkbox" value="" onclick="window.location.href='. "'search.php". $filter_string . '\'"'. $checked . '>
                       <a href="search.php'. $filter_string . '">'. $school . ' (' . $s['count'] . ')</a>
-                      
                     </label>
                   </div>';
         }
@@ -446,10 +422,8 @@ if ($display_filter) {
   $template->pageData['content'] .= '<h5>Active filters: '. $active_filter_message . '</h5>';
 
   if ($school_filter) {
-    foreach ($schools_filter_array as $sfilter) {
-      if ($sfilter != 'Adam Smith Business School') $template->pageData['content'] .= '<div class="college-filter-badge">'. 'School of '. $sfilter . '</div>';
-      else $template->pageData['content'] .= '<div class="college-filter-badge">'. $sfilter . '</div>';
-    }
+    foreach ($schools_filter_array as $sfilter)
+      $template->pageData['content'] .= '<div class="college-filter-badge">'. $sfilter . '</div>';
   } 
 
   if ($class_size_filter) 
@@ -475,7 +449,6 @@ if ($display_filter) {
   $template->pageData['content'] .= '<div class="search-results-header-wrap col-xs-12">
                 <div class="search-results-header">';
   $search_filter = '';
-  if ($search_college) $search_filter .= ' in <span style="color:#607D8B">' . $search_college . '</span>';
   if ($search_school) $search_filter .= ' > <span style="color:#607D8B">' . $search_school . '</span>';
   if ($byAuthor) $custom_search = 'by Author';
   if ($byKeyword) $custom_search = 'by Keyword';
@@ -485,7 +458,7 @@ if ($display_filter) {
   $template->pageData['content'] .= '<div class="search-results col-xs-12">';
 }
 
-if ($results) {
+if (!empty($results)) {
   foreach ($results as $tt) {
     $author = $tt->get_author();
     $tt_time = date('d M y', $tt->whencreated);
@@ -494,7 +467,7 @@ if ($results) {
                     <div class="row">
                       <div class="search-result-title col-sm-9 col-xs-12"><h4><a href="teaching_tip.php?ttID='. $tt->id . '">'. $tt->title . '</a></h4></div>
                       <div class="search-result-date col-sm-3 col-xs-12">'. $tt_time . '</div>
-                      <div class="search-result-author col-xs-12"><span>by</span> <a href="profile.php?usrID='. $author->id . '">'. $author->name . ' ' . $author->lastname . '</a> . <span>'. $author->college . '</span> . <span>'. $author->school . '</span></div>
+                      <div class="search-result-author col-xs-12"><span>by</span> <a href="profile.php?usrID='. $author->id . '">'. $author->name . ' ' . $author->lastname . '</a> . <span>'. $author->school . '</span></div>
                       <div class="search-result-description col-xs-12">'. $tt->description . '</div>
                       <div class="search-result-icons col-xs-12">
                         <div class="feed-icons"><button class="glyphicon glyphicon-thumbs-up feed-likebutton"></button> '. $tt->get_number_likes() . '</div>

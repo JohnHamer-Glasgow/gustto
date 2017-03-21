@@ -2,8 +2,7 @@
 
 // Get the user object for the database user record of a logged in
 // user, and create it if it doesn't exist.
-function getUserRecord($uinfo)
-{
+function getUserRecord($uinfo) {
   $dbUser = user::retrieve_by_username($uinfo['uname']);
   if($dbUser == false && !empty($uinfo['uname']) && !empty($uinfo['gn']) && !empty($uinfo['sn']) && !empty($uinfo['email'])) {
     // User not found in database, so create a new record
@@ -65,10 +64,8 @@ function getLatestTeachingTips($limit=false,$lowerL=0){
 }
 
 
-function getTeachingTip($ttID){
-    $teachingTip = dataConnection::runQuery("SELECT u.id, u.name, u.lastname, u.username, tt.* FROM user AS u
-        INNER JOIN teachingtip AS tt ON u.id = tt.author_id WHERE tt.id = $ttID");
-    return $teachingTip;
+function getTeachingTip($ttID) {
+  return dataConnection::runQuery("select u.id, u.name, u.lastname, u.username, tt.* from user as u inner join teachingtip as tt on u.id = tt.author_id where tt.id = $ttID");
 }
 
 function checkUserLikesTT($ttID, $userID) {
@@ -108,13 +105,10 @@ function userUnlikesTT($ttID, $loggedUserId) {
     // Notification to the followers removed
 
     $followers = getFollowers($loggedUserId);
-    if($followers){
-        foreach ($followers as $follower) {
-            $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
-            $uultt = dataConnection::runQuery($query);
-            
-            deleteNotification($follower->id,$uultt[0]['id'],'like');
-        }
+    foreach ($followers as $follower) {
+      $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
+      $uultt = dataConnection::runQuery($query);
+      deleteNotification($follower->id,$uultt[0]['id'],'like');
     }
 
     // Remove it from user like tt
@@ -181,18 +175,12 @@ function getFilterCategory($opt) {
     else return false;
 }
 
-// get tts which have a particular list of filters in a particular category
 function getTTsWithFilters($filter_string) {
-    $query = "SELECT DISTINCT tt.* FROM ttfilter as f INNER JOIN teachingtip as tt ON f.teachingtip_id = tt.id WHERE archived = 0 AND draft = 0 AND " . $filter_string . "ORDER BY time DESC";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $tts = array();
-        foreach($result as $r){
-            $tt = new teachingtip($r);
-            array_push($tts, $tt);
-        }
-        return $tts;
-    } else return array();
+  $tts = array();
+  $result = dataConnection::runQuery("select distinct tt.* from ttfilter as f inner join teachingtip as tt on f.teachingtip_id = tt.id where archived = 0 and draft = 0 and " . $filter_string . " order by time desc");
+  foreach($result as $r)
+    array_push($tts, new teachingtip($r));
+  return $tts;
 }
 
 // get the ttkeywords that contain $keyword
@@ -292,245 +280,120 @@ function searchKeywordsByKeyword($keyword){
     } else return false;
 }
 
-// get teaching tips by user id
-function myTeachingTips($userId){
-    $query = "SELECT * FROM teachingtip WHERE author_id= $userId AND archived='0'";
-    $result = dataConnection::runQuery($query);
-    return $result;
+function myTeachingTips($userId) {
+  return dataConnection::runQuery("select * from teachingtip where author_id = $userId and archived = '0'");
 }
 
 function deleteComment($cID, $loggedUserId) {
-    $query = "DELETE FROM ttcomment WHERE id = {$cID}";
-    $result = dataConnection::runQuery($query);
-    if (!$result) return false;
+  if (!dataConnection::runQuery("delete from ttcomment where id = {$cID}"))
+    return false;
 
-    // Notification to the author removed
-    $query = "SELECT * FROM user_comments_tt WHERE comment_id='{$cID}' AND user_id = '{$loggedUserId}'";
-    $uuctt = dataConnection::runQuery($query);
-    $tt = teachingtip::retrieve_teachingtip($uuctt[0]['teachingtip_id']);
-    if ($loggedUserId!=$tt->author_id) deleteNotification($tt->author_id,$uuctt[0]['id'],'comment');
+  $uuctt = dataConnection::runQuery("select * from user_comments_tt where comment_id='{$cID}' and user_id = '{$loggedUserId}'");
+  $tt = teachingtip::retrieve_teachingtip($uuctt[0]['teachingtip_id']);
+  if ($loggedUserId != $tt->author_id)
+    deleteNotification($tt->author_id, $uuctt[0]['id'], 'comment');
 
-    // Notification to the followers removed
-
-    $followers = getFollowers($loggedUserId);
-    if($followers){
-        foreach ($followers as $follower) deleteNotification($follower->id,$uuctt[0]['id'],'comment');                 
-    }
-
-    // Notification to the commenters removed
-    $commenters = getTtCommentUsers ($tt,$loggedUserId);
-    if ($commenters){
-        foreach ($commenters as $commenter) deleteNotification($commenter->id,$uuctt[0]['id'],'comment');
-    }
-
-    // Delete User Comment TT
-
-    $query = "DELETE FROM user_comments_tt WHERE comment_id={$cID} AND user_id = {$loggedUserId}";
-    $result = dataConnection::runQuery($query);
-    if (!$result) return false;
-    return true;
+  $followers = getFollowers($loggedUserId);
+  foreach ($followers as $follower)
+    deleteNotification($follower->id,$uuctt[0]['id'],'comment');                 
+    
+  $commenters = getTtCommentUsers($tt,$loggedUserId);
+  if ($commenters)
+    foreach ($commenters as $commenter) deleteNotification($commenter->id,$uuctt[0]['id'],'comment');
+  
+  return dataConnection::runQuery("delete from user_comments_tt where comment_id = {$cID} and user_id = {$loggedUserId}");
 }
 
-// FULL TEXT SEARCH
-function searchTTs($search_string, $search_college, $search_school) {
-    $search_string = dataConnection::safe($search_string);
-    $query = "SELECT DISTINCT tt.*,
-        MATCH (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) AGAINST ('{$search_string}') as ttmatch,
-        MATCH (u.name, u.lastname) AGAINST ('{$search_string}') as umatch,
-        MATCH (k.keyword) AGAINST ('{$search_string}') as kmatch
-        FROM ttkeyword as k
-        LEFT JOIN teachingtip as tt ON tt.id = k.ttid_id
-        LEFT JOIN user as u ON u.id = tt.author_id
-        WHERE
-        tt.archived = 0 AND tt.draft = 0 AND";
-    if (!empty($search_college)) {
-        $query .= " u.college = '" . dataConnection::safe($search_college) . "' AND";
-
-        if (!empty($search_school)) $query .= " u.school = '" . dataConnection::safe($search_school) . "' AND";
-
-    }
-    $query .= " (MATCH (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) AGAINST ('{$search_string}') OR
-        MATCH (u.name, u.lastname) AGAINST ('{$search_string}') OR
-        MATCH (k.keyword) AGAINST ('{$search_string}'))
-        ORDER BY (kmatch + umatch*2.25 + ttmatch) DESC";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $tts = array();
-        foreach($result as $r){
-            $tt = new teachingtip($r);
-            array_push($tts, $tt);
-        }
-        return array_unique($tts);
-    } else return false;
-    // if (sizeof($result) != 0) {
-    //     $tts = array();
-    //     $tts_kmatch = array();
-    //     foreach ($result as $r) {
-    //         if (array_key_exists($r['id'], $tts_kmatch)) $tts_kmatch[$r['id']] += $r['kmatch'];
-    //         else $tts_kmatch[$r['id']] = $r['kmatch'];
-    //     }
-    //     arsort($tts_kmatch);
-    //     foreach ($tts_kmatch as $ttid=>$km) {
-    //         foreach ($result as $r) {
-    //             if ($ttid == $r['id']) {
-    //                 $tt = new teachingtip($r);
-    //                 array_push($tts, $tt);
-    //             }
-    //         }
-    //     }
-    //     return array_unique($tts);
-    // } else return false;
-
+function searchTTs($search_string, $search_school) {
+  $search_string = dataConnection::safe($search_string);
+  $query = "select distinct tt.*,
+        match (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) against ('{$search_string}') as ttmatch,
+        match (u.name, u.lastname) against ('{$search_string}') as umatch,
+        match (k.keyword) against ('{$search_string}') as kmatch
+        from ttkeyword as k
+        left join teachingtip as tt ON tt.id = k.ttid_id
+        left join user u on u.id = tt.author_id
+        where
+        tt.archived = 0 and tt.draft = 0 and";
+  if (!empty($search_school))
+    $query .= " tt.school like '" . dataConnection::safe($search_school) . "' and";
+  $query .= " (match (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) against ('{$search_string}')
+           or match (u.name, u.lastname) against ('{$search_string}')
+           or match (k.keyword) against ('{$search_string}'))
+           order by (kmatch + umatch * 2.25 + ttmatch) desc";
+  $tts = array();
+  foreach (dataConnection::runQuery($query) as $r)
+    array_push($tts, new teachingtip($r));
+  return array_unique($tts);
 }
 
-// Search TTs by Author
-function searchTTsByAuthor($search_author, $search_college, $search_school){
-    $search_author = dataConnection::safe($search_author);
-    $query = "SELECT DISTINCT tt.*,
-        MATCH (u.name, u.lastname) AGAINST ('{$search_author}') as umatch
-        FROM teachingtip as tt
-        LEFT JOIN user as u ON u.id = tt.author_id
-        WHERE
-        tt.archived = 0 AND tt.draft = 0 AND";
-    if (!empty($search_college)) {
-        $query .= " u.college = '" . dataConnection::safe($search_college) . "' AND";
-
-        if (!empty($search_school)) $query .= " u.school = '" . dataConnection::safe($search_school) . "' AND";
-
-    }
-    $query .= " MATCH (u.name, u.lastname) AGAINST ('{$search_author}') 
-        ORDER BY umatch DESC";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $tts = array();
-        foreach($result as $r){
-            $tt = new teachingtip($r);
-            array_push($tts, $tt);
-        }
-        return $tts;
-    } else return false;
+function searchTTsByAuthor($search_author, $search_school){
+  $search_author = dataConnection::safe($search_author);
+  $query = "select distinct tt.*,
+        match (u.name, u.lastname) against ('{$search_author}') as umatch
+        from teachingtip as tt
+        left join user as u ON u.id = tt.author_id
+        where
+        tt.archived = 0 AND tt.draft = 0 and";
+  if (!empty($search_school))
+    $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
+  $query .= " umatch order by umatch desc";
+  $result = dataConnection::runQuery($query);
+  $tts = array();
+  foreach ($result as $r)
+    array_push($tts, new teachingtip($r));
+  return $tts;
 }
 
-/* KEEP THIS HERE - might need it later */
-// Search TTs by Keyword
-// function searchTTsByKeyword($search_keyword) {
-//     $search_keyword = dataConnection::safe($search_keyword);
-//     $query = "SELECT DISTINCT tt.*, k.keyword,
-//         MATCH (k.keyword) AGAINST ('{$search_keyword}') as kmatch
-//         FROM teachingtip as tt
-//         LEFT JOIN ttkeyword as k ON tt.id = k.ttid_id
-//         WHERE
-//         tt.archived = 0 AND tt.draft = 0 AND
-//         MATCH (k.keyword) AGAINST ('{$search_keyword}')
-//         ORDER BY kmatch DESC";
-//     $result = dataConnection::runQuery($query);
-//     if (sizeof($result) != 0) {
-//         $tts = array();
-//         $tts_kmatch = array();
-//         foreach ($result as $r) {
-//             if (array_key_exists($r['id'], $tts_kmatch)) $tts_kmatch[$r['id']] += $r['kmatch'];
-//             else $tts_kmatch[$r['id']] = $r['kmatch'];
-//         }
-//         arsort($tts_kmatch);
-//         foreach ($tts_kmatch as $ttid=>$km) {
-//             foreach ($result as $r) {
-//                 if ($ttid == $r['id']) {
-//                     $tt = new teachingtip($r);
-//                     array_push($tts, $tt);
-//                 }
-//             }
-//         }
-//         return array_unique($tts);
-//     } else return false;
-// }
-
-function searchTTsByKeyword($search_keyword, $search_college, $search_school) {
-    $search_keyword = dataConnection::safe($search_keyword);
-    $query = "SELECT DISTINCT tt.*
-        FROM teachingtip as tt
-        INNER JOIN ttkeyword as k ON tt.id = k.ttid_id
-        INNER JOIN user as u ON tt.author_id = u.id
-        WHERE tt.archived = 0 AND tt.draft = 0 AND";
-    if (!empty($search_college)) {
-        $query .= " u.college = '" . dataConnection::safe($search_college) . "' AND";
-
-        if (!empty($search_school)) $query .= " u.school = '" . dataConnection::safe($search_school) . "' AND";
-
-    }
-    $query .= " k.keyword = '{$search_keyword}'";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $tts = array();
-        foreach($result as $r){
-            $tt = new teachingtip($r);
-            array_push($tts, $tt);
-        }
-        return $tts;
-    } else return false;
+function searchTTsByKeyword($search_keyword, $search_school) {
+  $search_keyword = dataConnection::safe($search_keyword);
+  $query = "select distinct tt.*
+        from teachingtip as tt
+        inner join ttkeyword as k on tt.id = k.ttid_id
+        inner join user as u on tt.author_id = u.id
+        where tt.archived = 0 and tt.draft = 0 and";
+  if (!empty($search_school))
+    $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
+  $query .= " k.keyword = '{$search_keyword}'";
+  $result = dataConnection::runQuery($query);
+  $tts = array();
+  foreach($result as $r)
+    array_push($tts, new teachingtip($r));
+  return $tts;
 }
-
-
 
 function get_number_tts_from_school($school) {
-    $query = "SELECT COUNT(tt.id) as school_count FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE tt.archived = 0 AND tt.draft = 0 AND u.school = '{$school}'";
-    $result = dataConnection::runQuery($query);
-    return $result[0]['school_count'];
+  $result = dataConnection::runQuery("select count(*) as n from teachingtip where archived = 0 and draft = 0 and school = '{$school}'");
+  return $result[0]['n'];
 }
 
 function checkUserFollowsUser($followerID, $userID) {
-    $query = "SELECT * FROM user_follows_user WHERE follower_id = '". dataConnection::safe($followerID) ."' AND user_id = '" . dataConnection::safe($userID) . "'";
-    $result = dataConnection::runQuery($query);
-    if ($result) return true;
-    else return false;
+  return dataConnection::runQuery("select * from user_follows_user where follower_id = '". dataConnection::safe($followerID) ."' and user_id = '" . dataConnection::safe($userID) . "'");
 }
 
 function userUnfollowsUser($followerID, $userID) {
-    // remove notification
-    $query = "SELECT * FROM user_follows_user WHERE follower_id = '{$followerID}' AND user_id = '{$userID}'";
-    $result = dataConnection::runQuery($query);
-    if(sizeof($result) != 0) deleteNotification($userID, $result[0]['id'], 'follow');
-
-    // remove follow entry
-    $query = "DELETE FROM user_follows_user WHERE follower_id = '". dataConnection::safe($followerID) ."' AND user_id = '" . dataConnection::safe($userID) . "'";
-    $result = dataConnection::runQuery($query);
-    return $query;
-    if ($result < 1) return false;
-    return true;
+  $result = dataConnection::runQuery("select * from user_follows_user where follower_id = '{$followerID}' and user_id = '{$userID}'");
+  if(sizeof($result) != 0)
+    deleteNotification($userID, $result[0]['id'], 'follow');
+  return dataConnection::runQuery("delete from user_follows_user where follower_id = '". dataConnection::safe($followerID) ."' and user_id = '" . dataConnection::safe($userID) . "'");
 }
 
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// Notifications
-
 function getFollowers($userID) {
-    $query = "SELECT follower_id FROM user_follows_user WHERE user_id = {$userID}";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $followers = array();
-        foreach($result as $r){
-            $follower = user::retrieve_user($r['follower_id']);
-            array_push($followers, $follower);
-        }
-        return $followers;
-    } else return false;
+  $followers = array();
+  foreach(dataConnection::runQuery("select follower_id from user_follows_user where user_id = {$userID}") as $r)
+    array_push($followers, user::retrieve_user($r['follower_id']));
+  return $followers;
 }
 
 function getFollowing($userID) {
-    $query = "SELECT user_id FROM user_follows_user WHERE follower_id = {$userID}";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $followings = array();
-        foreach($result as $r){
-            $following = user::retrieve_user($r['user_id']);
-            array_push($followings, $following);
-        }
-        return $followings;
-    } else return false;
+  $followings = array();
+  foreach (dataConnection::runQuery("select user_id from user_follows_user where follower_id = {$userID}") as $r)
+    array_push($followings, user::retrieve_user($r['user_id']));
+  return $followings;
 }
 
-function getSameSchoolUsers($school,$loggedUserId){
-    $query = "SELECT id FROM user WHERE school = '$school' AND id <> '$loggedUserId'";
-    $usersIdSchool = dataConnection::runQuery($query);
-    return $usersIdSchool; 
+function getSameSchoolUsers($school, $loggedUserId) {
+  return dataConnection::runQuery("select id from user where school = '$school' and id <> '$loggedUserId'");
 }
 
 // Create a system notification for $userId and send email notification if user has enabled
