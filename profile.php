@@ -49,12 +49,7 @@ $loggedUserLastname = $uinfo['sn'];
 $template->pageData['userLoggedIn'] = $loggedUserName . ' ' . $loggedUserLastname ;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
 $template->pageData['navProfile'] = 'sidebar-current-page';
-
-if (notification::getNotifications($loggedUserID,false,0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
 $esteem_la = $user->get_awards('likes', 'esteem');

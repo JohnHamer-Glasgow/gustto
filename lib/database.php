@@ -2,40 +2,157 @@
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
 function initializeDataBase_() {
-  $query = "CREATE TABLE user(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(30), lastname VARCHAR(30), phonenumber VARCHAR(20), username VARCHAR(20), email VARCHAR(50), profile_picture VARCHAR(50), school VARCHAR(50), esteem INTEGER, engagement INTEGER, lastaccess DATE, joindate DATE, last_visit DATETIME, isadmin INTEGER, FULLTEXT(name,lastname)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, school_posts INTEGER, tts_activity INTEGER, followers_posts INTEGER, awards INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE admin(id INTEGER PRIMARY KEY AUTO_INCREMENT, role VARCHAR(20)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE admin_settings(id INTEGER PRIMARY KEY AUTO_INCREMENT, esteem_like INTEGER, esteem_comment INTEGER, esteem_share INTEGER, esteem_view INTEGER, esteem_follow INTEGER, engagement_like INTEGER, engagement_comment INTEGER, engagement_share INTEGER, engagement_view INTEGER, engagement_follow INTEGER, log_actions INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE award(id INTEGER PRIMARY KEY AUTO_INCREMENT, name VARCHAR(40), url VARCHAR(50), category VARCHAR(20), type VARCHAR(20), rank INTEGER, about VARCHAR(128)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_earns_award(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, award_id INTEGER, time DATETIME, promoted INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE teachingtip(id INTEGER PRIMARY KEY AUTO_INCREMENT, author_id INTEGER, title VARCHAR(128), whencreated timestamp default current_timestamp, time DATETIME, rationale TEXT, description TEXT, practice TEXT, worksbetter TEXT, doesntworkunless TEXT, essence TEXT, school text, archived INTEGER, draft INTEGER, FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE ttcomment(id INTEGER PRIMARY KEY AUTO_INCREMENT, time DATETIME, comment TEXT, archived INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE ttkeyword(id INTEGER PRIMARY KEY AUTO_INCREMENT, ttid_id INTEGER, keyword VARCHAR(30), archived INTEGER, FULLTEXT(keyword)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE ttfilter(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, category VARCHAR(30), opt VARCHAR(30)) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE ttview(id INTEGER PRIMARY KEY AUTO_INCREMENT, teachingtip_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE contributors(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, email VARCHAR(50), seen INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_comments_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, comment_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_likes_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, teachingtip_id INTEGER, time DATETIME, archived INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_shares_tt(id INTEGER PRIMARY KEY AUTO_INCREMENT, sender VARCHAR(50), recipient VARCHAR(50), teachingtip_id INTEGER, time DATETIME, message TEXT, archived INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE user_follows_user(id INTEGER PRIMARY KEY AUTO_INCREMENT, follower_id INTEGER, user_id INTEGER, time DATETIME) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
-  $query = "CREATE TABLE notification(id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, activity_id INTEGER, activity_type VARCHAR(10), category VARCHAR(20), time DATETIME, seen INTEGER) ENGINE=MyISAM;";
-  dataConnection::runQuery($query);
+  $createTable =
+    array("
+CREATE TABLE user(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   name VARCHAR(30),
+   lastname VARCHAR(30),
+   phonenumber VARCHAR(20),
+   username VARCHAR(20),
+   email VARCHAR(50),
+   profile_picture VARCHAR(50),
+   school VARCHAR(50),
+   esteem INTEGER,
+   engagement INTEGER,
+   lastaccess DATE,
+   joindate DATE,
+   last_visit DATETIME,
+   isadmin INTEGER,
+   FULLTEXT(name, lastname));",
+	  "
+CREATE TABLE user_settings(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   school_posts INTEGER,
+   tts_activity INTEGER,
+   followers_posts INTEGER,
+   awards INTEGER);",
+	  "
+CREATE TABLE admin(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   role VARCHAR(20));",
+	  "
+CREATE TABLE admin_settings(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   esteem_like INTEGER,
+   esteem_comment INTEGER,
+   esteem_share INTEGER,
+   esteem_view INTEGER,
+   esteem_follow INTEGER,
+   engagement_like INTEGER,
+   engagement_comment INTEGER,
+   engagement_share INTEGER,
+   engagement_view INTEGER,
+   engagement_follow INTEGER,
+   log_actions INTEGER);",
+	  "
+CREATE TABLE award(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   name VARCHAR(40),
+   url VARCHAR(50),
+   category VARCHAR(20),
+   type VARCHAR(20),
+   rank INTEGER,
+   about VARCHAR(128));",
+	  "
+CREATE TABLE user_earns_award(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   award_id INTEGER,
+   time DATETIME,
+   promoted INTEGER);",
+	  "
+CREATE TABLE teachingtip(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   author_id INTEGER,
+   title VARCHAR(128),
+   whencreated timestamp default current_timestamp,
+   time DATETIME,
+   rationale TEXT,
+   description TEXT,
+   practice TEXT,
+   worksbetter TEXT,
+   doesntworkunless TEXT,
+   essence TEXT,
+   school text,
+   archived INTEGER,
+   draft INTEGER,
+   FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence));",
+	  "
+CREATE TABLE ttcomment(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   time DATETIME,
+   comment TEXT,
+   archived INTEGER);",
+	  "
+CREATE TABLE ttkeyword(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   ttid_id INTEGER,
+   keyword VARCHAR(30),
+   archived INTEGER,
+   FULLTEXT(keyword));",
+	  "
+CREATE TABLE ttfilter(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   teachingtip_id INTEGER,
+   category VARCHAR(30),
+   opt VARCHAR(30));",
+	  "
+CREATE TABLE ttview(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   teachingtip_id INTEGER,
+   user_id INTEGER,
+   time DATETIME);",
+	  "
+CREATE TABLE contributors(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   teachingtip_id INTEGER,
+   email VARCHAR(50),
+   seen INTEGER);",
+	  "
+CREATE TABLE user_comments_tt(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   teachingtip_id INTEGER,
+   comment_id INTEGER,
+   time DATETIME,
+   archived INTEGER);",
+	  "
+CREATE TABLE user_likes_tt(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   teachingtip_id INTEGER,
+   time DATETIME,
+   archived INTEGER);",
+	  "
+CREATE TABLE user_shares_tt(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   sender VARCHAR(50),
+   recipient VARCHAR(50),
+   teachingtip_id INTEGER,
+   time DATETIME,
+   message TEXT,
+   archived INTEGER);",
+	  "
+CREATE TABLE user_follows_user(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   follower_id INTEGER,
+   user_id INTEGER,
+   time DATETIME);",
+	  "
+CREATE TABLE notification(
+   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+   user_id INTEGER,
+   activity_id INTEGER,
+   activity_type VARCHAR(10),
+   category VARCHAR(20),
+   time DATETIME,
+   seen INTEGER);");
+
+  foreach ($createTable as $query)
+    dataConnection::runQuery($query . "  ENGINE=MyISAM");
 }
 
 class user {
@@ -193,7 +310,6 @@ class user {
     $out .= "</user>\n";
     return $out;
   }
-  //[[USERCODE_user]] Put code for custom class members in this block.
   
   static function get_number_users() {
     $result = dataConnection::runQuery("select count(id) as number_users from user");
@@ -215,11 +331,15 @@ class user {
     return $output;
   }
 
-  static function get_most_tts() {
-    $query = "select u.*, count(tt.id) as number_tts from user as u inner join teachingtip as tt on u.id = tt.author_id where tt.draft = 0 and tt.archived = 0 group by u.id order by number_tts desc, u.id";
+  static function get_most_tts($limit, $offset) {
+    $query = "select u.*, count(tt.id) as number_tts from user as u inner join teachingtip as tt on u.id = tt.author_id
+ where tt.draft = 0 and tt.archived = 0
+ group by u.id
+ order by number_tts desc, u.id
+ limit $limit offset $offset";
     $users = array();
     foreach (dataConnection::runQuery($query) as $r)
-      array_push($users, array(new user($r), $r['number_tts']));
+      array_push($users, array('user' => new user($r), 'n' => $r['number_tts']));
     return $users;
   }
 
@@ -241,80 +361,70 @@ class user {
   }
   
   function get_number_new_tts($since) {
-    $query = "SELECT COUNT(id) AS number_tts FROM teachingtip as tt WHERE tt.time > '". dataConnection::time2db($since) ."' AND tt.author_id <> '". dataConnection::safe($this->id) ."' AND archived = 0 AND draft = 0";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("
+select count(id) as number_tts
+ from teachingtip as tt
+ where tt.time > '" . dataConnection::time2db($since) . "' and tt.author_id <> '" . dataConnection::safe($this->id) . "' and archived = 0 and draft = 0");
     return $result[0]['number_tts'];
   }
 
   function getLikes() {
-    $query = "SELECT * FROM user_likes_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-      $likes = array();
-      foreach ($result as $r)
-	array_push($likes, new user_likes_tt($r));
-      return $likes;
-    } else
-      return false;
+    $likes = array();
+    foreach (dataConnection::runQuery("select * from user_likes_tt where user_id ='" . dataConnection::safe($this->id)."' and archived='0' ") as $r)
+      array_push($likes, new user_likes_tt($r));
+    return $likes;
   }
 
   function getComments() {
-    $query = "SELECT * FROM user_comments_tt WHERE user_id ='".dataConnection::safe($this->id)."' AND archived='0' ";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-      $comments = array();
-      foreach ($result as $r)
-	array_push($comments, new user_comments_tt($r));
-      return $comments;
-    } else
-      return false;
+    $comments = array();
+    foreach(dataConnection::runQuery("select * from user_comments_tt where user_id ='" . dataConnection::safe($this->id)."' and archived='0'") as $r)
+      array_push($comments, new user_comments_tt($r));
+    return $comments;
   }
 
   function getShares() {
-    $query = "SELECT * FROM user_shares_tt WHERE sender ='".dataConnection::safe($this->email)."' AND archived='0' ";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-      $shares = array();
-      foreach($result as $r)
-	array_push($shares, new user_shares_tt($r));
-      return $shares;
-    } else
-      return false;
+    $shares = array();
+    foreach (dataConnection::runQuery("select * from user_shares_tt where sender ='" . dataConnection::safe($this->email) . "' and archived='0'") as $r)
+      array_push($shares, new user_shares_tt($r));
+    return $shares;
   }
 
   function get_number_tts() {
-    $query = "SELECT COUNT(id) AS number_tts FROM teachingtip WHERE archived = 0 AND draft = 0 AND author_id = '" . dataConnection::safe($this->id) ."'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("select count(id) as number_tts from teachingtip where archived = 0 and draft = 0 and author_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_tts'];
   }
 
   function get_number_received_likes() {
-    $query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ultt.user_id <> '".dataConnection::safe($this->id). "'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("
+select count(ultt.id) as number_likes
+ from user_likes_tt as ultt inner join teachingtip as tt on ultt.teachingtip_id = tt.id
+ where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and ultt.user_id <> '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_likes'];
   }
 
   function get_number_received_comments() {
-    $query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND uctt.user_id <> '".dataConnection::safe($this->id). "'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("
+select count(uctt.id) as number_comments from user_comments_tt as uctt inner join teachingtip as tt on uctt.teachingtip_id = tt.id
+ where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and uctt.user_id <> '" . dataConnection::safe($this->id). "'");
     return $result[0]['number_comments'];
   }
 
   function get_number_shares_of_tts() {
-    $query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '".dataConnection::safe($this->id)."' AND ustt.sender <> '".dataConnection::safe($this->email). "'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("
+select count(ustt.id) as number_shares from user_shares_tt as ustt inner join teachingtip as tt on ustt.teachingtip_id = tt.id
+ where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and ustt.sender <> '".dataConnection::safe($this->email). "'");
     return $result[0]['number_shares'];
   }
 
   function get_number_received_views_tts() {
-    $query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id = '" .dataConnection::safe($this->id) . "'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("
+select count(ttv.id) as number_views from ttview as ttv inner join teachingtip as tt on ttv.teachingtip_id = tt.id
+ where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_views'];
   }
 
   function get_number_followers() {
-    $query = "SELECT COUNT(*) AS number_followers FROM user_follows_user WHERE user_id = '" .dataConnection::safe($this->id) . "'";
-    $result = dataConnection::runQuery($query);
+    $result = dataConnection::runQuery("select count(*) as number_followers from user_follows_user where user_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_followers'];
   }
 
@@ -1572,49 +1682,29 @@ class teachingtip
 		} else return false;
 	}
 	
-	// Get popular teaching tips based on their likes if true,else comments  
-	// use of limmit as false so can retrieve all
-	// use of start as 0 to consider all by default
-	static function getPopularTeachingTips($limit=false,$start=false,$type=true,$operator='<',$time=false){
-		if(!$time){
-			$time= time();
-		}
-		
-		// Conversion to db format for querring
-		$time = date("Y-m-d H:i:s",$time);
-		if($type){
-			$query = "SELECT tt.*, COUNT(ultt.id) as count_likes FROM teachingtip as tt LEFT JOIN user_likes_tt as ultt ON tt.id = ultt.teachingtip_id WHERE tt.archived = '0' AND tt.draft = '0' AND tt.time ".$operator." '".$time."' GROUP BY tt.id ORDER BY count_likes DESC";
-		}else{
-			$query = "SELECT tt.*, COUNT(uctt.id) as count_comments FROM teachingtip as tt LEFT JOIN user_comments_tt as uctt ON tt.id = uctt.teachingtip_id WHERE tt.archived = '0' AND tt.draft = '0' AND tt.time ".$operator." '".$time."' GROUP BY tt.id ORDER BY count_comments DESC";
-		}
-		if ($limit) $query .= " LIMIT ". dataConnection::safe($limit);
-		if ($start) $query .= " OFFSET " . dataConnection::safe($start); 
-		$query .= " ;";
-    	$result = dataConnection::runQuery($query);
-    	if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;	
+	static function getPopularTeachingTips($limit, $offset, $table, $time) {
+	  $result = dataConnection::runQuery("
+select tt.*, count(u.id) as n from teachingtip as tt left join user_{$table}_tt u on tt.id = u.teachingtip_id
+ where tt.archived = '0' and tt.draft = '0' and tt.time > '" . date("Y-m-d H:i:s", $time) . "'
+ group by tt.id
+ order by n desc
+ limit " . dataConnection::safe($limit) . " offset " . dataConnection::safe($offset));
+	  $tts = array();
+	  foreach($result as $r)
+	    array_push($tts, new teachingtip($r));
+	  return $tts;
 	}
 
-	static function get_latest_teaching_tips($limit=false) {
-		$query = "SELECT * FROM teachingtip WHERE archived='0' AND draft='0' ORDER BY time DESC";
-		if ($limit) $query .= " LIMIT $limit";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
-
-
+	static function get_latest_teaching_tips($limit = false) {
+	  $query = "select * from teachingtip where archived='0' and draft='0' order by time desc";
+	  if ($limit) $query .= " limit $limit";
+	  $result = dataConnection::runQuery($query);
+	  if (sizeof($result) != 0) {
+	    $tts = array();
+	    foreach($result as $r)
+	      array_push($tts, new teachingtip($r));
+	    return $tts;
+	  } else return false;
 	}
 
 	function get_author() {
@@ -2370,15 +2460,10 @@ class contributors
 	        $query .= " LIMIT ".$count." OFFSET ".$from;
 	    $query .= ';';
 	    $result = dataConnection::runQuery($query);
-	    if(sizeof($result)!=0)
-	    {
-	        $output = array();
-	        foreach($result as $r)
-	            $output[] = new contributors($r);
-	        return $output;
-	    }
-	    else
-	        return false;
+	    $output = array();
+	    foreach($result as $r)
+	      $output[] = new contributors($r);
+	    return $output;
 	}
 	
 	function insert()
@@ -3120,26 +3205,19 @@ class notification
 	}
 	//[[USERCODE_notification]] Put code for custom class members in this block.
 
-	// Get the notifications for each user
-	// seen 0 = query unseen >>>> seen 1 = query seen >>>> seen 2 = get all
-	static function getNotifications($userID,$limit=false,$seen=2,$start=false){
-		$query = "SELECT * FROM notification WHERE user_id = $userID";
-		if ($seen == 0) $query .= " AND seen = 0 ";
-		if ($seen == 1) $query .= " AND seen = 1 ";
-		$query.= " ORDER BY id DESC ";
-		if ($limit) $query .= " LIMIT ". dataConnection::safe($limit);
-		if ($start) $query .= " OFFSET " . dataConnection::safe($start);
-		$query .= " ;";
-    	$result = dataConnection::runQuery($query);
-    	if (sizeof($result) != 0) {
-			$notifications = array();
-			foreach($result as $r){
-				$notification = new notification($r);
-				array_push($notifications, $notification);
-			}
-			return $notifications;
-		} else return false;	
-
+	static function getNotifications($userID, $limit = false, $seen = 2, $start = false) {
+	  $query = "select * from notification where user_id = $userID";
+	  if ($seen == 0) $query .= " and seen = 0 ";
+	  if ($seen == 1) $query .= " and seen = 1 ";
+	  $query .= " order by id desc ";
+	  if ($limit) $query .= " limit ". dataConnection::safe($limit);
+	  if ($start) $query .= " offset " . dataConnection::safe($start);
+	  $query .= " ;";
+	  $result = dataConnection::runQuery($query);
+	  $notifications = array();
+	  foreach($result as $r)
+	    array_push($notifications, new notification($r));
+	  return $notifications;
 	}
 
 	//[[USERCODE_notification]] WEnd of custom class members.

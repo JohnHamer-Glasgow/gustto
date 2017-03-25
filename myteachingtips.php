@@ -35,10 +35,7 @@ $template->pageData['userLoggedIn'] = $loggedUserName . ' ' . $loggedUserLastnam
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
 $template->pageData['navTTs'] = 'sidebar-current-page';
 
-if (notification::getNotifications($loggedUserID, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
+$notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notificationNo'] = $notificationNo;
 $template->pageData['notifications'] = notifications($dbUser);
 
@@ -64,7 +61,7 @@ if(!empty($myTTs)){
       <div class="col-xs-12 my-tt-info" value="'.$myTT->id.'" >
       <div class="col-xs-12 feed-title">
       <h4 class="col-sm-8 col-xs-12 my-tt-title"><a href="teaching_tip.php?ttID='.$myTT->id.'">'.$myTT->title.'</a></h4>
-      <span class="col-sm-4 col-xs-12 my-tt-time">'.date('d M y', $myTT->whencreated).'</span>
+      <span class="col-sm-4 col-xs-12 my-tt-time">'.date('d M Y', $myTT->whencreated).'</span>
       </div>';
 
       if (!empty($ttContributors)) {
@@ -143,7 +140,7 @@ foreach ($myTTs as $myTT) {
       <div class="col-xs-12 my-tt-info" value="' . $myTT->id . '" >
       <div class="col-xs-12 feed-title">
       <h4 class="col-sm-8 col-xs-12 my-tt-title"><a href="teaching_tip.php?ttID=' . $myTT->id . '">' . $myTT->title . '</a></h4>
-      <span class="col-sm-4 col-xs-12 my-tt-time">' . date('d M y', $myTT->whencreated) . '</span>
+      <span class="col-sm-4 col-xs-12 my-tt-time">' . date('d M Y', $myTT->whencreated) . '</span>
       </div>';
       
     if (!empty($ttContributors)) {
@@ -204,7 +201,7 @@ foreach ($contributedTTs as $cTT) {
             <h4><a href="teaching_tip.php?ttID=' . $cTT->id . '">' . $cTT->title . '</a></h4>
             <span class="draft-tt-user">by <a href="profile.php?usrID=' . $author->id . '">' . $author->name . ' ' . $author->lastname . '</a></span>
           </div>
-          <span class="col-sm-2 col-xs-12 my-tt-time">' . date('d M y', $cTT->whencreated) . '</span>
+          <span class="col-sm-2 col-xs-12 my-tt-time">' . date('d M Y', $cTT->whencreated) . '</span>
           </div>
           <span class="col-xs-12">
           </span>
@@ -242,7 +239,7 @@ foreach ($contributedTTs as $cTT){
             <h4><a href="teaching_tip.php?ttID=' . $cTT->id . '">' . $cTT->title . '</a></h4>
             <span class="draft-tt-user">by <a href="profile.php?usrID=' . $author->id . '">' . $author->name . ' ' . $author->lastname . '</a></span>
           </div>
-          <span class="col-sm-2 col-xs-12 my-tt-time">' . date('d M y', $cTT->whencreated) . '</span>
+          <span class="col-sm-2 col-xs-12 my-tt-time">' . date('d M Y', $cTT->whencreated) . '</span>
           </div>
           <span class="col-xs-12">
           </span>

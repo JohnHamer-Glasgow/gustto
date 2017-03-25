@@ -100,12 +100,7 @@ $loggedUserLastname = $uinfo['sn'];
   
 $template->pageData['userLoggedIn'] = $loggedUserName.' '.$loggedUserLastname ;
 $template->pageData['profileLink'] = "profile.php?usrID=".$loggedUserID;
-
-if (notification::getNotifications($loggedUserID,false,0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID,false,0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID,false,0));
 $template->pageData['notifications'] = notifications($dbUser);
 	
 $keywords = $tt->get_keywords();
@@ -179,7 +174,7 @@ $template->pageData['content'].=
                     <h4 class='tt-profile-name'><a href='profile.php?usrID={$author->id}'>{$author->name} {$author->lastname}</a></h4>
                     <div class='tt-school'>$author->school</div>
                     <div class='tt-datetime'>
-                      <p class='tt-date'>".date('d M y',$tt->whencreated)."</p>
+                      <p class='tt-date'>".date('d M Y',$tt->whencreated)."</p>
                     </div>
                   </div>
                 </div>
@@ -312,7 +307,7 @@ if (!$isDraft) {
   if ($comments) {
     foreach($comments as $c) {
       $comment_author = $c->get_author();
-        $cTime = date('d M y',$c->whencreated);
+      $cTime = date('d M Y', $c->time);
         $template->pageData['content'] .= 
 	  "<div class='tt-comment'>
                     <div class='tt-comment-profile'>
@@ -347,22 +342,25 @@ if (!$isDraft) {
   }
   $template->pageData['content'] .= '</div>';
   $template->pageData['content'] .= "<div class='clearfix'></div>";
-  $template->pageData['content'] .= 
-                  "<div class='tt-comment-form-wrapper'><form class='tt-comment-form form-horizontal' action='ajax/tt_add_comment.php' method='post'>
-                    <input type='hidden' name='csrf_token' value='{$_SESSION['csrf_token']}' />
-                    <input type='hidden' name='ttID' value='{$tt->id}' />
-                    <div class='form-group'>
-                      <label for='inputComment' class='col-sm-2 control-label'>Add a comment</label>
-                      <div class='col-sm-10'>
-                        <textarea rows='4' cols='50' class='form-control' name='inputComment' id='inputComment' placeholder='Comment...' required></textarea>                      
-                      </div>
-                    </div>
-                    <div class='form-group'>
-                      <div class='col-sm-offset-2 col-sm-10'>
-                        <button type='submit' id='commentSubmit' class='btn btn-default'>Add comment</button>
-                      </div>
-                    </div>
-                  </form></div></div>";
+  $template->pageData['content'] .= "
+  <div class='tt-comment-form-wrapper'>
+    <form class='tt-comment-form form-horizontal' action='ajax/tt_add_comment.php' method='post'>
+      <input type='hidden' name='csrf_token' value='{$_SESSION['csrf_token']}' />
+      <input type='hidden' name='ttID' value='{$tt->id}' />
+      <div class='form-group'>
+        <label for='inputComment' class='col-sm-2 control-label'>Add a comment</label>
+        <div class='col-sm-10'>
+          <textarea rows='4' cols='50' class='form-control' name='inputComment' id='inputComment' placeholder='Comment...' required></textarea>                      
+        </div>
+      </div>
+      <div class='form-group'>
+        <div class='col-sm-offset-2 col-sm-10'>
+          <button type='submit' id='commentSubmit' class='btn btn-default'>Add comment</button>
+        </div>
+      </div>
+     </form>
+  </div>
+</div>";
 }
 
 $template->pageData['content'] .= '</div></div>'; 

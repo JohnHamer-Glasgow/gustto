@@ -2,53 +2,48 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once(__DIR__.'/../config.php');
-require_once(__DIR__.'/../lib/database.php');
-require_once(__DIR__.'/../lib/sharedfunctions.php');
-require_once(__DIR__.'/../corelib/dataaccess.php');
-require_once(__DIR__.'/../lib/formfunctions.php');
+require_once(__DIR__ . '/../config.php');
+require_once(__DIR__ . '/../lib/database.php');
+require_once(__DIR__ . '/../lib/sharedfunctions.php');
+require_once(__DIR__ . '/../corelib/dataaccess.php');
+require_once(__DIR__ . '/../lib/formfunctions.php');
 
 $uinfo = checkLoggedInUser();
-if ($uinfo == false) {
-  header("Location: ../login.php");
-  exit();
-}
+if ($uinfo == false) exit();
 
 $data = array();
-if (isset($_GET['filterType']) && !empty($_GET['filterType']) && isset($_GET['period']) && !empty($_GET['period']) && isset($_GET['offset']) ) {
-  $filterType = dataConnection::safe(sanitize_input($_GET['filterType']));
-  $period = dataConnection::safe(sanitize_input($_GET['period']));
-  $offset = dataConnection::safe(sanitize_input($_GET['offset']));
+if (!empty($_GET['filterType']) && !empty($_GET['period']) && isset($_GET['offset']) ) {
+  $filterType = sanitize_input($_GET['filterType']);
+  $period = sanitize_input($_GET['period']);
+  $offset = intval($_GET['offset']);
 
-  if ($filterType == 'like') {
+  if ($filterType == 'likes') {
     if ($period == 'alltime')
-      $data = teachingtip::getPopularTeachingTips(5, $offset);
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', 0);
     elseif ($period == 'lastthree')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, true, '>', time() - (60 * 60 * 24 * 90));
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 90));
     elseif ($period == 'lastmonth')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, true, '>', time() - (60 * 60 * 24 * 30));
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 30));
     elseif ($period == 'lastweek')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, true, '>', time() - (60 * 60 * 24 * 7));
-  } elseif ($filterType == 'comment') {
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 7));
+  } elseif ($filterType == 'comments') {
     if ($period == 'alltime')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, false);
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', 0);
     elseif ($period == 'lastthree')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, false, '>', time() - (60 * 60 * 24 * 90));
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 90));
     elseif ($period == 'lastmonth')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, false, '>',time() - (60 * 60 * 24 * 30));
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 30));
     elseif ($period == 'lastweek')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, false, '>',time() - (60 * 60 * 24 * 7));
-  }
-} elseif (isset($_GET['offset'])) {
-  $offset = dataConnection::safe(sanitize_input($_GET['offset']));
-  $data = getLatestTeachingTips(5, $offset);
+      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 7));
+  } elseif (isset($_GET['offset']))
+    $data = getLatestTeachingTips(5, intval($_GET['offset']), 'likes', 0);
 }
 
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 
 foreach ($data as $tt) {	
-  $tt->tt_time = date('d M y',$tt->whencreated);
+  $tt->tt_time = date('d M Y', $tt->whencreated);
   $tt->number_likes = $tt->get_number_likes();
   $tt->number_comments = $tt->get_number_comments();
   $tt->number_shares = $tt->get_number_shares();

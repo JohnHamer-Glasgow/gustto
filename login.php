@@ -24,6 +24,7 @@ if ($uinfo) {
   if ($dbUser->school == '' && isset($uinfo['school']))
     $dbUser->school = $uinfo['school'];
   $dbUser->update();
+
   header("Location: $url");
   exit();
 }

@@ -149,12 +149,7 @@ $loggedUserLastname = $uinfo['sn'];
 $template->pageData['userLoggedIn'] = $loggedUserName . ' ' . $loggedUserLastname ;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
 $template->pageData['navSearch'] = 'sidebar-current-page';
-
-if (notification::getNotifications($loggedUserID, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
 $template->pageData['content'] .= 
@@ -461,7 +456,7 @@ if ($display_filter) {
 if (!empty($results)) {
   foreach ($results as $tt) {
     $author = $tt->get_author();
-    $tt_time = date('d M y', $tt->whencreated);
+    $tt_time = date('d M Y', $tt->whencreated);
     $template->pageData['content'] .= 
       '<div class="search-result">
                     <div class="row">

@@ -10,8 +10,7 @@ require_once(__DIR__ . '/../corelib/dataaccess.php');
 $uinfo = checkLoggedInUser();
 if ($uinfo == false) exit();
 
-if (!isset($_GET['userId']) || !is_numeric($_GET['userId']))
+if (!isset($_GET['offset']) || !is_numeric($_GET['offset']))
   exit();
 
-$user = user::retrieve_user(dataConnection::safe($_GET['userId']));
-echo json_encode(array_slice($user->get_top_teaching_tips(), 3)); // The top 3 are already displayed
+echo json_encode(user::get_most_tts(10, $_GET['offset']));

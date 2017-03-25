@@ -1766,6 +1766,19 @@ body {
  	text-decoration: underline;
  }
 
+ .homepage-view-more-contrib {
+ 	padding-top: 10px;
+	text-align: center;
+	color: #337AB7;
+	font-weight: 600;
+	font-size: 16px;
+	cursor: pointer;
+ }
+
+ .homepage-view-more-contrib:hover{
+ 	text-decoration: underline;
+ }
+
 .tt-comments {
 	padding: 0 15px;
 	position: relative;
@@ -2633,6 +2646,9 @@ body {
 	padding: 10px 0;
 }
 
+.period-selected {
+    color: #337ab7 !important;
+}
 
 .activity-comment-text{
 	color: grey;

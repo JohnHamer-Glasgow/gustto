@@ -25,7 +25,7 @@ $data = array();
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
   exit();
 
-if (!isset($_POST['comment']) || strlen(trim($_POST['comment'])) <= 0)
+if (!isset($_POST['comment']) || strlen(trim($_POST['comment'])) == 0)
   exit();
 
 if (!isset($_POST['ttID']) || !is_numeric($_POST['ttID']) || $_POST['ttID'] < 0)
@@ -43,7 +43,7 @@ if (is_null($cID)) {
   exit();
 }
 
-$data['c_time'] = date('H:i d M y', $c->time);
+$data['c_time'] = date('d M Y', $c->time);
 $data['c_id'] = $c->id;
 $data['comment'] = $c->comment;
 
@@ -54,7 +54,7 @@ $uctt->comment_id = $cID;
 $success = $uctt->insert();
 
 // NOTIFICATIONS
-$tt =  teachingtip::retrieve_teachingtip($ttID);
+$tt = teachingtip::retrieve_teachingtip($ttID);
 if ($loggedUserID != $tt->author_id)
   createNotification($tt->author_id, $uctt->id, 'comment', 'tts_activity');
 
@@ -68,11 +68,10 @@ foreach ($followers as $follower) {
 }
 
 // Notification to the commenters
-$commenters = getTtCommentUsers ($tt,$loggedUserID);
-foreach ($commenters as $commenter) 
+$commenters = getTtCommentUsers ($tt, $loggedUserID);
+foreach ($commenters as $commenter)
   if (!in_array($commenter->id, $fl))
     createNotification($commenter->id, $uctt->id, 'comment', 'commenters_activity');
-}
 
 // REPUTATION and AWARD update
 if ($tt->author_id != $loggedUserID) {

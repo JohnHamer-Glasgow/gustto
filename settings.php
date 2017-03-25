@@ -34,19 +34,14 @@ $loggedUserId = $dbUser->id;
 $template->pageData['userLoggedIn'] = $givenname . ' ' . $surname ;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserId;
 $template->pageData['navHome'] = 'sidebar-current-page';
-
-if (notification::getNotifications($loggedUserId, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserId, false, 0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserId, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
 $loggedUser = user::retrieve_user($loggedUserId);
 $user_settings = $loggedUser->get_settings();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (!isset($_POST['csrf_token'] || $_POST['csrf_token'] !== $_SESSION['csrf_token']))
+  if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
     exit();
 
   $error = false;

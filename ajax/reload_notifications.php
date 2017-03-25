@@ -8,34 +8,16 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
+
+if ($uinfo == false) exit();
+
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 
-if($uinfo==false) exit();
-
 $data = array();
-
-// Notification No
-if (notification::getNotifications($loggedUserID,false,0) == false) $notificationNo = 0;
-else $notificationNo = sizeof(notification::getNotifications($loggedUserID,false,0));
-
-$notificationNo = " (".$notificationNo.") ";
-
-
-$data['notificationNo'] = $notificationNo;
-
-// Notifications
-
-$notifications = notifications($dbUser);
-//encoding html as text to be passed
-$notifications = htmlspecialchars($notifications);
-
-$data['notifications'] = $notifications;
-
-
+$data['notificationNo'] = "(" . sizeof(notification::getNotifications($loggedUserID, false, 0)) . ")";
+$data['notifications'] = htmlspecialchars(notifications($dbUser));
 
 echo json_encode($data);
-
-?>
 
 

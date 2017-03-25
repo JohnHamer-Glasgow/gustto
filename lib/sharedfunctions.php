@@ -337,7 +337,7 @@ function searchTTsByAuthor($search_author, $search_school){
         tt.archived = 0 AND tt.draft = 0 and";
   if (!empty($search_school))
     $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
-  $query .= " umatch order by umatch desc";
+  $query .= " match (u.name, u.lastname) against ('{$search_author}') order by umatch desc";
   $result = dataConnection::runQuery($query);
   $tts = array();
   foreach ($result as $r)
@@ -441,23 +441,18 @@ function deleteNotification($userId,$activityId,$activityType){
 }
 
 function getTtCommentUsers ($tt,$loggedUserId){
-    $query = "SELECT DISTINCT user_id FROM user_comments_tt WHERE teachingtip_id = {$tt->id} AND user_id <> {$tt->author_id} AND user_id <> $loggedUserId";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $users = array();
-        foreach($result as $r){
-            $user = user::retrieve_user($r['user_id']);
-            array_push($users, $user);
-        }
-        return $users;
-    } else return false;
+  $result = dataConnection::runQuery("select distinct user_id from user_comments_tt where teachingtip_id = {$tt->id} and user_id <> {$tt->author_id} and user_id <> $loggedUserId");
+  $users = array();
+  foreach($result as $r)
+    array_push($users, user::retrieve_user($r['user_id']));
+  return $users;
 }
 
 // Used to print the notifications to the user Drop Down-- limited to 5 and only unseen 
 
 function notifications($user) {
-    $notificationsUnseen = notification::getNotifications($user->id,5,0); // notifications of the user specified-limited to 5 - 0 for unseen
-    if($notificationsUnseen){
+    $notificationsUnseen = notification::getNotifications($user->id, 5, 0);
+    if ($notificationsUnseen > 0) {
         $out='';
         foreach ($notificationsUnseen as $notification) {
             $activity_type = $notification->activity_type;
@@ -465,20 +460,20 @@ function notifications($user) {
             if( $activity_type == 'like'){
                 $activity = user_likes_tt::retrieve_user_likes_tt($notification->activity_id);
                 $activity_type_print = 'likes';
-                $activity_time = date('H:i d M y', $activity->time);
+                $activity_time = date('d M Y', $activity->time);
                 $fromUser = user::retrieve_user($activity->user_id);
             }
             elseif($activity_type == 'comment'){
                 $activity = user_comments_tt::retrieve_user_comments_tt($notification->activity_id);
                 $activity_type_print = 'commented on';
-                $activity_time = date('H:i d M y', ttcomment::retrieve_ttcomment($activity->comment_id)->time);
+                $activity_time = date('d M Y', ttcomment::retrieve_ttcomment($activity->comment_id)->time);
                 $fromUser = user::retrieve_user($activity->user_id);
 
             }
             elseif($activity_type == 'share'){
                 $activity = user_shares_tt::retrieve_user_shares_tt($notification->activity_id);
                 $activity_type_print = 'shared';
-                $activity_time = date('H:i d M y', $activity->time);
+                $activity_time = date('d M Y', $activity->time);
                 // Temporary mod to allow older PHP
                 $tmpusers = user::retrieve_user_matching('email', $activity->sender);
                 $fromUser = $tmpusers[0];
@@ -487,7 +482,7 @@ function notifications($user) {
             elseif($activity_type == 'post'){
                 $tt = teachingtip::retrieve_teachingtip($notification->activity_id);
                 $activity_type_print = 'posted';
-                $activity_time = date('H:i d M y', $tt->time);
+                $activity_time = date('d M Y', $tt->time);
                 $fromUser = user::retrieve_user($tt->author_id);
             }
             elseif($activity_type == 'award') {
@@ -495,12 +490,12 @@ function notifications($user) {
                 $award = award::retrieve_award($activity->award_id);
                 $activity_type_print = 'earned a new';
                 $activity_name = $award->name;
-                $activity_time = date('H:i d M y', $activity->time);
+                $activity_time = date('d M Y', $activity->time);
             }
             elseif($activity_type == 'follow') {
                 $activity = user_follows_user::retrieve_user_follows_user($notification->activity_id);
                 $activity_type_print = 'followed';
-                $activity_time = date('H:i d M y', $activity->time);
+                $activity_time = date('d M Y', $activity->time);
                 $fromUser = user::retrieve_user($activity->follower_id);
             }
 
@@ -528,12 +523,8 @@ function notifications($user) {
             $out .= '</a>';
             $out .= '<span class="notification-time">'. $activity_time .'</span>';
             $out .= '</div>';
-                       
-       
         }
-    }
-
-    else{
+    } else {
         $out ='<div class="col-xs-12 notification-teachingtip notification-empty">';
         $out .='<strong>You do not have any new notifications.</strong>';
         $out .='</div>';   
@@ -546,7 +537,7 @@ function notifications($user) {
 // Notifications Page
 
 
-function notificationsPrinting($notifications,$loggedUserId){
+function notificationsPrinting($notifications, $loggedUserId) {
     $out = '';
     foreach ($notifications as $notification) {
       // Notification Details
@@ -558,7 +549,7 @@ function notificationsPrinting($notifications,$loggedUserId){
         $notification_tt = teachingtip::retrieve_teachingtip($activity->teachingtip_id);
         $notification_action = 'likes';
         $icon = 'glyphicon-thumbs-up';
-        $notification_time = date('H:i d M y',$activity->time);
+        $notification_time = date('d M Y', $activity->time);
       }
       elseif ($notification_type == 'comment'){ 
         $activity =  user_comments_tt::retrieve_user_comments_tt($notification->activity_id);
@@ -567,7 +558,7 @@ function notificationsPrinting($notifications,$loggedUserId){
         $notification_tt = teachingtip::retrieve_teachingtip($activity->teachingtip_id);
         $notification_action = "commented on";
         $icon = 'glyphicon-comment';
-        $notification_time = date('H:i d M y',$comment->time);
+        $notification_time = date('d M Y', $comment->time);
       }
       elseif ($notification_type == 'share') {
         $activity =  user_shares_tt::retrieve_user_shares_tt($notification->activity_id);
@@ -578,7 +569,7 @@ function notificationsPrinting($notifications,$loggedUserId){
         //$notification_user = user::retrieve_user_matching('email', $activity->sender)[0];
         $notification_action = "shared";
         $icon = 'glyphicon-share-alt';
-        $notification_time = date('H:i d M y',$activity->time);
+        $notification_time = date('d M Y', $activity->time);
       }
       elseif ($notification_type == 'post') {
         $activity =  teachingtip::retrieve_teachingtip($notification->activity_id); 
@@ -586,7 +577,7 @@ function notificationsPrinting($notifications,$loggedUserId){
         $notification_user = user::retrieve_user($activity->author_id);
         $notification_action = "posted";
         $icon = 'glyphicon-file';
-        $notification_time = date('H:i d M y',$activity->time);
+        $notification_time = date('d M Y', $activity->time);
       }
       elseif($notification_type == 'award') {
         $activity = user_earns_award::retrieve_user_earns_award($notification->activity_id);
@@ -595,30 +586,29 @@ function notificationsPrinting($notifications,$loggedUserId){
         $activity_name = $award->name;
         $notification_action = 'earned a new';
         $icon = 'glyphicon-star';
-        $notification_time = date('H:i d M y',$activity->time);
+        $notification_time = date('d M Y', $activity->time);
       }
       elseif($notification_type == 'follow') {
         $activity = user_follows_user::retrieve_user_follows_user($notification->activity_id);
         $notification_user = user::retrieve_user($activity->follower_id);
         $notification_action = 'followed';
         $icon = 'glyphicon-signal';
-        $notification_time = date('H:i d M y', $activity->time);
+        $notification_time = date('d M Y', $activity->time);
         
       }
       
-      // Seen
       $notification_seen = $notification->seen;
       if ($notification_seen) $notification_seen='';
       else $notification_seen = 'notification-wrapper-unseen';
 
       $out .= '<div class="row notification-wrapper '.$notification_seen.'">';
 
-      if ($notification_type == 'award') 
-        $out .= '<a href="profile.php?usrID='.$notification_user->id.'" class="col-xs-12 notification-update" value="'.$notificationId.'">';
+      if ($notification_type == 'award')
+        $out .= '<a href="profile.php?usrID=' . $loggedUserId . '" class="col-xs-12 notification-update" value="' . $notificationId . '">';
       elseif ($notification_type == 'follow') 
-        $out.= '<a href="settings.php" class="col-xs-12 notification-update" value="'.$notificationId.'">';
+        $out .= '<a href="profile.php?usrID=' . $notification_user->id . '" class="col-xs-12 notification-update" value="' . $notificationId . '">';
       else 
-        $out .= '<a href="teaching_tip.php?ttID='.$notification_tt->id.'" class="col-xs-12 notification-update" value="'.$notificationId.'">';
+        $out .= '<a href="teaching_tip.php?ttID=' . $notification_tt->id . '" class="col-xs-12 notification-update" value="' . $notificationId.'">';
 
       $out .= '<div class="notification-text-wrapper" >
              <span class="glyphicon '.$icon.' notification-icon"></span>';

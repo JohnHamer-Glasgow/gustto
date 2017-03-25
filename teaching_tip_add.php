@@ -43,12 +43,7 @@ $edit = false;
 
 $template->pageData['userLoggedIn'] = $givenname . ' ' . $surname ;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
-
-if (notification::getNotifications($loggedUserID, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
 if (!isset($_SESSION['csrf_token']))

@@ -1,9 +1,6 @@
 <?php
 function sanitize_input($input) {
-  $input = trim($input);
-  $input = stripslashes($input);
-  $input = htmlspecialchars($input);
-  return $input;
+  return htmlspecialchars(stripslashes(trim($input)));
 }
 
 function teachingtip_add($ttdata, $userID, $draft=false) {

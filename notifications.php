@@ -27,17 +27,10 @@ $template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
-
 $template->pageData['userLoggedIn'] = $givenname . ' ' . $surname;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserId;
 $template->pageData['navHome'] = 'sidebar-current-page';
-
-if (notification::getNotifications($loggedUserId, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserId, false, 0));
-
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserId, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 $notifications = notification::getNotifications($loggedUserId, 15);
 
@@ -53,7 +46,7 @@ $template->pageData['content'] = '
     </div>
     </div>';
 
-if ($notifications) {
+if (count($notifications) > 0) {
   $template->pageData['content'] .= '
     <div class="notifications-wrapper">' . notificationsPrinting($notifications, $loggedUserId) . '</div>';
   $allNotifNo = sizeof(notification::getNotifications($loggedUserId, false));

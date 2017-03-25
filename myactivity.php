@@ -35,12 +35,7 @@ $loggedUserLastname = $uinfo['sn'];
 $template->pageData['userLoggedIn'] = $loggedUserName.' ' . $loggedUserLastname ;
 $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
 $template->pageData['navActivity'] = 'sidebar-current-page';
-
-if (notification::getNotifications($loggedUserID, false, 0) == false)
-  $notificationNo = 0;
-else
-  $notificationNo = sizeof(notification::getNotifications($loggedUserID, false, 0));
-$template->pageData['notificationNo'] = $notificationNo;
+$template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
 $template->pageData['content'] .= '
@@ -82,30 +77,15 @@ $template->pageData['content'] .= '
     					</div>
     				</div>';
 
-$myLikes = $user->getLikes();
-$myComments = $user->getComments();
-$myShares = $user->getShares();
 $activity = array();
-if (is_array($myLikes)) {
-  foreach ($myLikes as $like) {
-    $temp = [$like->time, $like];
-    array_push($activity, $temp);
-  }
-}
+foreach ($user->getLikes() as $like)
+  array_push($activity, [$like->time, $like]);
 
-if (is_array($myShares)) {
-  foreach ($myShares as $share){
-    $temp = [$share->time, $share];
-    array_push($activity, $temp);
-  }
-}
+foreach ($user->getShares() as $share)
+  array_push($activity, [$share->time, $share]);
 
-if (is_array($myComments)) {
-  foreach($myComments as $comment){
-    $temp = [commentTime($comment->comment_id), $comment];
-    array_push($activity, $temp);
-  }
-}
+foreach($user->getComments() as $comment)
+  array_push($activity, [commentTime($comment->comment_id), $comment]);
 
 function cmp($a, $b) { return $b[0] - $a[0]; }
 usort($activity, "cmp");
@@ -119,7 +99,7 @@ else {
   foreach ($activity as $act) {
     $activity_tt = teachingtip::retrieve_teachingtip($act[1]->teachingtip_id) ;
     $activity_author = user::retrieve_user($activity_tt->author_id);
-    $activity_time = date('H:i d M y', $act[1]->time);  //conversion
+    $activity_time = date('d M Y', $act[1]->time);  //conversion
     if ($act[1] instanceof user_likes_tt) {
       $likeMin = false; 
       $like_id = $act[1]->id;
@@ -138,7 +118,7 @@ else {
 
     if ($act[1] instanceof user_comments_tt) {
       $commentMin = false; 
-      $activity_time = date('H:i d M y', commentTime($act[1]->comment_id));
+      $activity_time = date('d M Y', commentTime($act[1]->comment_id));
       $comment_id = $act[1]->comment_id;
       $comment = ttcomment::retrieve_ttcomment($comment_id);
       $template->pageData['content'] .= '
@@ -182,7 +162,6 @@ if ($shareMin)
   $template->pageData['content'] .= '<div class="no-share-activity"><strong>There is no share activity!</strong></div>';
 
 $template->pageData['content'] .= '
-              	</div>
               </div>
           </div>';
 
