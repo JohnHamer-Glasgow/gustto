@@ -157,7 +157,7 @@ foreach($tips as $ltt) {
    <div class='col-sm-2 feed-profile hidden-xs'>
      <img class='img-circle' src='{$author->profile_picture}' alt='profile picture'>
      <a href='profile.php?usrID={$author->id}' class='col-xs-12 tt-profile-name '>{$author->name} {$author->lastname}</a>
-     <span class='feed-tt-profile-school'>{$author->school}</span>
+     <div class='feed-tt-profile-school'>{$author->school}</div>
      <div class='clearfix'></div>
      <span class='feed-tt-time'>{$tt_time}</span>
    </div>
