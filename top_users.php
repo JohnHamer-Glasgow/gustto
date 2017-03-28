@@ -45,7 +45,7 @@ $template->pageData['content'] .=
            <span class="caret" />
          </button>
          <button type="button" class="btn btn-default dropdown-toggle hidden-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-           <div class="col-xs-1 glyphicon glyphicon-blackboard options-icon"></div><span class="feed-dropdown-text">Most Teaching Tips</span>
+           <div class="col-xs-1 glyphicon glyphicon-blackboard options-icon"></div><span class="feed-dropdown-text">Authors</span>
            <span class="caret" />
          </button>
          <ul class="dropdown-menu main-feed-dropdown">
@@ -63,7 +63,7 @@ $template->pageData['content'] .=
            </li>
            <li class="col-xs-12 options-wrapper" id="filter-top-users">
              <div class="col-xs-1 glyphicon glyphicon-blackboard options-icon"></div>
-             <div class="col-xs-9 options-option"> <a href="top_users.php">Most Teaching Tips</a></div>
+             <div class="col-xs-9 options-option"> <a href="top_users.php">Authors</a></div>
              <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-recent"></div>
            </li>
          </ul>

@@ -110,7 +110,7 @@ foreach ($filterData as $f => $data) {
 $template->pageData['content'] .= '
                     <li class="col-xs-12 options-wrapper" id="filter-top-users">
                       <div class="col-xs-1 glyphicon glyphicon-blackboard options-icon"></div>
-                      <div class="col-xs-9 options-option"> <a href="top_users.php">Most Teaching Tips</a></div>
+                      <div class="col-xs-9 options-option"> <a href="top_users.php">Authors</a></div>
                     </li>';
 
 $template->pageData['content'] .= '
@@ -150,7 +150,6 @@ foreach($tips as $ltt) {
   $number_shares = $tt->get_number_shares();
   $keywords = $tt->get_keywords();
   $author = $tt->get_author();
-  $school = $tt->school;
 
   $template->pageData['content'] .= "
 <div class='feed-tt'>
@@ -158,6 +157,7 @@ foreach($tips as $ltt) {
    <div class='col-sm-2 feed-profile hidden-xs'>
      <img class='img-circle' src='{$author->profile_picture}' alt='profile picture'>
      <a href='profile.php?usrID={$author->id}' class='col-xs-12 tt-profile-name '>{$author->name} {$author->lastname}</a>
+     <span class='feed-tt-profile-school'>{$author->school}</span>
      <div class='clearfix'></div>
      <span class='feed-tt-time'>{$tt_time}</span>
    </div>
@@ -168,12 +168,11 @@ foreach($tips as $ltt) {
        </div>
        <div class='col-xs-10'>
          <h4 class='feed-tt-title'><a href='teaching_tip.php?ttID={$tt->id}'>{$tt->title}</a></h4>
-         <span class='feed-tt-time'>{$tt_time}</span>. <a href='search.php?school={$school}' class='feed-tt-profile-school'>{$author->school}</a>
+         <span class='feed-tt-time'>{$tt_time}</span>
        </div>
      </div>
      <div class='feed-title hidden-xs'>
        <h4 class='feed-tt-title'><a href='teaching_tip.php?ttID={$tt->id}'>{$tt->title}</a></h4>
-       <a href='search.php?school={$school}' class='feed-tt-profile-school'>{$author->school}</a>
      </div>
      <div class='feed-text-wrapper'>
        <p class='feed-text'>{$tt->description}</p>

@@ -462,7 +462,7 @@ if (!empty($results)) {
                     <div class="row">
                       <div class="search-result-title col-sm-9 col-xs-12"><h4><a href="teaching_tip.php?ttID='. $tt->id . '">'. $tt->title . '</a></h4></div>
                       <div class="search-result-date col-sm-3 col-xs-12">'. $tt_time . '</div>
-                      <div class="search-result-author col-xs-12"><span>by</span> <a href="profile.php?usrID='. $author->id . '">'. $author->name . ' ' . $author->lastname . '</a> . <span>'. $author->school . '</span></div>
+                      <div class="search-result-author col-xs-12"><span>by</span> <a href="profile.php?usrID='. $author->id . '">'. $author->name . ' ' . $author->lastname . '</a> <span>'. $author->school . '</span></div>
                       <div class="search-result-description col-xs-12">'. $tt->description . '</div>
                       <div class="search-result-icons col-xs-12">
                         <div class="feed-icons"><button class="glyphicon glyphicon-thumbs-up feed-likebutton"></button> '. $tt->get_number_likes() . '</div>

@@ -485,12 +485,11 @@ $(document).ready(function () {
 			temp += "</div>";
 			temp += "<div class='col-xs-10'>";
 			temp += "<h4 class='feed-tt-title'><a href='profile.php?usrID=" + d.user.id + "'>" + d.user.name + " " + d.user.lastname + "</a></h4>";
-			temp += "<div class='feed-tt-profile-school'>" + d.user.school + "</div>";
+			temp += "<span class='feed-tt-profile-school'>" + d.user.school + "</span>";
 			temp += "</div>";
 			temp += "</div>";
 			temp += "<div class='feed-title hidden-xs'>";
 			temp += "<h4 class='feed-tt-title'><a href='profile.php?usrID=" + d.user.id + "'>" + d.user.name + " " + d.user.lastname + "</a></h4>";
-			temp += "<div class='feed-tt-profile-school'>" + d.user.school + "</div>";
 			temp += "</div>";
 			temp += "<div class='feed-text-wrapper'>";
 			temp += "<strong>" + d.n + " " + (d.n == 1 ? "Teaching Tip" : "Teaching Tips") + "</strong>";
@@ -512,12 +511,12 @@ $(document).ready(function () {
         $.get("ajax/view_more_home.php", {filterType: filterType, period: period, offset: offset}, null, 'json')
             .done(function(data) {
 		$(data).each(function(i, tt) {
-		    var author_school = tt.author.school;
 		    var temp = "<div class='feed-tt'>" 
 		    temp+="<div class='row'>";
 		    temp+="<div class='col-sm-2 feed-profile hidden-xs'>";
 		    temp+="<img class='img-circle' src='"+ tt.author.profile_picture +"' alt='profile picture'>";
 		    temp+="<a href='profile.php?usrID="+tt.author.id+"' class='col-xs-12 tt-profile-name '>"+tt.author.name+" "+tt.author.lastname+"</a>";
+		    temp+="<div class='feed-tt-profile-school'>" + tt.author.school + "</div>";
 		    temp+="<div class='clearfix'></div>";
 		    temp+="<span class='feed-tt-time'>"+tt.tt_time+"</span>";
 		    temp+="</div>";
@@ -528,11 +527,10 @@ $(document).ready(function () {
 		    temp+="</div>";
 		    temp+="<div class='col-xs-10'>";
 		    temp+="<h4 class='feed-tt-title'><a href='teaching_tip.php?ttID="+tt.id+"'>"+tt.title+"</a></h4>";
-		    temp+="<span class='feed-tt-time'>"+tt.tt_time+"</span> . <a href='search.php?school="+ author_school +"' class='feed-tt-profile-school'>"+tt.author.school+"</a>";
+		    temp+="<span class='feed-tt-time'>"+tt.tt_time+"</span> ";
 		    temp+="</div>        </div>";
 		    temp+="<div class='feed-title hidden-xs'>";
 		    temp+="<h4 class='feed-tt-title'><a href='teaching_tip.php?ttID="+tt.id+"'>"+tt.title+"</a></h4>";
-		    temp+="<div class='feed-tt-profile-school'>"+tt.author.school+"</div>";
 		    temp+="</div>";
 		    temp+="<div class='feed-text-wrapper'>";
 		    temp+="<p class='feed-text'>"+tt.description+"</p>";
