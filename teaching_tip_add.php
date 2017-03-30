@@ -504,7 +504,7 @@ foreach ($ITC as $key => $val)
    </div>';
 $template->pageData['content'] .= '</div>';
 
-$template->pageData['content'] .= '<div class="form-group"><label for="inputTTschool" class="control-label">Attach your Teaching Tip to a school, for easier search</label>';
+$template->pageData['content'] .= '<div class="form-group"><label for="inputTTschool" class="control-label">Please indicate your school or unit, for easier search.</label>';
 $template->pageData['content'] .= '<select class="form-control" id="inputTTschool" name="school">';
 foreach ($SCHOOLS as $s)
   $template->pageData['content'] .= '<option value="' . $s . '"' . ($s == $ttSchool ? " selected='selected'" : '') . '>' . $s . '</option>';

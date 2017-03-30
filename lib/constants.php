@@ -21,6 +21,7 @@ $SCHOOLS =
 	  'Physics and Astronomy',
 	  'Psychology',
 	  'Social and Political Sciences',
+	  'University Services',
 	  'Veterinary Medicine',
 	  'Other');
 
