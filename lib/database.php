@@ -1670,16 +1670,11 @@ class teachingtip
 
 	// get all teaching tips in the database (except for drafts)
 	static function get_all_teaching_tips() {
-		$query = "SELECT * FROM teachingtip WHERE draft = 0 ORDER BY id ASC";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$tts = array();
-			foreach($result as $r){
-				$tt = new teachingtip($r);
-				array_push($tts, $tt);
-			}
-			return $tts;
-		} else return false;
+	  $result = dataConnection::runQuery("select * from teachingtip where draft = 0 order by id asc");
+	  $tts = array();
+	  foreach($result as $r)
+	    array_push($tts, new teachingtip($r));
+	  return $tts;
 	}
 	
 	static function getPopularTeachingTips($limit, $offset, $table, $time) {
