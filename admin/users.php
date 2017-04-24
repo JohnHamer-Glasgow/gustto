@@ -92,24 +92,24 @@ $template->pageData['content'].=
             </ul>';
 
 $template->pageData['content'] .= 
-            '<table> <!-- bootstrap classes added by the uitheme widget -->
+            '<table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th data-sorter="shortDate" data-date-format="yyyy-mm-dd">Join date</th>
                         <th>Name</th>
-                        <th>School</th>
+                        <th>Engagment</th>
                         <th>Esteem</th>
                         <th class="filter-select filter-exact" data-placeholder="All">Status</th>
                         <th data-sorter="false" data-filter="false">Actions</th>
-                        
                 </thead>
+<!--
                 <tfoot>
                     <tr>
                         <th>ID</th>
                         <th>Join date</th>
                         <th>Name</th>
-                        <th>School</th>
+                        <th>Engagement</th>
                         <th>Esteem</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -139,6 +139,7 @@ $template->pageData['content'] .=
                         </th>
                     </tr>
                 </tfoot>
+-->
                 <tbody>';
 
 foreach ($users as $u) {
@@ -150,7 +151,7 @@ foreach ($users as $u) {
                     <td>'. $u->id .'</td>
                     <td>'. $joined .'</td>
                     <td><a href="../profile.php?usrID='. $u->id .'">'. $u->name . ' ' . $u->lastname .'</a></td>
-                    <td>'. $u->school .'</td>
+                    <td>'. $u->engagement .'</td>
                     <td>'. $u->esteem .'</td>
                     <td>'. $status .'</td>
                     <td>

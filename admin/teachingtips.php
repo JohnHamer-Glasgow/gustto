@@ -102,6 +102,7 @@ $template->pageData['content'] .= '
   		<th data-sorter="false" data-filter="false">Actions</th>
           </tr>		
   </thead>
+<!--
   <tfoot>
   	<tr>
   		<th>ID</th>
@@ -134,6 +135,7 @@ $template->pageData['content'] .= '
   		</th>
   	</tr>
   </tfoot>
+-->
   <tbody>';
 
 foreach ($tts as $tt) {
