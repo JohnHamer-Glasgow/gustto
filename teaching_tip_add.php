@@ -22,7 +22,7 @@ $user = user::retrieve_user($loggedUserID);
 $template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 
-$template->pageData['customCSS'] = '<script src="http://cdn.tinymce.com/4/tinymce.min.js"></script>
+$template->pageData['customCSS'] = '<script src="tinymce/js/tinymce/tinymce.min.js"></script>
                                     <script>tinymce.init({ 
                                         selector: "textarea#inputTTPractice",
                                         theme: "modern",
@@ -373,7 +373,7 @@ if ($saved_as_draft)
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTName" class="control-label"><span class="mandatory">*</span>Name of Teaching Tip (Representing the essence of the Teaching Tip)</label>';
+                    <label for="inputTTName" class="control-label"><span class="mandatory">*</span>Name of Teaching Tip (representing the essence of the Teaching Tip)</label>';
 if ($errors['name'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['name'] . '</span>';
 $template->pageData['content'] .= '<input type="text" class="form-control" id="inputTTName" name="title" placeholder="Name of the Teaching Tip..." value="' . $title . '">';
@@ -381,7 +381,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTRationale" class="control-label"><span class="mandatory">*</span>Rationale statement (The reason for adopting the Teaching Tip)</label>';
+                    <label for="inputTTRationale" class="control-label"><span class="mandatory">*</span>Rationale statement (the reason for adopting the Teaching Tip)</label>';
 if ($errors['rationale'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['rationale'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTRatioanle" name="rationale" placeholder="Rationale...">' . $rationale . '</textarea>';
@@ -389,7 +389,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTDescription" class="control-label"><span class="mandatory">*</span>Description (One sentence description of the essence of the Teaching Tip)</label>';
+                    <label for="inputTTDescription" class="control-label"><span class="mandatory">*</span>Description (one sentence description of the essence of the Teaching Tip)</label>';
 if ($errors['description'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['description'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTDescription" name="description" placeholder="This Teaching Tip...">' . $description . '</textarea>';
@@ -397,7 +397,7 @@ $template->pageData['content'] .= '</div>';
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTPractice" class="control-label"><span class="mandatory">*</span>Practice of Teaching Tip (Description of the actual practice)</label>
+                    <label for="inputTTPractice" class="control-label"><span class="mandatory">*</span>Practice of Teaching Tip (description of the actual practice)</label>
                     <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Here you may include references or links to other material if appropriate. If you want to include any images, they must first be uploaded to an online image hosting service (such as imgur.com)."><span class="glyphicon glyphicon-question-sign"></span></button>';
 if ($errors['practice'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['practice'] . '</span>';
@@ -406,7 +406,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTConditional1" class="control-label">Conditional statement (This tends to work better if)</label>
+                    <label for="inputTTConditional1" class="control-label">Conditional statement (<q>this tends to work better if</q>)</label>
                     <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"><span class="glyphicon glyphicon-question-sign"></span></button>';
 if ($errors['cond1'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['cond1'] . '</span>';
@@ -415,22 +415,22 @@ $template->pageData['content'] .= '</div>';
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTConditional2" class="control-label">Conditional statement (This doesn\'t work unless)</label>
+                    <label for="inputTTConditional2" class="control-label">Conditional statement (<q>this doesn\'t work unless</q>)</label>
                     <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"><span class="glyphicon glyphicon-question-sign"></span></button>';
 if ($errors['cond2'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['cond2'] . '</span>';
-$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional2" name="cond2" placeholder="This doesn\'t work unless...">' . $cond2 . '</textarea>';
+$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional2" name="cond2" placeholder="<q>this doesn\'t work unless...</q>">' . $cond2 . '</textarea>';
 $template->pageData['content'] .= '</div>';     
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTEssence" class="control-label"><span class="mandatory">*</span>Essence statement (Sum up the nature of the problem and the solution)</label>';
+                    <label for="inputTTEssence" class="control-label"><span class="mandatory">*</span>Essence statement (sum up the nature of the problem and the solution)</label>';
 if ($errors['essence'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['essence'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="4" cols="50" class="form-control" id="inputTTEssence" name="essence" placeholder="So...">' . $essence . '</textarea>';
 $template->pageData['content'] .= '</div>'; 	
 
-$template->pageData['content'] .= '<h4 class="tt-add-form-subtitle">Keywords and Filters (Used for effective searching)</h4>';
+$template->pageData['content'] .= '<h4 class="tt-add-form-subtitle">Keywords and filters (used for effective searching)</h4>';
 				
 $template->pageData['content'] .= 
   '<div class="form-group form-group-keywords">
