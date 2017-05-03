@@ -100,6 +100,8 @@ $template->pageData['content'] .=
                         <th>Name</th>
                         <th>Engagment</th>
                         <th>Esteem</th>
+                        <th>#Tips</th>
+                        <th>Last authored</th>
                         <th class="filter-select filter-exact" data-placeholder="All">Status</th>
                         <th data-sorter="false" data-filter="false">Actions</th>
                 </thead>
@@ -146,23 +148,26 @@ foreach ($users as $u) {
   $status = ($u->isadmin == 1) ? 'Admin' : 'User';
   $action = ($u->isadmin == 1) ? 'Demote' : 'Promote';
   $joined = date('Y-m-d', $u->joindate);
+  $w = $u->get_most_recent_tip_date();
+  $latest = $w == 0 ? '' : date('Y-m-d', $w);
   $template->pageData['content'] .= 
                 '<tr>
-                    <td>'. $u->id .'</td>
-                    <td>'. $joined .'</td>
-                    <td><a href="../profile.php?usrID='. $u->id .'">'. $u->name . ' ' . $u->lastname .'</a></td>
-                    <td>'. $u->engagement .'</td>
-                    <td>'. $u->esteem .'</td>
-                    <td>'. $status .'</td>
+                    <td>' . $u->id .'</td>
+                    <td>' . $joined .'</td>
+                    <td><a href="../profile.php?usrID=' . $u->id . '">'. $u->name . ' ' . $u->lastname . '</a></td>
+                    <td>' . $u->engagement . '</td>
+                    <td>' . $u->esteem . '</td>
+                    <td>' . $u->get_number_tts() . '</td>
+                    <td>' . $latest . '</td>
+                    <td>' . $status . '</td>
                     <td>
                         <form onsubmit="return confirm(\'Are you sure you want to '.$action.' this user?\');" class="admin-panel-promote-user-form" id="appromu-'.$u->id.'" action="" method="post">
-                            <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] .'" />
-                            <input type="hidden" name="uID" value="' . $u->id .'" />
+                            <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '" />
+                            <input type="hidden" name="uID" value="' . $u->id . '" />
                             <input type="hidden" name="uAction" value="' . strtolower($action) .'" />
-                            <a href="#" type="submit" onclick="$(\'#appromu-'.$u->id.'\').submit()">'. $action .'</a>
+                            <a href="#" type="submit" onclick="$(\'#appromu-'.$u->id.'\').submit()">' . $action . '</a>
                         </form>
                     </td>
-                    
                 </tr>';
 }
                     
