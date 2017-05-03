@@ -222,6 +222,7 @@ $template->pageData['customJS'] .=
         container: $(\".ts-pager\"),
         cssGoto  : \".pagenum\",
         removeRows: false,
+        size: 1000,
         output: '{startRow} - {endRow} of {filteredRows} ({totalRows} total)'
     });
 });</script>

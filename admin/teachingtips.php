@@ -218,6 +218,7 @@ $template->pageData['customJS'] .=
 	.tablesorterPager({
 		container: $(\".ts-pager\"),
 		cssGoto  : \".pagenum\",
+                size: 1000,
 		removeRows: false,
 		output: 'Showing {startRow} - {endRow} of {filteredRows} ({totalRows} total)'
 	});
