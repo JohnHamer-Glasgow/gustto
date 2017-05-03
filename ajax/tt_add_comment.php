@@ -11,13 +11,10 @@ require_once(__DIR__.'/../lib/constants.php');
 
 $uinfo = checkLoggedInUser();
 
-if($uinfo == false) {
+if ($uinfo == false) {
   header("Location: ../login.php");
   exit();
 }
-
-$dbUser = getUserRecord($uinfo);
-$loggedUserID = $dbUser->id;
 
 session_start();
 $data = array();
@@ -30,6 +27,9 @@ if (!isset($_POST['comment']) || strlen(trim($_POST['comment'])) == 0)
 
 if (!isset($_POST['ttID']) || !is_numeric($_POST['ttID']) || $_POST['ttID'] < 0)
   exit ();
+
+$dbUser = getUserRecord($uinfo);
+$loggedUserID = $dbUser->id;
 
 $ttID = $_POST['ttID'];
 $comment = sanitize_input($_POST['comment']);

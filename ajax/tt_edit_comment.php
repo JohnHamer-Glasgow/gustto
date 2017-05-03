@@ -14,30 +14,29 @@ $uinfo = checkLoggedInUser();
 $dbUser = getUserRecord($uinfo);
 $userID = $dbUser->id;
 
-if($uinfo==false)
-{
-	header("Location: ../login.php");
-	exit();
+if ($uinfo == false) {
+  header("Location: ../login.php");
+  exit();
 }
 
-// Check a POST is valid.
-if (!(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token'])) exit();
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
+  exit();
 
-// POST is valid
-if (isset($_POST['cID']) && is_numeric($_POST['cID']) && $_POST['cID'] >= 0) {
-	$cID = $_POST['cID'];
-} else exit();
+if (!isset($_POST['cID']) || !is_numeric($_POST['cID']) || $_POST['cID'] < 0)
+  exit();
 
-if (isset($_POST['comment']) && strlen(trim($_POST['comment'])) > 0) {
-	$comment = sanitize_input($_POST['comment']);
-} else exit();
+if (!isset($_POST['comment']) || strlen(trim($_POST['comment'])) == 0)
+  exit();
 
-$data = array();
+$comment = sanitize_input($_POST['comment']);
+
+$cID = $_POST['cID'];
 
 $uctt = user_comments_tt::retrieve_user_comments_tt_matching('comment_id', $cID)[0];
+if ($uctt->user_id != $userID)
+  exit();
 
-// extra security check
-if ($uctt->user_id != $userID) exit();
+$data = array();
 
 $c = ttcomment::retrieve_ttcomment($cID);
 $c->comment = $comment;
@@ -45,11 +44,9 @@ $c->comment = $comment;
 $success = $c->update();
 
 if ($success) {
-	$data['comment'] = $c->comment;
-	$data['action'] = 'edited';
-}
-else $data['action'] = '0';
+  $data['comment'] = $c->comment;
+  $data['action'] = 'edited';
+}else
+  $data['action'] = '0';
 
 echo json_encode($data);
-
-?>

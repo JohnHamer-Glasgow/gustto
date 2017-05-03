@@ -13,9 +13,6 @@ if ($uinfo == false) {
     exit();
 }
 
-session_start();
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 $username = $uinfo['uname'];
 $givenname = $uinfo['gn'];
 $surname = $uinfo['sn'];

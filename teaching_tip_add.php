@@ -32,9 +32,6 @@ $template->pageData['customCSS'] = '<script src="tinymce/js/tinymce/tinymce.min.
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
 
-session_start();
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 $username = $uinfo['uname'];
 $givenname = $uinfo['gn'];
 $surname = $uinfo['sn'];
@@ -46,6 +43,7 @@ $template->pageData['profileLink'] = "profile.php?usrID=" . $loggedUserID;
 $template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
+session_start();
 if (!isset($_SESSION['csrf_token']))
   $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 

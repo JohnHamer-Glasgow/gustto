@@ -364,7 +364,7 @@ class user {
     $result = dataConnection::runQuery("
 select count(id) as number_tts
  from teachingtip as tt
- where tt.time > '" . dataConnection::time2db($since) . "' and tt.author_id <> '" . dataConnection::safe($this->id) . "' and archived = 0 and draft = 0");
+ where tt.time > '" . dataConnection::time2db($since) . "' and archived = 0 and draft = 0");
     return $result[0]['number_tts'];
   }
 

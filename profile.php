@@ -14,14 +14,12 @@ if ($uinfo == false) {
   exit();
 }
 
-session_start();
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 $template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
 
+session_start();
 if (!isset($_SESSION['csrf_token']))
   $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 

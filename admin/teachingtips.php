@@ -25,11 +25,13 @@ $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 
 // have to include these here again since they can't be loaded from the template
 // because this page is in a different folder and the paths in the template are hardocded
-$template->pageData['customCSS'] = '<link href="../css/bootstrap.min.css" rel="stylesheet">
-									<link href="../css/style.css" rel="stylesheet">';
+$template->pageData['customCSS'] = '
+<link href="../css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/style.css" rel="stylesheet">';
 
-$template->pageData['customCSS'] .= '<link rel="stylesheet" href="../css/theme.bootstrap.min.css">
-									<link rel="stylesheet" href="../css/jquery.tablesorter.pager.min.css">'; 
+$template->pageData['customCSS'] .= '
+<link rel="stylesheet" href="../css/theme.bootstrap.min.css">
+<link rel="stylesheet" href="../css/jquery.tablesorter.pager.min.css">'; 
 
 $template->pageData['homeURL'] = '../index.php';
 $template->pageData['logoURL'] = '../images/logo/logo.png';

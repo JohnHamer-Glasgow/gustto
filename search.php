@@ -18,9 +18,6 @@ if ($uinfo == false) {
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 
-session_start();
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 $display_filter = false;
 
 $template = new templateMerge($TEMPLATE);

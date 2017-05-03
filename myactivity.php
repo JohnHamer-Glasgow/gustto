@@ -20,8 +20,6 @@ $template->pageData['logoURL'] = 'images/logo/logo.png';
 
 session_start();
 
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 if (!isset($_SESSION['csrf_token']))
   $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
  
@@ -39,43 +37,43 @@ $template->pageData['notificationNo'] = sizeof(notification::getNotifications($l
 $template->pageData['notifications'] = notifications($dbUser);
 
 $template->pageData['content'] .= '
-    <div class="col-xs-12 col-sm-9">
-      	<div class="card myactivity-card">
-          	<div class="main-header">
-    				<div class="col-xs-8 main-header-myactivity main-header">
-    					<h4>My Activity</h4>
-    				</div>
-    				<div class="col-xs-4 activity-options">
-    					<!-- Single button -->
-    					<div class="btn-group">
-    					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="activity-dropdown-text">
-    						All  </span><span class="caret"></span>
-    					  </button>
-    					  <ul class="dropdown-menu">
-    						<li class="col-xs-12 options-wrapper">
-    							<div class="col-xs-1 glyphicon glyphicon-star options-icon options-icon-star"></div>
-    							<div class="col-xs-9 options-option"><a role="button" id="filterAll">All</a></div>
-                  <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-all"></div>
-    						</li>
-    						<li class="col-xs-12 options-wrapper">
-    							<div class="col-xs-1 glyphicon glyphicon-thumbs-up options-icon options-icon-like"></div>
-    							<div class="col-xs-9 options-option"><a role="button" id="filterLikes">My Likes</a></div>
-                  <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-liked"></div>
-    						</li>
-    						<li class="col-xs-12 options-wrapper">
-    							<div class="col-xs-1 glyphicon glyphicon-comment options-icon options-icon-comment"></div>
-    							<div class="col-xs-9 options-option"><a role="button" id="filterComments">My Comments</a></div>
-                  <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-commented"></div>
-    						</li>
-    						<li class="col-xs-12 options-wrapper">
-    							<div class="col-xs-1 glyphicon glyphicon-share-alt options-icon options-icon-share"></div>
-    							<div class="col-xs-9 options-option"> <a role="button" id="filterShares">My Shares</a></div>
-                  <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-shared"></div>
-    						</li>
-    					  </ul>
-    					</div>
-    					</div>
-    				</div>';
+<div class="col-xs-12 col-sm-9">
+  <div class="card myactivity-card">
+    <div class="main-header">
+      <div class="col-xs-8 main-header-myactivity main-header">
+    	<h4>My activity</h4>
+      </div>
+      <div class="col-xs-4 activity-options">
+    	<div class="btn-group">
+    	  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	    <span class="activity-dropdown-text"> All </span>
+	    <span class="caret"></span>
+    	  </button>
+    	  <ul class="dropdown-menu">
+    	    <li class="col-xs-12 options-wrapper">
+    	      <div class="col-xs-1 glyphicon glyphicon-star options-icon options-icon-star"></div>
+    	      <div class="col-xs-9 options-option"><a role="button" id="filterAll">All</a></div>
+              <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-all"></div>
+    	    </li>
+    	    <li class="col-xs-12 options-wrapper">
+    	      <div class="col-xs-1 glyphicon glyphicon-thumbs-up options-icon options-icon-like"></div>
+    	      <div class="col-xs-9 options-option"><a role="button" id="filterLikes">My Likes</a></div>
+              <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-liked"></div>
+    	    </li>
+    	    <li class="col-xs-12 options-wrapper">
+    	      <div class="col-xs-1 glyphicon glyphicon-comment options-icon options-icon-comment"></div>
+    	      <div class="col-xs-9 options-option"><a role="button" id="filterComments">My Comments</a></div>
+              <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-commented"></div>
+    	    </li>
+    	    <li class="col-xs-12 options-wrapper">
+    	      <div class="col-xs-1 glyphicon glyphicon-share-alt options-icon options-icon-share"></div>
+    	      <div class="col-xs-9 options-option"> <a role="button" id="filterShares">My Shares</a></div>
+              <div class="col-xs-2 glyphicon glyphicon-ok options-icon ok-shared"></div>
+    	    </li>
+    	  </ul>
+    	</div>
+      </div>
+    </div>';
 
 $activity = array();
 foreach ($user->getLikes() as $like)

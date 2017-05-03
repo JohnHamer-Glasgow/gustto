@@ -15,8 +15,6 @@ if($uinfo == false) {
   exit();
 }
 
-$dbUser = getUserRecord($uinfo);
-$loggedUserID = $dbUser->id;
 session_start();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
@@ -26,6 +24,9 @@ if (!isset($_POST['ttID']) || !is_numeric($_POST['ttID']) || $_POST['ttID'] < 0)
   exit();
 
 $ttID = $_POST['ttID'];
+
+$dbUser = getUserRecord($uinfo);
+$loggedUserID = $dbUser->id;
 
 if (isset($_POST['like']) && is_numeric($_POST['like']) && ($_POST['like'] == 0 || $_POST['like'] == 1)) {
   $like = $_POST['like'];

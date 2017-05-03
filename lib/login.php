@@ -12,9 +12,11 @@ function checkLoggedInUser($allowLogin = true) {
   else
     $uinfo = false;
 
-  if (!$uinfo)
+  if (!$uinfo) {
     setcookie($cookie, '');
-  else {
+    session_start();
+    session_destroy();
+  } else {
     $cookieinfo = base64_encode(serialize($uinfo)) . '@' . (time() + $CFG['cookietimelimit']);
     setcookie($cookie,  $cookieinfo . '::' . md5($cookieinfo, $CFG['cookiehash']));
   }
@@ -41,21 +43,21 @@ function loginBox($uinfo) {
     $protocol = 'http';
 
   if ($uinfo == false) {
-    $out ='<div class="card login-card col-sm-10 col-xs-12 col-sm-offset-1">';
-    $out .= '<div class="row">';
-    $out .= '<div class="gustto-login-img-wrapper col-sm-6 col-xs-12 hidden-xs">';
-    $out .= '<div class="gustto-login-img">';
-    $out .=
-      '<div id="login-images" class="carousel slide carousel-wrapper" data-ride="carousel">
-          <ol class="carousel-indicators">
-            <li data-target="#login-images" data-slide-to="0" class="active"></li>
-            <li data-target="#login-images" data-slide-to="1"></li>
-            <li data-target="#login-images" data-slide-to="2"></li>
-            <li data-target="#login-images" data-slide-to="3"></li>
-            <li data-target="#login-images" data-slide-to="4"></li>
-            <li data-target="#login-images" data-slide-to="5"></li>
-          </ol>
-          <div class="carousel-inner" role="listbox">
+    $out = '
+<div class="card login-card col-sm-10 col-xs-12 col-sm-offset-1">
+  <div class="row">
+    <div class="gustto-login-img-wrapper col-sm-6 col-xs-12 hidden-xs">
+      <div class="gustto-login-img">
+	<div id="login-images" class="carousel slide carousel-wrapper" data-ride="carousel">
+	  <ol class="carousel-indicators">
+	    <li data-target="#login-images" data-slide-to="0" class="active"></li>
+	    <li data-target="#login-images" data-slide-to="1"></li>
+	    <li data-target="#login-images" data-slide-to="2"></li>
+	    <li data-target="#login-images" data-slide-to="3"></li>
+	    <li data-target="#login-images" data-slide-to="4"></li>
+	    <li data-target="#login-images" data-slide-to="5"></li>
+	  </ol>
+	  <div class="carousel-inner" role="listbox">
             <div id="login-image-0" class="item active">
               <img class="img-responsive" src="images/slider/1_1.jpg" alt="glasgow-tt-1">
             </div>
@@ -74,11 +76,11 @@ function loginBox($uinfo) {
             <div id="login-image-5" class="item">
               <img class="img-responsive" src="images/slider/6_1.jpg" alt="glasgow-tt-1">
             </div>           
-          </div>
-        </div>
+	  </div>
+	</div>
+      </div>
     </div>
-</div>
-
+ 
 <div class="form-wrapper col-sm-6 col-xs-12">';
     $out .= "<form class='form-horizontal' method='POST' action='$protocol://" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . "'>";
     $out .= '<h3>Log in</h3>';

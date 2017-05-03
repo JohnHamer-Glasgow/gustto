@@ -24,8 +24,6 @@ $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
 
 session_start();
-$_SESSION['url'] = $_SERVER['REQUEST_URI'];
-
 if (!isset($_SESSION['csrf_token']))
   $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 
@@ -191,7 +189,8 @@ if ($isDraft)
                 </div>';
 
 
-if ($loggedUserID == $tt->author_id)
+if ($loggedUserID == $tt->author_id) {
+  $deleteText = $tt->draft ? 'Archive' : 'Unpublish';
   $template->pageData['content'] .= "
                   <div class='btn-group pull-right col-xs-3'>
                     <a role='button' class='glyphicon glyphicon-option-horizontal teachingtip-options-button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
@@ -205,12 +204,13 @@ if ($loggedUserID == $tt->author_id)
                           <form class='deleteTTView' action='ajax/deleteTT.php' method='post'>
                             <input type='hidden' name='csrf_token' value='{$_SESSION['csrf_token']}' />
                             <input type='hidden' name='ttId' value='{$tt->id}' />
-                            <button type='submit' class='teachingtip-options-Dbutton'>Delete</button>
+                            <button type='submit' class='teachingtip-options-Dbutton'>$deleteText</button>
                           </form>
                         </li>             
                       </ul>
                     </div>                      
                   </div> ";
+}
 
 $template->pageData['content'] .= "<h3 class='tt-name'>{$tt->title}</h3>";
 if ($contributors) {
@@ -320,8 +320,13 @@ if (!$isDraft) {
                         <div class='tt-comment-datetime'>{$cTime}</div>";
 
         if ($comment_author->id == $loggedUserID) 
-          $template->pageData['content'] .=
-	    "<div class='tt-comment-options'><a class='tt-edit-comment-btn' role='button' data-target={$c->id}>Edit</a> . <form class='tt-comment-delete-form' action='ajax/tt_delete_comment.php' method='post'><a role='button' class='tt-comment-delete-btn' type='submit' data-cid='{$c->id}'>Delete</a></form></div>";
+          $template->pageData['content'] .= "
+<div class='tt-comment-options'>
+  <a class='tt-edit-comment-btn' role='button' data-target={$c->id}>Edit</a>
+  <form class='tt-comment-delete-form' action='ajax/tt_delete_comment.php' method='post'>
+    <a role='button' class='tt-comment-delete-btn' type='submit' data-cid='{$c->id}'>Delete</a>
+  </form>
+</div>";
 
         $template->pageData['content'] .= 
 	  "</div>

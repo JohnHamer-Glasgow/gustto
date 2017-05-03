@@ -12,17 +12,15 @@ require_once(__DIR__.'/../lib/constants.php');
 
 $uinfo = checkLoggedInUser();
 
-if ($uinfo == false) {
-  header("Location: ../index.php");
+if ($uinfo == false)
   exit();
-}
 
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
+
+$action = '';
+
 session_start();
-
-$data = array();
-
 if (isset($_POST['csrf_token']) &&
     $_POST['csrf_token'] === $_SESSION['csrf_token'] &&
     isset($_POST['ttId']) &&
@@ -30,23 +28,26 @@ if (isset($_POST['csrf_token']) &&
     $_POST['ttId'] >= 0 ) {
   $ttId = dataConnection::safe(sanitize_input($_POST['ttId']));
   $tt = teachingtip::retrieve_teachingtip($ttId);
-  $author = $tt->get_author();
+  
+  if ($loggedUserID == $tt->author_id && $tt->archived == '0') {
+    if ($tt->draft == '1') {
+      $action = 'Deleted';
+      dataConnection::runQuery("update teachingtip set archived = '1' where id = $ttId");
+    } else {
+      $action = 'Unpublished';
+      dataConnection::runQuery("update teachingtip set draft = '1' where id = $ttId");
+      $loggedUser = user::retrieve_user($loggedUserID);
+      foreach (getSameSchoolUsers($loggedUser->school, $loggedUserID) as $userId)
+	deleteNotification($userId['id'], $ttId, 'post');
 
-  if ($loggedUserID != $author->id)
-    exit();
-
-  $result = dataConnection::runQuery("update teachingtip set archived = '1' where id = $ttId");
-  $loggedUser = user::retrieve_user($loggedUserID);
-  foreach (getSameSchoolUsers($loggedUser->school, $loggedUserID) as $userId)
-    deleteNotification($userId['id'], $ttId, 'post');
-
-  $userSchool = $loggedUser->school;
-  foreach (getFollowers($loggedUserID) as $follower) {
-    //avoid deleting twice as the user is deleted from the school loop
-    if ($follower->school != $userSchool)
-      deleteNotification($follower->id, $ttId, 'post');
+      $userSchool = $loggedUser->school;
+      foreach (getFollowers($loggedUserID) as $follower) {
+	//avoid deleting twice as the user is deleted from the school loop
+	if ($follower->school != $userSchool)
+	  deleteNotification($follower->id, $ttId, 'post');
+      }
+    }
   }
 }
 
-$data['ttId'] = $ttId;
-echo json_encode($data);
+echo json_encode($action);

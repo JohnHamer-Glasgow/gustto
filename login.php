@@ -11,21 +11,15 @@ $uinfo = checkLoggedInUser();
 if ($uinfo) {
   session_start();
 
-  if (isset($_SESSION['url'])) {
-    $path = $_SESSION['url'];
-    $path = explode('/', $path);
-    $url = $path[sizeof($path) - 1];
-  } else
-    $url = "index.php"; 
-  
   $dbUser = getUserRecord($uinfo, false);
 
   $_SESSION['last_visit'] = $dbUser->last_visit;
   if ($dbUser->school == '' && isset($uinfo['school']))
     $dbUser->school = $uinfo['school'];
+  $dbUser->last_visit = time();
   $dbUser->update();
 
-  header("Location: $url");
+  header("Location: index.php");
   exit();
 }
 
