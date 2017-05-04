@@ -394,6 +394,11 @@ select count(id) as number_tts
     return $result[0]['number_tts'];
   }
 
+  function get_most_recent_tip_date() {
+    $result = dataConnection::runQuery("select unix_timestamp(max(whencreated)) as w from teachingtip where archived = 0 and draft = 0 and author_id = '" . dataConnection::safe($this->id) . "'");
+    return $result[0]['w'];
+  }
+  
   function get_number_received_likes() {
     $result = dataConnection::runQuery("
 select count(ultt.id) as number_likes
