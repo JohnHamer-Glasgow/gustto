@@ -89,6 +89,7 @@ $template->pageData['content'].=
               <li role="presentation" class=""><a href=".">Settings</a></li>
               <li role="presentation" class=""><a href="teachingtips.php">Teaching Tips</a></li>
               <li role="presentation" class="active"><a href="users.php">Users</a></li>
+              <li role="presentation"><a href="statistics.php">Statistics</a></li>
             </ul>';
 
 $template->pageData['content'] .= 

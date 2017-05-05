@@ -135,6 +135,7 @@ $template->pageData['content'] .= '
       <li role="presentation" class="active"><a href=".">Settings</a></li>
       <li role="presentation" class=""><a href="teachingtips.php">Teaching Tips</a></li>
       <li role="presentation" class=""><a href="users.php">Users</a></li>
+      <li role="presentation"><a href="statistics.php">Statistics</a></li>
     </ul>
 
     <div class="row">
