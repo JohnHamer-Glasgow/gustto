@@ -100,7 +100,6 @@ $dt = new DateTime();
 list ($y0, $w0) = split('-', key($timeseries));
 end($timeseries);
 list ($y1, $w1) = split('-', key($timeseries));
-Debug(array($y0, $w0, $y1, $w1));
 reset($timeseries);
 for ($y = $y0; $y <= $y1; $y++) {
   if ($y == $y1)
