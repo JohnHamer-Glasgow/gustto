@@ -93,14 +93,33 @@ foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(
   $timeseries[$v['d']]['likes'] = $v['c'];
 foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(*) as c from user_shares_tt group by d") as $v)
   $timeseries[$v['d']]['shares'] = $v['c'];
+ksort($timeseries);
 
-$template->pageData['content'] .= '<tbody>';
+$dt = new DateTime();
+// Add any missing weeks
+list ($y0, $w0) = split('-', key($timeseries));
+end($timeseries);
+list ($y1, $w1) = split('-', key($timeseries));
+Debug(array($y0, $w0, $y1, $w1));
+reset($timeseries);
+for ($y = $y0; $y <= $y1; $y++) {
+  if ($y == $y1)
+    $lastw = $w1;
+  else
+    $lastw = $dt->setISODate($y, 53)->format('W') === "53" ? 53 : 52;
+  for ($w = $w0; $w <= $lastw; $w++)
+    $timeseries[sprintf("%04d-%02d", $y, $w)]['touched'] = 1;
+  $w0 = 1;
+}
 
 ksort($timeseries);
-foreach ($timeseries as $d => $t)
+$template->pageData['content'] .= '<tbody>';
+foreach ($timeseries as $d => $t) {
+  list ($year, $week) = split('-', $d);
+  $monday = $dt->setISODate(intval($year), intval($week))->format('d M');
   $template->pageData['content'] .= '
 <tr>
-    <td>' . $d . '</td>
+    <td>' . $d . " ($monday)" . '</td>
     <td>' . $t['tips'] .'</td>
     <td>' . $t['views'] .'</td>
     <td>' . $t['follows'] .'</td>
@@ -108,7 +127,8 @@ foreach ($timeseries as $d => $t)
     <td>' . $t['likes'] .'</td>
     <td>' . $t['shares'] .'</td>
 </tr>';
-                    
+}
+
 $template->pageData['content'] .= '
   </tbody>
 </table>
