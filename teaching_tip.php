@@ -37,7 +37,7 @@ $ttID = $_GET['ttID'];
 $tt = teachingtip::retrieve_teachingtip($ttID);
 $isDraft = false;
     
-if (!$tt || $tt->archived == 1) {
+if (!$tt || ($user->isadmin == 0 && $tt->archived == 1)) {
   $template->pageData['content'] .= pageNotFound();
   echo $template->render();
   exit();
@@ -104,8 +104,6 @@ $template->pageData['notifications'] = notifications($dbUser);
 $keywords = $tt->get_keywords();
 $comments = $tt->get_comments();
 $liked = checkUserLikesTT($tt->id, $loggedUserID);
-$number_likes = $tt->get_number_likes();
-$number_comments = $tt->get_number_comments();
 $number_shares = $tt->get_number_shares();
 $contributors = $tt->get_contributors();
 
@@ -276,14 +274,25 @@ if($keywords)
 
 $template->pageData['content'] .= "</div>";
 
-if (!$isDraft) {
-  $template->pageData['content'] .= 
-                "<div class='tt-stats hidden-print'>
-                  <div class='tt-thumbs-up'><span class='glyphicon glyphicon-thumbs-up'></span> <span class='tt-likes-number'>{$number_likes}</span> people like this</div>
-                  <div class='tt-comments-number'><span class='glyphicon glyphicon-comment'></span> {$number_comments} comments </div>
-                </div>
+function plural($n, $single, $plural) {
+  return $n == 1 ? "$n $single" : "$n $plural";
+}
 
-                <div class='tt-options hidden-print'>";
+if (!$isDraft) {
+  $number_comments = plural($tt->get_number_comments(), 'comment', 'comments');
+  $number_likes = plural($tt->get_number_likes(), 'person likes this', 'people like this');
+ 
+  $template->pageData['content'] .= "
+<div class='tt-stats hidden-print'>
+  <div class='tt-thumbs-up'>
+   <span class='glyphicon glyphicon-thumbs-up'></span>
+   <span class='tt-likes-number'>{$number_likes}</span>
+  </div>
+  <div class='tt-comments-number'>
+    <span class='glyphicon glyphicon-comment'></span> {$number_comments}
+  </div>
+</div>
+<div class='tt-options hidden-print'>";
   if ($liked)
     $template->pageData['content'] .= "<div class='tt-rate'><form class='tt-like-form' action='ajax/like_tt.php' method='post'><a role='button' type='submit' class='tt-liked' id='ttLikeButton' value='liked' data-ttid='{$tt->id}'><span class='glyphicon glyphicon-thumbs-up'></span> You like this</a></form></div>";
   else 
