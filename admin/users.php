@@ -155,7 +155,7 @@ foreach ($users as $u) {
                 '<tr>
                     <td>' . $u->id .'</td>
                     <td>' . $joined .'</td>
-                    <td><a href="../profile.php?usrID=' . $u->id . '">'. $u->name . ' ' . $u->lastname . '</a></td>
+                    <td title="' . $u->school . '"><a href="../profile.php?usrID=' . $u->id . '">'. $u->name . ' ' . $u->lastname . '</a></td>
                     <td>' . $u->engagement . '</td>
                     <td>' . $u->esteem . '</td>
                     <td>' . $u->get_number_tts() . '</td>
