@@ -127,7 +127,7 @@ for ($y = $y0; $y <= $y1; $y++) {
   $w0 = 1;
 }
 
-ksort($timeseries);
+krsort($timeseries);
 $template->pageData['content'] .= '<tbody>';
 foreach ($timeseries as $d => $t) {
   list ($year, $week) = split('-', $d);

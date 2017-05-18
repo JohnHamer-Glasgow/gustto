@@ -99,7 +99,7 @@ $template->pageData['content'] .=
                         <th>ID</th>
                         <th data-sorter="shortDate" data-date-format="yyyy-mm-dd">Join date</th>
                         <th>Name</th>
-                        <th>Engagment</th>
+                        <th>Engagement</th>
                         <th>Esteem</th>
                         <th>#Tips</th>
                         <th>Last authored</th>
