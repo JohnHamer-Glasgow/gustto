@@ -84,7 +84,7 @@ function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
   $tt = teachingtip::retrieve_teachingtip($ttID);
   $cids = $tt->get_contributors_ids();
 
-  if ($userID != $tt->author_id && ($cids && !in_array($userID, $cids)))
+  if ($userID != $tt->author_id && !in_array($userID, $cids))
     return false;
 
   $tt->title = $ttdata['title'];

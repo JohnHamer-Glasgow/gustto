@@ -1493,8 +1493,7 @@ class user_earns_award
 	//[[USERCODE_user_earns_award]] WEnd of custom class members.
 }
 
-class teachingtip
-{
+class teachingtip {
 	var $id; //primary key
 	var $author_id; //foreign key
 	var $title;
@@ -1814,116 +1813,90 @@ select tt.*, count(u.id) as n from teachingtip as tt left join user_{$table}_tt 
 		return $result[0]['count'];
 	}
 
-	// get the contributors for this TT as user objects
 	function get_contributors() {
-		$query = "SELECT * FROM contributors WHERE teachingtip_id ='". dataConnection::safe($this->id) ."' AND user_id IS NOT NULL";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$contributors = array();
-			foreach($result as $r){
-				$contributor = user::retrieve_user($r['user_id']);
-				array_push($contributors, $contributor);
-			}
-			return $contributors;
-		} else return false;
-
+	  $result = dataConnection::runQuery("select * from contributors where teachingtip_id ='" . dataConnection::safe($this->id) . "' and user_id is not null");
+	  $contributors = array();
+	  foreach($result as $r)
+	    array_push($contributors, user::retrieve_user($r['user_id']));
+	  return $contributors;
 	}
 
 	function get_contributors_ids() {
-		$query = "SELECT * FROM contributors WHERE teachingtip_id ='". dataConnection::safe($this->id) ."' AND user_id IS NOT NULL";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$contributors = array();
-			foreach($result as $r){
-				array_push($contributors, $r['user_id']);
-			}
-			return $contributors;
-		} else return false;
+	  $result = dataConnection::runQuery("select * from contributors where teachingtip_id ='" . dataConnection::safe($this->id) . "' and user_id is not null");
+	  $contributors = array();
+	  foreach($result as $r)
+	    array_push($contributors, $r['user_id']);
+	  return $contributors;
 	}
 
 	static function get_all_schools() {
-		$query = "SELECT u.school FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id GROUP BY u.school";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$schools = array();
-			foreach ($result as $r) {
-				$schools[] = $r['school'];
-			}
-		}
-		return $schools;
+	  $result = dataConnection::runQuery("select u.school from teachingtip as tt inner join user as u on tt.author_id = u.id group by u.school");
+	  $schools = array();
+	  foreach ($result as $r)
+	    $schools[] = $r['school'];
+	  return $schools;
 	}
 
 	static function get_tts_from_schools($schools) {
-	  $query = "SELECT tt.* FROM teachingtip as tt INNER JOIN user as u ON tt.author_id = u.id WHERE archived = 0 AND draft = 0 AND (tt.school = '$schools[0]'";
+	  $query = "select tt.* from teachingtip as tt inner join user as u on tt.author_id = u.id where archived = 0 and draft = 0 and (tt.school = '$schools[0]'";
 	  if (sizeof($schools > 1)) {
 	    foreach (array_slice($schools, 1) as $school)
-	      $query .= " OR tt.school = '$school'";
+	      $query .= " or tt.school = '$school'";
 	  }
 	  
-	  $query .= ") ORDER BY time DESC";
+	  $query .= ") order by time desc";
 	  $result = dataConnection::runQuery($query);
-	  if (sizeof($result) != 0) {
-	    $tts = array();
-	    foreach($result as $r)
-	      array_push($tts, new teachingtip($r));
-	    return $tts;
-	  } else
-	    return false;
+	  $tts = array();
+	  foreach($result as $r)
+	    array_push($tts, new teachingtip($r));
+	  return $tts;
 	}
 
 	static function get_tts_from_filters($schools, $sizes, $envs, $sol, $itc) {
-	  $list = array();
+	  $result = array();
 	  if ($schools) {
 	    $schools_map = array_map(function($s) { return 'tt.school = ' . "'" . $s . "'"; }, $schools);
 	    if (!empty($schools_map)) {
 	      $schools_string = implode(' or ', $schools_map);
-	      $query = "select distinct tt.* from teachingtip as tt inner join user as u on tt.author_id = u.id where archived = 0 and draft = 0 and (" . $schools_string . ") order by time desc";
-	      $result = dataConnection::runQuery($query);
-	      if (sizeof($result) != 0) {
-		$r1 = array();
-		foreach($result as $r)
-		  array_push($r1, new teachingtip($r));
-		$list[] = $r1;
-	      }	      
+	      $result = dataConnection::runQuery("select distinct tt.* from teachingtip as tt"
+						 . " inner join user as u on tt.author_id = u.id"
+						 . " where archived = 0 and draft = 0 and (" . $schools_string
+						 . ") order by time desc");
+	      foreach($result as $r)
+		$result[] = new teachingtip($r);
 	    }
 	  }
 	  
 	  if ($sizes) {
-	    $sizes_map = array_map(function($cs) { return 'f.opt='."'".$cs."'"; }, $sizes);
+	    $sizes_map = array_map(function($cs) { return 'f.opt = ' . "'" . $cs . "'"; }, $sizes);
 	    if (!empty($sizes_map)) {
-	      $sizes_string = "f.category = 'class_size' AND (".implode(' OR ', $sizes_map).") ";
-	      $r2 = getTTsWithFilters($sizes_string);
-	      $list[] = $r2;
+	      foreach (getTTsWithFilters("f.category = 'class_size' AND (" . implode(' OR ', $sizes_map) . ") ") as $tt)
+		$result[] = $tt;
 	    }
 	  }
 	  
 	  if ($envs) {
-	    $envs_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $envs );
+	    $envs_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $envs);
 	    if (!empty($envs_map))
-	      $list[] = getTTsWithFilters("f.category = 'environment' AND (".implode(' OR ', $envs_map).") ");
+	      foreach (getTTsWithFilters("f.category = 'environment' AND (" . implode(' OR ', $envs_map) . ") ") as $tt)
+		$result[] = $tt;
 	  }
 
 	  if ($sol) {
-	    $sol_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $sol );
+	    $sol_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $sol);
 	    if (!empty($sol_map))
-	      $list[] = getTTsWithFilters("f.category = 'suitable_ol' AND (".implode(' OR ', $sol_map).") ");
+	      foreach (getTTsWithFilters("f.category = 'suitable_ol' AND (" . implode(' OR ', $sol_map) . ") ") as $tt)
+		$result[] = $tt;
 	  }
 	  
 	  if ($itc) {
-	    $itc_map = array_map(function($e) { return 'f.opt='."'".$e."'"; }, $itc);
+	    $itc_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $itc);
 	    if (!empty($itc_map))
-	      $list[] = getTTsWithFilters("f.category = 'it_competency' AND (".implode(' OR ', $itc_map).") ");
+	      foreach (getTTsWithFilters("f.category = 'it_competency' AND (" . implode(' OR ', $itc_map) . ") ") as $tt)
+		$result[] = $tt;
 	  }
 	  
-	  if (sizeof($list) > 1)
-	    $results = call_user_func_array('array_intersect', $list);
-	  else
-	    $results = $list[0];
-
-	  if (sizeof($results) != 0)
-	    return $results;
-	  else
-	    return false;
+	  return $results;
 	}
 }
 

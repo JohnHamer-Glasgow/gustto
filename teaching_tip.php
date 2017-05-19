@@ -211,7 +211,7 @@ if ($loggedUserID == $tt->author_id) {
 }
 
 $template->pageData['content'] .= "<h3 class='tt-name'>{$tt->title}</h3>";
-if ($contributors) {
+if (!empty($contributors)) {
   $i = 0;
   $template->pageData['content'] .= "<h4>Co-authors</h4>";
   foreach ($contributors as $contributor) {

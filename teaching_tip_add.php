@@ -100,14 +100,11 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	$saved_as_draft = $tt->draft == 1;
 	if ($saved_as_draft) {
 	  $ttcontributors = $tt->get_contributors();
-	  if ($ttcontributors) {
-	    $contributorsEmail = array();
-	    foreach ($ttcontributors as $ttcontr)
-	      $contributorsEmail[] = $ttcontr->email;
-	  }
+	  $contributorsEmail = array();
+	  foreach ($ttcontributors as $ttcontr)
+	    $contributorsEmail[] = $ttcontr->email;
 	}
-      }
-      else {
+      } else {
 	header("Location: teaching_tip_add.php");
 	exit();
       }
@@ -115,6 +112,11 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $ttSchool = $user->get_school_for_tt($SCHOOLS);
 }
 
+$class_size = array();
+$contributorsIDs = array();
+$contributorsEmails = array();
+$environment = array();
+$it_competency = array();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
     exit();
@@ -140,8 +142,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   if (!empty($_POST['contributors'])) {
     $contributorsEmail = $_POST['contributors'];
-    $contributorsIDs = array();
-    $contributorsEmails = array();
 
     foreach ($contributorsEmail as $index=>$contributorEmail) {
       $contributorEmail = sanitize_input($contributorEmail);
@@ -217,7 +217,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors['class_size'] = 'Please select an option/multiple options for the class size';
   else {
     $post_class_size = $_POST['class_size'];
-    $class_size = array();
     foreach ($post_class_size as $key=>$val) {
       $cs = sanitize_input($val);
       if (array_key_exists($cs, $CLASS_SIZES))
@@ -229,7 +228,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors['environment'] = 'Please select an option for the environment';
   else {
     $post_environment = $_POST['environment'];
-    $environment = array();
     foreach ($post_environment as $key=>$val) {
       $e = sanitize_input($val);
       if (array_key_exists($e, $ENVS))
@@ -248,7 +246,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors['it_competency'] = 'Please select an option for the IT competency required';
   else {
     $post_it_competency = $_POST['it_competency'];
-    $it_competency = array();
     foreach ($post_it_competency as $key=>$val) {
       $itc = sanitize_input($val);
       if (array_key_exists($itc, $ITC)) $it_competency[] = $itc;
