@@ -9,18 +9,23 @@ require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/constants.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
-session_start();
-
 $uinfo = checkLoggedInUser();
+
+if ($uinfo == false) {
+  header("Location: ../login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+  exit();
+}
+
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 $user = user::retrieve_user($loggedUserID);
 
-if ($uinfo == false || $user->isadmin != '1') {
+if ($user->isadmin != '1') {
   header("Location: ../index.php");
   exit();
 }
 
+session_start();
 if (!isset($_SESSION['csrf_token']))
   $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 

@@ -11,10 +11,15 @@ require_once(__DIR__.'/../lib/formfunctions.php');
 $template = new templateMerge('../html/template.html');
 
 $uinfo = checkLoggedInUser();
+if (!$uinfo) {
+  header("Location: ../login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+  exit();
+}
+
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 $user = user::retrieve_user($loggedUserID);
-if ($uinfo == false || $user->isadmin != '1') {
+if ($user->isadmin != '1') {
   header("Location: ../index.php");
   exit();
 }

@@ -19,7 +19,13 @@ if ($uinfo) {
   $dbUser->last_visit = time();
   $dbUser->update();
 
-  header("Location: index.php");
+  if (isset($_REQUEST['redirect']))
+    // TODO: add some security here; this should only ever be a local URI
+    $location = $_REQUEST['redirect'];
+  else
+    $location = 'index.php';
+
+  header("Location: $location");
   exit();
 }
 

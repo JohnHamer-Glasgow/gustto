@@ -83,6 +83,8 @@ function loginBox($uinfo) {
  
 <div class="form-wrapper col-sm-6 col-xs-12">';
     $out .= "<form class='form-horizontal' method='POST' action='$protocol://" . $_SERVER['SERVER_NAME'] . $_SERVER['PHP_SELF'] . "'>";
+    if (isset($_GET['redirect']))
+      $out .= '<input type="hidden" name="redirect" value="' . htmlspecialchars($_GET['redirect']) . '" />';
     $out .= '<h3>Log in</h3>';
     $out .= '<div class="form-group">';
     $out .= '<input type="text" class="form-control" name="uname" id="inputUsername" placeholder="GUID" required autofocus>';

@@ -9,7 +9,7 @@ require_once(__DIR__ . '/corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
 if ($uinfo == false) {
-  header("Location: login.php");
+  header("Location: login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
   exit();
 }
 
@@ -93,8 +93,6 @@ if(!empty($myTTs)){
       <div class="col-sm-6 col-xs-12 my-tt-buttons">
       <a href="teaching_tip.php?ttID=' . $myTT->id . '" class="btn btn-success">View</a>
       <a href="teaching_tip_add.php?ttID=' . $myTT->id . '" class="btn btn-info">Edit</a>
-
-      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="target-uniqueId' . $myTT->id . '">Delete</button>
 
       <div class="modal fade delete-modal-tt target-uniqueId' . $myTT->id . '" id="deleteTTModal" tabindex="-1" role="dialog">
       <div class="modal-dialog">

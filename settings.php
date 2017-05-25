@@ -10,7 +10,7 @@ require_once(__DIR__ . '/lib/formfunctions.php');
 
 $uinfo = checkLoggedInUser();
 if ($uinfo == false) {
-  header("Location: login.php");
+  header("Location: login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
   exit();
 }
 

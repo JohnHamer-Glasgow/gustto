@@ -9,7 +9,7 @@ require_once(__DIR__ . '/corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
 if ($uinfo == false) {
-  header("Location: login.php");
+  header("Location: login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
   exit();
 }
 

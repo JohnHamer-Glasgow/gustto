@@ -11,15 +11,22 @@ require_once(__DIR__.'/../lib/formfunctions.php');
 $template = new templateMerge('../html/template.html');
 
 $uinfo = checkLoggedInUser();
+if (!$uinfo) {
+  header("Location: ../login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+  exit();
+}
+
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 $user = user::retrieve_user($loggedUserID);
-if ($uinfo==false || $user->isadmin != '1') {
-    header("Location: ../index.php");
-    exit();
+if ($user->isadmin != '1') {
+  header("Location: ../index.php");
+  exit();
 }
 
 session_start();
+if (!isset($_SESSION['csrf_token']))
+  $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 
@@ -35,9 +42,6 @@ $template->pageData['customCSS'] .= '
 
 $template->pageData['homeURL'] = '../index.php';
 $template->pageData['logoURL'] = '../images/logo/logo.png';
-
-if (!isset($_SESSION['csrf_token']))
-  $_SESSION['csrf_token'] = base64_encode(openssl_random_pseudo_bytes(32));
 
 $username = $uinfo['uname'];
 $givenname = $uinfo['gn'];

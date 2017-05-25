@@ -10,8 +10,8 @@ require_once(__DIR__ . '/lib/constants.php');
 
 $uinfo = checkLoggedInUser();
 if ($uinfo == false) {
-    header("Location: login.php");
-    exit();
+  header("Location: login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
+  exit();
 }
 
 $template = new templateMerge($TEMPLATE);
