@@ -1,11 +1,9 @@
 <?php
-
 // Get the user object for the database user record of a logged in
 // user, and create it if it doesn't exist.
 function getUserRecord($uinfo) {
   $dbUser = user::retrieve_by_username($uinfo['uname']);
-  if($dbUser == false && !empty($uinfo['uname']) && !empty($uinfo['gn']) && !empty($uinfo['sn']) && !empty($uinfo['email'])) {
-    // User not found in database, so create a new record
+  if ($dbUser == false && !empty($uinfo['uname']) && !empty($uinfo['gn']) && !empty($uinfo['sn']) && !empty($uinfo['email'])) {
     $dbUser = new user();
     $dbUser->username = $uinfo['uname'];
     $dbUser->name = $uinfo['gn'];
@@ -37,7 +35,7 @@ function getUserRecord($uinfo) {
       $c->email = "";
       $c->update();
     }
-  } elseif($dbUser) {
+  } elseif ($dbUser) {
     $dbUser->lastaccess = time();
     $dbUser->update();
   }
@@ -49,18 +47,18 @@ function getUserRecord($uinfo) {
 // NEW DATABASE FUNCTIONS
 
 function getLatestTeachingTips($limit=false,$lowerL=0){
-    $query = "SELECT * FROM teachingtip WHERE archived='0' AND draft='0' ORDER BY id DESC";
-    if($limit) $query.= " LIMIT " .dataConnection::safe($limit);
-    $query .= " OFFSET " . dataConnection::safe($lowerL);
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-            $tts = array();
-            foreach($result as $r){
-                $tt = new teachingtip($r);
-                array_push($tts, $tt);
-            }
-            return $tts;
-        } else return false;
+  $query = "SELECT * FROM teachingtip WHERE archived='0' AND draft='0' ORDER BY id DESC";
+  if ($limit) $query.= " LIMIT " .dataConnection::safe($limit);
+  $query .= " OFFSET " . dataConnection::safe($lowerL);
+  $result = dataConnection::runQuery($query);
+  if (sizeof($result) != 0) {
+    $tts = array();
+    foreach($result as $r){
+      $tt = new teachingtip($r);
+      array_push($tts, $tt);
+    }
+    return $tts;
+  } else return false;
 }
 
 
@@ -69,110 +67,96 @@ function getTeachingTip($ttID) {
 }
 
 function checkUserLikesTT($ttID, $userID) {
-    $query = "SELECT COUNT(*) as count FROM user_likes_tt as ultt WHERE ultt.user_id = '{$userID}' AND ultt.teachingtip_id = '{$ttID}'";
-    $result = dataConnection::runQuery($query);
-    $count = $result[0]['count'];
-    return ($count > 0) ? true : false;
-
+  $query = "SELECT COUNT(*) as count FROM user_likes_tt as ultt WHERE ultt.user_id = '{$userID}' AND ultt.teachingtip_id = '{$ttID}'";
+  $result = dataConnection::runQuery($query);
+  return $result[0]['count'] > 0;
 }
 
 function userLikesTT($ttID, $userID) {
-    $liked = checkUserLikesTT($ttID, $userID);
-    if ($liked) return false;
-
-    $ultt = new user_likes_tt();
-    $ultt->user_id = $userID;
-    $ultt->teachingtip_id = $ttID;
-    $success = $ultt->insert();
-    if(is_null($success)) return false;
-    //Notification
-    return $ultt;
+  $liked = checkUserLikesTT($ttID, $userID);
+  if ($liked) return false;
+  
+  $ultt = new user_likes_tt();
+  $ultt->user_id = $userID;
+  $ultt->teachingtip_id = $ttID;
+  $success = $ultt->insert();
+  if (is_null($success)) return false;
+  return $ultt;
 }
 
 function userUnlikesTT($ttID, $loggedUserId) {
-    $liked = checkUserLikesTT($ttID, $loggedUserId);
-    if (!$liked) return false;
+  $liked = checkUserLikesTT($ttID, $loggedUserId);
+  if (!$liked) return false;
 
-    // Notification to the author removed
-    $tt = teachingtip::retrieve_teachingtip($ttID);
-    if($loggedUserId != $tt->author_id){
-        $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
-        $uultt = dataConnection::runQuery($query);
-        
-        deleteNotification($tt->author_id,$uultt[0]['id'],'like');
-    }
+  // Notification to the author removed
+  $tt = teachingtip::retrieve_teachingtip($ttID);
+  if($loggedUserId != $tt->author_id){
+    $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
+    $uultt = dataConnection::runQuery($query);
+    deleteNotification($tt->author_id,$uultt[0]['id'],'like');
+  }
 
-    // Notification to the followers removed
+  // Notification to the followers removed
+  $followers = getFollowers($loggedUserId);
+  foreach ($followers as $follower) {
+    $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
+    $uultt = dataConnection::runQuery($query);
+    deleteNotification($follower->id,$uultt[0]['id'],'like');
+  }
 
-    $followers = getFollowers($loggedUserId);
-    foreach ($followers as $follower) {
-      $query = "SELECT * FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}' ";
-      $uultt = dataConnection::runQuery($query);
-      deleteNotification($follower->id,$uultt[0]['id'],'like');
-    }
-
-    // Remove it from user like tt
-
-    $query = "DELETE FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}'";
-    $result = dataConnection::runQuery($query);
-
-    if ($result < 1) return false;
-
-    return true;
+  // Remove it from user like tt
+  $query = "DELETE FROM user_likes_tt WHERE user_id='{$loggedUserId}' AND teachingtip_id='{$ttID}'";
+  $result = dataConnection::runQuery($query);
+  return $result > 0;
 }
 
 
 function getTopLikedTeachingTips($limit,$userID){
-    $query = "SELECT * FROM teachingtip WHERE author_id={$userID} ORDER BY number_likes DESC LIMIT {$limit}";
-    $topLikedTeachingTips = dataConnection::runQuery($query);
-    return $topLikedTeachingTips;
+  $query = "SELECT * FROM teachingtip WHERE author_id={$userID} ORDER BY number_likes DESC LIMIT {$limit}";
+  $topLikedTeachingTips = dataConnection::runQuery($query);
+  return $topLikedTeachingTips;
 }
 
 function commentTime($commentId){
-    $query = "SELECT time FROM ttcomment WHERE id='{$commentId}'";
-    $result = dataConnection::runQuery($query);
-    return strtotime($result[0]['time']);
-
-    
+  $query = "SELECT time FROM ttcomment WHERE id='{$commentId}'";
+  $result = dataConnection::runQuery($query);
+  return strtotime($result[0]['time']);
 }
 
 function userCommentsTT($ttID, $userID, $comment) {
-    // create new ttcomment object and insert it into the db
-    $c = new ttcomment();
-    $c->comment = $comment;
-    $cID = $c->insert();
-
-    if (is_null($cID)) return false;
-
-    // create new user_comments_tt object and insert it into the db
-    $uctt = new user_comments_tt();
-    $uctt->user_id = $userID;
-    $uctt->teachingtip_id = $ttID;
-    $uctt->comment_id = $cID;
-    $success = $uctt->insert();
-
-    if(is_null($success)) return false;
-    return true;
-    
-
+  // create new ttcomment object and insert it into the db
+  $c = new ttcomment();
+  $c->comment = $comment;
+  $cID = $c->insert();
+  
+  if (is_null($cID)) return false;
+  
+  // create new user_comments_tt object and insert it into the db
+  $uctt = new user_comments_tt();
+  $uctt->user_id = $userID;
+  $uctt->teachingtip_id = $ttID;
+  $uctt->comment_id = $cID;
+  $success = $uctt->insert();
+  
+  if (is_null($success)) return false;
+  return true;
 }
 
 // check if a user ($senderEmail) shared $ttID woth $recipientEmail
 // return true if shared, false otherwise
 function userSharedTT($ttID, $senderEmail, $recipientEmail) {
-    $query = "SELECT COUNT(*) AS share_count FROM user_shares_tt WHERE teachingtip_id = '". dataConnection::safe($ttID) ."' AND sender = '". dataConnection::safe($senderEmail) ."' AND recipient = '". dataConnection::safe($recipientEmail) ."'";
-    $result = dataConnection::runQuery($query);
-    return ($result[0]['share_count'] > 0);
-
+  $query = "SELECT COUNT(*) AS share_count FROM user_shares_tt WHERE teachingtip_id = '". dataConnection::safe($ttID) ."' AND sender = '". dataConnection::safe($senderEmail) ."' AND recipient = '". dataConnection::safe($recipientEmail) ."'";
+  $result = dataConnection::runQuery($query);
+  return ($result[0]['share_count'] > 0);
 }
 
 // get the category for a filter option
 function getFilterCategory($opt) {
-    if (array_key_exists($opt, $GLOBALS['CLASS_SIZES'])) return 'class_size';
-    else if (array_key_exists($opt, $GLOBALS['ENVS'])) return 'environment';
-    else if (array_key_exists($opt, $GLOBALS['SOL'])) return 'suitable_ol';
-    else if (array_key_exists($opt, $GLOBALS['ITC'])) return 'it_competency';
-    else return false;
+  if (array_key_exists($opt, $GLOBALS['CLASS_SIZES'])) return 'class_size';
+  else if (array_key_exists($opt, $GLOBALS['ENVS'])) return 'environment';
+  else if (array_key_exists($opt, $GLOBALS['SOL'])) return 'suitable_ol';
+  else if (array_key_exists($opt, $GLOBALS['ITC'])) return 'it_competency';
+  else return false;
 }
 
 function getTTsWithFilters($filter_string) {
@@ -185,19 +169,17 @@ function getTTsWithFilters($filter_string) {
 
 // get the ttkeywords that contain $keyword
 function searchTTKeywordsByKeyword($keyword) {
-    $k = '%' . $keyword . '%';
-    $query = "SELECT DISTINCT * FROM ttkeyword WHERE keyword LIKE '". dataConnection::safe($k) ."'";
-    $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-        $kws = array();
-        foreach ($result as $r)
-        {
-            $kw = new ttkeyword($r);
-            array_push($kws, $kw);
-             
-        }
-        return array_unique($kws);
-    } else return false;
+  $k = '%' . $keyword . '%';
+  $query = "SELECT DISTINCT * FROM ttkeyword WHERE keyword LIKE '". dataConnection::safe($k) ."'";
+  $result = dataConnection::runQuery($query);
+  if (sizeof($result) != 0) {
+    $kws = array();
+    foreach ($result as $r) {
+      $kw = new ttkeyword($r);
+      array_push($kws, $kw);
+    }
+    return array_unique($kws);
+  } else return false;
 }
 
 function searchUsersByKeyword($keyword) {
@@ -356,45 +338,44 @@ function getSameSchoolUsers($school, $loggedUserId) {
 // Create a system notification for $userId and send email notification if user has enabled
 // email notification for every activity in this category
 function createNotification($userId,$activityId,$activityType,$category){
-    $n = new notification();
-    $n->user_id = $userId;
-    $n->activity_id = $activityId;
-    $n->activity_type = $activityType;
-    $n->category = $category;
-    $nID = $n->insert();
+  $n = new notification();
+  $n->user_id = $userId;
+  $n->activity_id = $activityId;
+  $n->activity_type = $activityType;
+  $n->category = $category;
+  $nID = $n->insert();
 
-    // get the user settings and check if user has enabled email notification for every activity in this category
-    $us = user_settings::retrieve_user_settings($userId);
-    switch ($activityType) {
-        case 'post':
-            if ($category == 'school_posts') 
-                if ($us->school_posts == '1') sendEmailNotification($nID);
-            elseif ($category == 'followers_posts')
-                if ($us->followers_posts == '1') sendEmailNotification($nID);
-
-        case 'like':
-        case 'comment':
-            if ($category == 'tts_activity')
-                if ($us->tts_activity == '1') sendEmailNotification($nID);
-            // elseif ($category == 'followers_activity')
-            //     if ($us->followers_activity == '1') sendEmailNotification($nID);
-            break;
-
-        case 'share':
-            if ($us->tts_activity == '1') sendEmailNotification($nID);
-            break;
-
-        case 'award':
-            if ($us->awards == '1') sendEmailNotification($nID);
-    }
+  // get the user settings and check if user has enabled email notification for every activity in this category
+  $us = user_settings::retrieve_user_settings($userId);
+  switch ($activityType) {
+  case 'post':
+    if ($category == 'school_posts') 
+      if ($us->school_posts == '1') sendEmailNotification($nID);
+    elseif ($category == 'followers_posts')
+      if ($us->followers_posts == '1') sendEmailNotification($nID);
     
-
-    return $nID;
+  case 'like':
+  case 'comment':
+    if ($category == 'tts_activity')
+      if ($us->tts_activity == '1') sendEmailNotification($nID);
+    // elseif ($category == 'followers_activity')
+    //     if ($us->followers_activity == '1') sendEmailNotification($nID);
+    break;
+    
+  case 'share':
+    if ($us->tts_activity == '1') sendEmailNotification($nID);
+    break;
+    
+  case 'award':
+    if ($us->awards == '1') sendEmailNotification($nID);
+  }
+  
+  return $nID;
 }
 
 function deleteNotification($userId,$activityId,$activityType){
-    $query = "DELETE FROM notification WHERE user_id='$userId' AND activity_id = '$activityId'  AND activity_type='$activityType' ";
-    $result = dataConnection::runQuery($query); 
+  $query = "DELETE FROM notification WHERE user_id='$userId' AND activity_id = '$activityId'  AND activity_type='$activityType' ";
+  $result = dataConnection::runQuery($query); 
 }
 
 function getTtCommentUsers ($tt,$loggedUserId){
@@ -408,53 +389,52 @@ function getTtCommentUsers ($tt,$loggedUserId){
 // Used to print the notifications to the user Drop Down-- limited to 5 and only unseen 
 
 function notifications($user) {
-    $notificationsUnseen = notification::getNotifications($user->id, 5, 0);
-    if ($notificationsUnseen > 0) {
-        $out='';
-        foreach ($notificationsUnseen as $notification) {
-            $activity_type = $notification->activity_type;
-            $notification_id = $notification->id;
-            if( $activity_type == 'like'){
-                $activity = user_likes_tt::retrieve_user_likes_tt($notification->activity_id);
-                $activity_type_print = 'likes';
-                $activity_time = date('d M Y', $activity->time);
-                $fromUser = user::retrieve_user($activity->user_id);
-            }
-            elseif($activity_type == 'comment'){
-                $activity = user_comments_tt::retrieve_user_comments_tt($notification->activity_id);
-                $activity_type_print = 'commented on';
-                $activity_time = date('d M Y', ttcomment::retrieve_ttcomment($activity->comment_id)->time);
-                $fromUser = user::retrieve_user($activity->user_id);
-
-            }
-            elseif($activity_type == 'share'){
-                $activity = user_shares_tt::retrieve_user_shares_tt($notification->activity_id);
-                $activity_type_print = 'shared';
-                $activity_time = date('d M Y', $activity->time);
-                // Temporary mod to allow older PHP
-                $tmpusers = user::retrieve_user_matching('email', $activity->sender);
-                $fromUser = $tmpusers[0];
-                //$fromUser = user::retrieve_user_matching('email', $activity->sender)[0];
-            }
-            elseif($activity_type == 'post'){
-                $tt = teachingtip::retrieve_teachingtip($notification->activity_id);
-                $activity_type_print = 'posted';
-                $activity_time = date('d M Y', $tt->time);
-                $fromUser = user::retrieve_user($tt->author_id);
-            }
-            elseif($activity_type == 'award') {
-                $activity = user_earns_award::retrieve_user_earns_award($notification->activity_id);
-                $award = award::retrieve_award($activity->award_id);
-                $activity_type_print = 'earned a new';
-                $activity_name = $award->name;
-                $activity_time = date('d M Y', $activity->time);
-            }
-            elseif($activity_type == 'follow') {
-                $activity = user_follows_user::retrieve_user_follows_user($notification->activity_id);
-                $activity_type_print = 'followed';
-                $activity_time = date('d M Y', $activity->time);
-                $fromUser = user::retrieve_user($activity->follower_id);
-            }
+  $notificationsUnseen = notification::getNotifications($user->id, 5, 0);
+  if ($notificationsUnseen > 0) {
+    $out = '';
+    foreach ($notificationsUnseen as $notification) {
+      $activity_type = $notification->activity_type;
+      $notification_id = $notification->id;
+      if ($activity_type == 'like'){
+	$activity = user_likes_tt::retrieve_user_likes_tt($notification->activity_id);
+	$activity_type_print = 'likes';
+	$activity_time = date('d M Y', $activity->time);
+	$fromUser = user::retrieve_user($activity->user_id);
+      }
+      elseif($activity_type == 'comment'){
+	$activity = user_comments_tt::retrieve_user_comments_tt($notification->activity_id);
+	$activity_type_print = 'commented on';
+	$activity_time = date('d M Y', ttcomment::retrieve_ttcomment($activity->comment_id)->time);
+	$fromUser = user::retrieve_user($activity->user_id);
+      }
+      elseif($activity_type == 'share'){
+	$activity = user_shares_tt::retrieve_user_shares_tt($notification->activity_id);
+	$activity_type_print = 'shared';
+	$activity_time = date('d M Y', $activity->time);
+	// Temporary mod to allow older PHP
+	$tmpusers = user::retrieve_user_matching('email', $activity->sender);
+	$fromUser = $tmpusers[0];
+	//$fromUser = user::retrieve_user_matching('email', $activity->sender)[0];
+      }
+      elseif($activity_type == 'post'){
+	$tt = teachingtip::retrieve_teachingtip($notification->activity_id);
+	$activity_type_print = 'posted';
+	$activity_time = date('d M Y', $tt->time);
+	$fromUser = user::retrieve_user($tt->author_id);
+      }
+      elseif($activity_type == 'award') {
+	$activity = user_earns_award::retrieve_user_earns_award($notification->activity_id);
+	$award = award::retrieve_award($activity->award_id);
+	$activity_type_print = 'earned a new';
+	$activity_name = $award->name;
+	$activity_time = date('d M Y', $activity->time);
+      }
+      elseif($activity_type == 'follow') {
+	$activity = user_follows_user::retrieve_user_follows_user($notification->activity_id);
+	$activity_type_print = 'followed';
+	$activity_time = date('d M Y', $activity->time);
+	$fromUser = user::retrieve_user($activity->follower_id);
+      }
 
             if($activity_type!='post'){
                 $tt = teachingtip::retrieve_teachingtip($activity->teachingtip_id);
@@ -666,6 +646,25 @@ function updateAdminSettings($esteem, $engagement, $awards) {
 
 /* EMAIL NOTIFICATIONS */
 
+function thisUrl($path) {
+  // From http://blog.lavoie.sl/2013/02/php-document-root-path-and-url-detection.html
+  $base_dir  = dirname(__DIR__ . "..");
+  $doc_root  = preg_replace("!${_SERVER['SCRIPT_NAME']}$!", '', $_SERVER['SCRIPT_FILENAME']);
+  $base_url  = preg_replace("!^${doc_root}!", '', $base_dir);
+  $protocol  = empty($_SERVER['HTTPS']) ? 'http' : 'https';
+  $port      = $_SERVER['SERVER_PORT'];
+  $disp_port = ($protocol == 'http' && $port == 80 || $protocol == 'https' && $port == 443) ? '' : ":$port";
+  $domain    = $_SERVER['SERVER_NAME'];
+  return  "${protocol}://${domain}${disp_port}${base_url}/$path";
+}
+
+
+function mailx($to, $subject, $body, $headers) {
+  Debug(array('to' => $to, 'subject' => $subject, 'body' => $body, 'headers' => $headers));
+  return true;
+}
+
+
 /*
  * Send email from the user that shared a TT (sender) to the recipient
  */
@@ -691,8 +690,9 @@ function sendEmailShare($usttID) {
         </head>
         <body>";
 
+    $thisTt = thisUrl("teaching_tip.php?ttID={$tt->id}");
     $body .= "Hi there, <br><br>";
-    $body .= "{$s->name} {$s->lastname} shared {$tt_author->name} {$tt_author->lastname}'s Teaching Tip, <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$tt->id}'>{$tt->title}</a> with you. <br><br>";
+    $body .= "{$s->name} {$s->lastname} shared {$tt_author->name} {$tt_author->lastname}'s Teaching Tip, <a href='$thisTt'>{$tt->title}</a> with you. <br><br>";
 
     if (!empty($ustt->message)) {
         $body .= "{$s->name} {$s->lastname}'s message for you: <br><br>";
@@ -701,13 +701,7 @@ function sendEmailShare($usttID) {
 
     $body .= "</body></html>";
 
-    // echo "To:{$to} <br> {$headers} <br> {$subject} <br> {$body}";
-
-    // SEND EMAIL
-    if(mail($to, $subject, $body, $headers)) return true;
-    return false;
-    
-
+    return mail($to, $subject, $body, $headers);
 }
 
 /*
@@ -722,7 +716,7 @@ function sendEmailNotification($nID) {
     $type = $n->activity_type;
     $aID = $n->activity_id;
 
-    $masterEmail = 'Niall.Barr@glasgow.ac.uk';
+    $masterEmaiL = 'NOREPLY-GUSTTO@glasgow.ac.uk';
     $to = $u->email;
 
     $headers = "MIME-Version: 1.0" . "\r\n";
@@ -747,7 +741,7 @@ function sendEmailNotification($nID) {
             $a = teachingtip::retrieve_teachingtip($aID);
             $a_user = $a->get_author();
             $subject = "{$a_user->name} {$a_user->lastname} posted a new Teaching Tip";
-            $body .= "{$a_user->name} {$a_user->lastname} posted <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$tt->id}'>{$a->title}</a>. <br><br>";
+            $body .= "{$a_user->name} {$a_user->lastname} posted <a href='" . thisUrl("teaching_tip.php?ttID={$tt->id}") . "'>{$a->title}</a>. <br><br>";
             $notificationReason = "new post in your school";
             break;
 
@@ -756,7 +750,7 @@ function sendEmailNotification($nID) {
             $a_user = user::retrieve_user($a->user_id);
             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
             $subject = "{$a_user->name} {$a_user->lastname} liked a Teaching Tip";
-            $body .= "{$a_user->name} {$a_user->lastname} liked <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br><br>";
+            $body .= "{$a_user->name} {$a_user->lastname} liked <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br><br>";
             if ($cat == 'tts_activity') 
                 $notificationReason = 'like/comment/share on your Teaching Tips';
             elseif ($cat == 'followers_activity')
@@ -768,7 +762,7 @@ function sendEmailNotification($nID) {
             $a_user = user::retrieve_user($a->user_id);
             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
             $subject = "{$a_user->name} {$a_user->lastname} commented on a Teaching Tip";
-            $body .= "{$a_user->name} {$a_user->lastname} commented on <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br><br>";
+            $body .= "{$a_user->name} {$a_user->lastname} commented on <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br><br>";
             if ($cat == 'tts_activity') 
                 $notificationReason = 'like/comment/share on your Teaching Tips';
             elseif ($cat == 'followers_activity')
@@ -779,10 +773,9 @@ function sendEmailNotification($nID) {
             $a = user_shares_tt::retrieve_user_shares_tt($aID);
             $tmpa = user::retrieve_user_matching('email', $a->sender);
             $a_user = $tmpa[0];
-            //$a_user = user::retrieve_user_matching('email', $a->sender)[0];
             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
             $subject = "{$a_user->name} {$a_user->lastname} shared your Teaching Tip";
-            $body .= "{$a_user->name} {$a_user->lastname} shared <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br><br>";
+            $body .= "{$a_user->name} {$a_user->lastname} shared <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br><br>";
             $notificationReason = 'like/comment/share on your Teaching Tips';
             break;
 
@@ -790,22 +783,18 @@ function sendEmailNotification($nID) {
             $a = user_earns_award::retrieve_user_earns_award($aID);
             $award = award::retrieve_award($a->award_id);
             $subject = "You earned a new award";
-            $body .= "Well done! You earned a {$award->name}. If you wish to see your awards you can do so by visiting your <a href='https://learn.gla.ac.uk/teachingtips/profile.php?usrID={$u->id}'>Profile</a>. <br><br>";
+            $body .= "Well done! You earned a {$award->name}. If you wish to see your awards you can do so by visiting your <a href='" . thisUrl("profile.php?usrID={$u->id}") . "'>Profile</a>. <br><br>";
             $notificationReason = "new award that you earn";
             break;
     }
 
-    $body .= "You received this email because you opted to receive an email notification for every {$notificationReason}. If you want to stop receiving these emails, please review your <a href='https://learn.gla.ac.uk/teachingtips/settings.php'>Email Notifications settings</a>. <br>";
+    $body .= "You received this email because you opted to receive an email notification for every {$notificationReason}. If you want to stop receiving these emails, please review your <a href='" . thisUrl("settings.php") . "'>Email Notifications settings</a>. <br>";
 
     $body .= "</body></html>";
 
     if (!$a) return false;
 
-    // echo "To:{$to} <br> {$headers} <br> {$subject} <br> {$body}";
-
-    // SEND EMAIL
-    if(mail($to, $subject, $body, $headers)) return true;
-    return false;
+    return mail($to, $subject, $body, $headers);
 }
 
 /*
@@ -828,7 +817,7 @@ function sendEmailNotification($nID) {
  * - notification 6
  */
 function sendWeeklyDigest($notifications) {
-    $masterEmail = 'Niall.Barr@glasgow.ac.uk';
+    $masterEmail = 'NOREPLY-GUSTTO@glasgow.ac.uk';
     $to = $u->email;
 
     $headers = "MIME-Version: 1.0" . "\r\n";
@@ -878,14 +867,14 @@ function sendWeeklyDigest($notifications) {
                             $a = teachingtip::retrieve_teachingtip($aID);
                             $a_user = $a->get_author();
                             $subject = "{$a_user->name} {$a_user->lastname} posted a new Teaching Tip";
-                            $body .= "{$a_user->name} {$a_user->lastname} posted <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$tt->id}'>{$a->title}</a>. <br>";
+                            $body .= "{$a_user->name} {$a_user->lastname} posted <a href='" . thisUrl("teaching_tip.php?ttID={$tt->id}") . "'>{$a->title}</a>. <br>";
                             break;
 
                         case 'like':
                             $a = user_likes_tt::retrieve_user_likes_tt($aID);
                             $a_user = user::retrieve_user($a->user_id);
                             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
-                            $body .= "{$a_user->name} {$a_user->lastname} liked <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br>";
+                            $body .= "{$a_user->name} {$a_user->lastname} liked <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br>";
                             break;
 
                         case 'comment':
@@ -893,7 +882,7 @@ function sendWeeklyDigest($notifications) {
                             $a_user = user::retrieve_user($a->user_id);
                             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
                             
-                            $body .= "{$a_user->name} {$a_user->lastname} commented on <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br>";
+                            $body .= "{$a_user->name} {$a_user->lastname} commented on <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br>";
                             
                             break;
 
@@ -904,7 +893,7 @@ function sendWeeklyDigest($notifications) {
                             //$a_user = user::retrieve_user_matching('email', $a->sender)[0];
                             $a_tt = teachingtip::retrieve_teachingtip($a->teachingtip_id);
                             
-                            $body .= "{$a_user->name} {$a_user->lastname} shared <a href='https://learn.gla.ac.uk/teachingtips/teaching_tip.php?ttID={$a_tt->id}'>{$a_tt->title}</a>. <br>";
+                            $body .= "{$a_user->name} {$a_user->lastname} shared <a href='" . thisUrl("teaching_tip.php?ttID={$a_tt->id}") . "'>{$a_tt->title}</a>. <br>";
                             
                             break;
 
@@ -912,7 +901,7 @@ function sendWeeklyDigest($notifications) {
                             $a = user_earns_award::retrieve_user_earns_award($aID);
                             $award = award::retrieve_award($a->award_id);
                             
-                            $body .= "Well done! You earned a {$award->name}. If you wish to see your awards you can do so by visiting your <a href='https://learn.gla.ac.uk/teachingtips/profile.php?usrID={$u->id}'>Profile</a>. <br>";
+                            $body .= "Well done! You earned a {$award->name}. If you wish to see your awards you can do so by visiting your <a href='" . thisUrl("profile.php?usrID={$u->id}") . "'>Profile</a>. <br>";
                            
                             break;
                     }
@@ -922,16 +911,10 @@ function sendWeeklyDigest($notifications) {
 
         }
 
-        $body .= "You received this email because you opted to receive a weekly digest. If you want to stop receiving these emails, please review your <a href='https://learn.gla.ac.uk/teachingtips/settings.php'>Email Notifications settings</a>. <br>";
+        $body .= "You received this email because you opted to receive a weekly digest. If you want to stop receiving these emails, please review your <a href='" . thisUrl("settings.php") . "'>Email Notifications settings</a>. <br>";
 
         $body .= "</body></html>";
-
-
     }
 
-    // echo "To:{$to} <br> {$headers} <br> {$subject} <br> {$body}";
-
-    // SEND EMAIL
-    if(mail($to, $subject, $body, $headers)) return true;
-    return false;
+	return mail($to, $subject, $body, $headers);
 }
