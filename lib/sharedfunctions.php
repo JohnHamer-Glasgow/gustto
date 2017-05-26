@@ -716,7 +716,7 @@ function sendEmailNotification($nID) {
     $type = $n->activity_type;
     $aID = $n->activity_id;
 
-    $masterEmaiL = 'NOREPLY-GUSTTO@glasgow.ac.uk';
+    $masterEmaiL = 'GUSTTO@glasgow.ac.uk';
     $to = $u->email;
 
     $headers = "MIME-Version: 1.0" . "\r\n";
@@ -817,7 +817,7 @@ function sendEmailNotification($nID) {
  * - notification 6
  */
 function sendWeeklyDigest($notifications) {
-    $masterEmail = 'NOREPLY-GUSTTO@glasgow.ac.uk';
+    $masterEmail = 'GUSTTO@glasgow.ac.uk';
     $to = $u->email;
 
     $headers = "MIME-Version: 1.0" . "\r\n";
