@@ -10,10 +10,8 @@ require_once(__DIR__.'/../lib/constants.php');
 
 $uinfo = checkLoggedInUser();
 
-if($uinfo == false) {
-  header("Location: ../login.php");
+if($uinfo == false)
   exit();
-}
 
 session_start();
 

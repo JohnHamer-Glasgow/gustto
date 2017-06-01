@@ -116,7 +116,7 @@ $class_size = array();
 $environment = array();
 $it_competency = array();
 
-if ($class_size_f) foreach ($class_size_f as $cs) $class_size[] = $CLASS_SIZES[$cs];
+foreach ($class_size_f as $cs) $class_size[] = $CLASS_SIZES[$cs];
 if ($environment_f) foreach ($environment_f as $env) $environment[] = $ENVS[$env];
 if ($it_competency_f) foreach ($it_competency_f as $itc) $it_competency[] = $ITC[$itc];
 
@@ -268,9 +268,8 @@ $template->pageData['content'] .=
 $template->pageData['content'] .= "<div class='tt-keywords'>
                   <h4>Keywords</h4>";
 
-if($keywords) 
-  foreach($keywords as $kw)
-    $template->pageData['content'] .= "<a href='search.php?q=". $kw->keyword ."&o=keyword'><div class='tt-keyword'>".$kw->keyword."</div></a>";
+foreach($keywords as $kw)
+  $template->pageData['content'] .= "<a href='search.php?q=". $kw->keyword ."&o=keyword'><div class='tt-keyword'>".$kw->keyword."</div></a>";
 
 $template->pageData['content'] .= "</div>";
 
@@ -313,12 +312,11 @@ if (!$isDraft) {
   $template->pageData['content'] .= 
     "<h3 class='tt-comments-header'>Comments</h3> ";
 
-  if ($comments) {
-    foreach($comments as $c) {
-      $comment_author = $c->get_author();
-      $cTime = date('d M Y', $c->time);
-        $template->pageData['content'] .= 
-	  "<div class='tt-comment'>
+  foreach($comments as $c) {
+    $comment_author = $c->get_author();
+    $cTime = date('d M Y', $c->time);
+    $template->pageData['content'] .= 
+      "<div class='tt-comment'>
                     <div class='tt-comment-profile'>
                       <div class='tt-comment-profile-img col-md-1 col-sm-1 col-xs-1'>
                         <img class='img responsive img-circle' src='{$comment_author->profile_picture}' alt='profile picture'>
@@ -328,17 +326,17 @@ if (!$isDraft) {
                         <div class='tt-comment-profile-name'><a href='profile.php?usrID={$comment_author->id}'>{$comment_author->name} {$comment_author->lastname}</a></div>
                         <div class='tt-comment-datetime'>{$cTime}</div>";
 
-        if ($comment_author->id == $loggedUserID) 
-          $template->pageData['content'] .= "
+    if ($comment_author->id == $loggedUserID) 
+      $template->pageData['content'] .= "
 <div class='tt-comment-options'>
   <a class='tt-edit-comment-btn' role='button' data-target={$c->id}>Edit</a>
   <form class='tt-comment-delete-form' action='ajax/tt_delete_comment.php' method='post'>
     <a role='button' class='tt-comment-delete-btn' type='submit' data-cid='{$c->id}'>Delete</a>
   </form>
 </div>";
-
-        $template->pageData['content'] .= 
-	  "</div>
+    
+    $template->pageData['content'] .= 
+      "</div>
                       <div class='tt-comment-body tt-comment-body-{$c->id} col-md-9 col-sm-12 col-xs-12'>
                         <div class='arrow_box hidden-sm hidden-xs'></div>
                         <div class='arrow_box-up visible-sm visible-xs'></div>
@@ -352,8 +350,8 @@ if (!$isDraft) {
                       </div>
                     </div>
                   </div>";                
-    }
   }
+  
   $template->pageData['content'] .= '</div>';
   $template->pageData['content'] .= "<div class='clearfix'></div>";
   $template->pageData['content'] .= "

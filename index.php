@@ -178,12 +178,10 @@ foreach($tips as $ltt) {
        <p class='feed-text'>{$tt->description}</p>
      </div>";
 
-  if ($keywords) {
-    $template->pageData['content'] .= "<div class='feed-tt-keywords'>";
-    foreach($keywords as $kw)
-      $template->pageData['content'] .= "<a href='search.php?q=" . $kw->keyword . "&o=keyword'><div class='tt-keyword'>" . $kw->keyword . "</div></a>";
-    $template->pageData['content'] .= "</div>"; 
-  }
+  $template->pageData['content'] .= "<div class='feed-tt-keywords'>";
+  foreach($keywords as $kw)
+    $template->pageData['content'] .= "<a href='search.php?q=" . $kw->keyword . "&o=keyword'><div class='tt-keyword'>" . $kw->keyword . "</div></a>";
+  $template->pageData['content'] .= "</div>"; 
   
   $template->pageData['content'] .= "
       <div class='feed-icons-wrapper'>";

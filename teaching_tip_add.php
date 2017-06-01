@@ -91,11 +91,9 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	$suitable_ol = $tt->get_filters("suitable_ol");
 	$it_competency = $tt->get_filters("it_competency");
                 
-	if ($kws) {
-	  foreach ($kws as $kw)
-	    $keywords[] = trim($kw->keyword);
-	  $kwsString = implode(',', $keywords);
-	}
+	foreach ($kws as $kw)
+	  $keywords[] = trim($kw->keyword);
+	$kwsString = implode(',', $keywords);
                 
 	$saved_as_draft = $tt->draft == 1;
 	if ($saved_as_draft) {

@@ -155,6 +155,34 @@ CREATE TABLE notification(
     dataConnection::runQuery($query . "  ENGINE=MyISAM");
 }
 
+class ChangeTracker {
+  var $_original;
+  var $_changes;
+    
+  function ChangeTracker($original) {
+    $this->_changes = array();
+    $this->_original = $original;
+  }
+  
+  function hasChanges() { return !empty($this->_changes); }
+  
+  function changes() { return $this->_changes; }
+  
+  function setIfChanged($current, $field, $type = 'string') {
+    if ($current != $this->_original[$field]) {
+      switch ($type) {
+      case 'date': $value = dataConnection::date2db($current); break;
+      case 'time': $value = dataConnection::time2db($current); break;
+      case 'boolean': $value = $current ? 1 : 0; break;
+      default: $value = dataConnection::safe($current); break;
+      }
+      
+      $this->_changes[] = "$field = '" . $value . "'";
+      $this->_original[$field] = $current;
+    }
+  }
+}
+  
 class user {
   var $id;
   var $name;
@@ -205,6 +233,7 @@ class user {
     $this->joindate = dataConnection::db2date($asArray['joindate']);
     $this->last_visit = dataConnection::db2time($asArray['last_visit']);
     $this->isadmin = ($asArray['isadmin']==0)?false:true;
+    $this->original = $asArray;
   }
   
   static function retrieve_user($id) {
@@ -258,24 +287,30 @@ class user {
     $this->id = $result2[0]['id'];
     return $this->id;
   }
-  
+
   function update() {
-    $query = "UPDATE user ";
-    $query .= "SET name='".dataConnection::safe($this->name)."' ";
-    $query .= ", lastname='".dataConnection::safe($this->lastname)."' ";
-    $query .= ", phonenumber='".dataConnection::safe($this->phonenumber)."' ";
-    $query .= ", username='".dataConnection::safe($this->username)."' ";
-    $query .= ", email='".dataConnection::safe($this->email)."' ";
-    $query .= ", profile_picture='".dataConnection::safe($this->profile_picture)."' ";
-    $query .= ", school='".dataConnection::safe($this->school)."' ";
-    $query .= ", esteem='".dataConnection::safe($this->esteem)."' ";
-    $query .= ", engagement='".dataConnection::safe($this->engagement)."' ";
-    $query .= ", lastaccess='".dataConnection::date2db($this->lastaccess)."' ";
-    $query .= ", joindate='".dataConnection::date2db($this->joindate)."' ";
-    $query .= ", last_visit='".dataConnection::time2db($this->last_visit)."' ";
-    $query .= ", isadmin='".(($this->isadmin===false)?0:1)."' ";
-    $query .= "WHERE id='".dataConnection::safe($this->id)."';";
-    return dataConnection::runQuery($query);
+    $changes = new ChangeTracker($this->original);
+    $changes->setIfChanged($this->name, 'name');
+    $changes->setIfChanged($this->lastname, 'lastname');
+    $changes->setIfChanged($this->phonenumber, 'phonenumber');
+    $changes->setIfChanged($this->username, 'username');
+    $changes->setIfChanged($this->email, 'email');
+    $changes->setIfChanged($this->profile_picture, 'profile_picture');
+    $changes->setIfChanged($this->school, 'school');
+    $changes->setIfChanged($this->esteem, 'esteem');
+    $changes->setIfChanged($this->engagement, 'engagement');
+    $changes->setIfChanged($this->lastaccess, 'lastaccess', 'date');
+    $changes->setIfChanged($this->joindate, 'joindate', 'date');
+    $changes->setIfChanged($this->last_visit, 'last_visit', 'time');
+    $changes->setIfChanged($this->isadmin, 'isadmin', 'boolean');
+
+    if ($changes->hasChanges()) {
+      if (!dataConnection::runQuery("update user set " . join(", ", $changes->changes()) . " where id = '" . dataConnection::safe($this->id) . "';"))
+	return false;
+      $this->original = $changes->_original;
+    }
+
+    return true;
   }
   
   static function count($where_name=null, $equals_value=null) {
@@ -1682,9 +1717,12 @@ class teachingtip {
 	}
 	
 	static function getPopularTeachingTips($limit, $offset, $table, $time) {
+	  $andTime = $time == 0 ? '' : "and tt.time > '" . date("Y-m-d H:i:s", $time) . "'";
 	  $result = dataConnection::runQuery("
-select tt.*, count(u.id) as n from teachingtip as tt left join user_{$table}_tt u on tt.id = u.teachingtip_id
- where tt.archived = '0' and tt.draft = '0' and tt.time > '" . date("Y-m-d H:i:s", $time) . "'
+select tt.*, count(u.id) as n
+ from teachingtip as tt
+ left join user_{$table}_tt u on tt.id = u.teachingtip_id
+ where tt.archived = '0' and tt.draft = '0' $andTime
  group by tt.id
  order by n desc
  limit " . dataConnection::safe($limit) . " offset " . dataConnection::safe($offset));
@@ -1707,110 +1745,87 @@ select tt.*, count(u.id) as n from teachingtip as tt left join user_{$table}_tt 
 	}
 
 	function get_author() {
-		$query = "SELECT u.* FROM user as u INNER JOIN teachingtip as tt ON u.id = tt.author_id WHERE tt.id ='".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) return new user($result[0]);
-		else return false;
+	  $result = dataConnection::runQuery("select u.* from user as u inner join teachingtip as tt on u.id = tt.author_id where tt.id ='" . dataConnection::safe($this->id)."'");
+	  if (sizeof($result) > 0)
+	    return new user($result[0]);
+	  else
+	    return false;
 	}
 
-	// get the comments for this teaching tip as an array of ttcomment objects
 	function get_comments() {
-		$query = "SELECT c.* FROM ttcomment as c INNER JOIN user_comments_tt as uctt ON c.id = uctt.comment_id WHERE uctt.teachingtip_id ='".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$comments = array();
-			foreach ($result as $r)
-            {
-               $comment = new ttcomment($r);
-               array_push($comments, $comment);
-             
-            }
-            return $comments;
-		} else return false;
+	  $result = dataConnection::runQuery("
+select c.* from ttcomment as c
+ inner join user_comments_tt as uctt on c.id = uctt.comment_id
+ where uctt.teachingtip_id ='" . dataConnection::safe($this->id) . "'");
+	  $comments = array();
+	  foreach ($result as $r)
+	    array_push($comments, new ttcomment($r));
+	  return $comments;
 	}
 
-	// get the keywords for this teaching tip as an array of ttkeyword objects
 	function get_keywords() {
-		$query = "SELECT kw.* FROM ttkeyword as kw INNER JOIN teachingtip as tt ON kw.ttid_id = tt.id WHERE tt.id ='".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$keywords = array();
-			foreach ($result as $r)
-            {
-               $keyword = new ttkeyword($r);
-               array_push($keywords, $keyword);
-             
-            }
-            return $keywords;
-		} else return false;
+	  $result = dataConnection::runQuery("select kw.* from ttkeyword as kw inner join teachingtip as tt on kw.ttid_id = tt.id where tt.id ='" . dataConnection::safe($this->id) . "'");
+	  $keywords = array();
+	  foreach ($result as $r)
+	    array_push($keywords, new ttkeyword($r));
+	  return $keywords;
 	}
 
-	// get all the filters for this teachingtip
 	function get_all_filters() {
-		$query = "SELECT f.* FROM ttfilter as f INNER JOIN teachingtip as tt ON f.teachingtip_id = tt.id WHERE tt.id ='".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$filters = array();
-			foreach ($result as $r)
-            {
-            	$filter = new ttfilter($r);
-               array_push($filters, $filter);
-            }
-            return $filters;
-		} else return false;
+	  $result = dataConnection::runQuery("select f.* from ttfilter as f inner join teachingtip as tt on f.teachingtip_id = tt.id where tt.id ='" . dataConnection::safe($this->id) . "'");
+	  $filters = array();
+	  foreach ($result as $r)
+	    array_push($filters, new ttfilter($r));
+	  return $filters;
 	}
 
-	// get the filter options for $cat category
 	function get_filters($cat) {
-		$query = "SELECT f.* FROM ttfilter as f INNER JOIN teachingtip as tt ON f.teachingtip_id = tt.id WHERE tt.id ='".dataConnection::safe($this->id)."' AND f.category = '".dataConnection::safe($cat)."'";
-		$result = dataConnection::runQuery($query);
-		if (sizeof($result) != 0) {
-			$filters = array();
-			foreach ($result as $r)
-            {
-               array_push($filters, $r['opt']);
-            }
-            return $filters;
-		} else return false;
+	  $result = dataConnection::runQuery("
+select f.*
+ from ttfilter as f
+ inner join teachingtip as tt on f.teachingtip_id = tt.id
+ where tt.id ='" . dataConnection::safe($this->id) . "' and f.category = '" . dataConnection::safe($cat)."'");
+	  $filters = array();
+	  foreach ($result as $r)
+	    array_push($filters, $r['opt']);
+	  return $filters;
 	}
 
 	function get_number_likes() {
-		$query = "SELECT COUNT(*) AS number_likes FROM user_likes_tt WHERE teachingtip_id = '".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_likes'];
+	  $result = dataConnection::runQuery("select count(*) as number_likes from user_likes_tt where teachingtip_id = '" . dataConnection::safe($this->id) . "'");
+	  return $result[0]['number_likes'];
 	}
 
-	// get the number of likes for this TT not including the own like (if existent)
 	function get_number_likes_not_author() {
-		$query = "SELECT COUNT(*) AS number_likes FROM user_likes_tt WHERE teachingtip_id = '".dataConnection::safe($this->id)."' AND user_id <> '". dataConnection::safe($this->author_id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_likes'];
+	  $result = dataConnection::runQuery("
+select count(*) as number_likes
+ from user_likes_tt
+ where teachingtip_id = '" . dataConnection::safe($this->id) . "' and user_id <> '". dataConnection::safe($this->author_id) ."'");
+	  return $result[0]['number_likes'];
 	}
 
 	function get_number_comments() {
-		$query = "SELECT COUNT(*) AS number_comments FROM user_comments_tt WHERE teachingtip_id = '".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_comments'];
+	  $result = dataConnection::runQuery("select count(*) as number_comments from user_comments_tt where teachingtip_id = '" . dataConnection::safe($this->id) . "'");
+	  return $result[0]['number_comments'];
 	}
-
 
 	// get the number of comments for this TT not including the author's comments (if any)
 	function get_number_comments_not_author() {
-		$query = "SELECT COUNT(*) AS number_comments FROM user_comments_tt WHERE teachingtip_id = '".dataConnection::safe($this->id)."' AND user_id <> '". dataConnection::safe($this->author_id) ."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_comments'];
+	  $result = dataConnection::runQuery("
+select count(*) as number_comments
+ from user_comments_tt
+ where teachingtip_id = '" . dataConnection::safe($this->id) . "' and user_id <> '". dataConnection::safe($this->author_id) ."'");
+	  return $result[0]['number_comments'];
 	}
-
+	
 	function get_number_shares() {
-		$query = "SELECT COUNT(*) AS number_shares FROM user_shares_tt WHERE teachingtip_id = '".dataConnection::safe($this->id)."'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['number_shares'];
+	  $result = dataConnection::runQuery("select count(*) as number_shares from user_shares_tt where teachingtip_id = '" . dataConnection::safe($this->id) . "'");
+	  return $result[0]['number_shares'];
 	}
 
 	function get_number_views() {
-		$query = "SELECT COUNT(id) as count FROM ttview WHERE teachingtip_id = '" . dataConnection::safe($this->id) . "'";
-		$result = dataConnection::runQuery($query);
-		return $result[0]['count'];
+	  $result = dataConnection::runQuery("select count(id) as count from ttview where teachingtip_id = '" . dataConnection::safe($this->id) . "'");
+	  return $result[0]['count'];
 	}
 
 	function get_contributors() {

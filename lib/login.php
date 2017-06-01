@@ -1,39 +1,19 @@
 <?php
 require_once(__DIR__ . '/guldap_login.php');
+require_once(__DIR__ . '/../config.php');
 
 function checkLoggedInUser($allowLogin = true) {
-  global $CFG;
-  $cookie = $CFG['appname'] . '_login';
+  session_start();
 
   if ($allowLogin && isset($_REQUEST['uname']) && isset($_REQUEST['pwd']))
     $uinfo = checkLogin($_REQUEST['uname'], $_REQUEST['pwd']);
-  elseif (!isset($_REQUEST['logout']) && isset($_COOKIE[$cookie]))
-    $uinfo = cookieToUinfo($_COOKIE[$cookie]);
+  elseif (!isset($_REQUEST['logout']) && isset($_SESSION['uinfo']))
+    $uinfo = $_SESSION['uinfo'];
   else
     $uinfo = false;
 
-  if (!$uinfo) {
-    setcookie($cookie, '');
-    session_start();
-    session_destroy();
-  } else {
-    $cookieinfo = base64_encode(serialize($uinfo)) . '@' . (time() + $CFG['cookietimelimit']);
-    setcookie($cookie,  $cookieinfo . '::' . md5($cookieinfo, $CFG['cookiehash']));
-  }
-
+  $_SESSION['uinfo'] = $uinfo;
   return $uinfo;
-}
-
-function cookieToUinfo($cookie) {
-  global $CFG;
-  list($cookieinfo, $hash) = explode('::', $cookie, 2);
-  if (md5($cookieinfo, $CFG['cookiehash']) == $hash) {
-    list ($uinfo, $t) = explode('@', $cookieinfo, 2);
-    if (intval($t) >= time())
-      return unserialize(base64_decode($uinfo));
-  }
-    
-  return false;
 }
 
 function loginBox($uinfo) {

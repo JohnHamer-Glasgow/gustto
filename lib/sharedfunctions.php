@@ -46,19 +46,15 @@ function getUserRecord($uinfo) {
 
 // NEW DATABASE FUNCTIONS
 
-function getLatestTeachingTips($limit=false,$lowerL=0){
-  $query = "SELECT * FROM teachingtip WHERE archived='0' AND draft='0' ORDER BY id DESC";
-  if ($limit) $query.= " LIMIT " .dataConnection::safe($limit);
-  $query .= " OFFSET " . dataConnection::safe($lowerL);
+function getLatestTeachingTips($limit = false, $lowerL = 0) {
+  $query = "select * from teachingtip where archived = '0' and draft = '0' order by id desc";
+  if ($limit) $query.= " limit " .dataConnection::safe($limit);
+  $query .= " offset " . dataConnection::safe($lowerL);
   $result = dataConnection::runQuery($query);
-  if (sizeof($result) != 0) {
-    $tts = array();
-    foreach($result as $r){
-      $tt = new teachingtip($r);
-      array_push($tts, $tt);
-    }
-    return $tts;
-  } else return false;
+  $tts = array();
+  foreach($result as $r)
+    array_push($tts, new teachingtip($r));
+  return $tts;
 }
 
 
@@ -67,8 +63,7 @@ function getTeachingTip($ttID) {
 }
 
 function checkUserLikesTT($ttID, $userID) {
-  $query = "SELECT COUNT(*) as count FROM user_likes_tt as ultt WHERE ultt.user_id = '{$userID}' AND ultt.teachingtip_id = '{$ttID}'";
-  $result = dataConnection::runQuery($query);
+  $result = dataConnection::runQuery("select count(*) as count from user_likes_tt as ultt where ultt.user_id = '{$userID}' and ultt.teachingtip_id = '{$ttID}'");
   return $result[0]['count'] > 0;
 }
 
@@ -80,8 +75,7 @@ function userLikesTT($ttID, $userID) {
   $ultt->user_id = $userID;
   $ultt->teachingtip_id = $ttID;
   $success = $ultt->insert();
-  if (is_null($success)) return false;
-  return $ultt;
+  return !is_null($success);
 }
 
 function userUnlikesTT($ttID, $loggedUserId) {
@@ -137,9 +131,8 @@ function userCommentsTT($ttID, $userID, $comment) {
   $uctt->teachingtip_id = $ttID;
   $uctt->comment_id = $cID;
   $success = $uctt->insert();
-  
-  if (is_null($success)) return false;
-  return true;
+
+  return !is_null($success);
 }
 
 // check if a user ($senderEmail) shared $ttID woth $recipientEmail
@@ -167,19 +160,13 @@ function getTTsWithFilters($filter_string) {
   return $tts;
 }
 
-// get the ttkeywords that contain $keyword
 function searchTTKeywordsByKeyword($keyword) {
   $k = '%' . $keyword . '%';
-  $query = "SELECT DISTINCT * FROM ttkeyword WHERE keyword LIKE '". dataConnection::safe($k) ."'";
-  $result = dataConnection::runQuery($query);
-  if (sizeof($result) != 0) {
-    $kws = array();
-    foreach ($result as $r) {
-      $kw = new ttkeyword($r);
-      array_push($kws, $kw);
-    }
-    return array_unique($kws);
-  } else return false;
+  $result = dataConnection::runQuery("select distinct * from ttkeyword where keyword like '" . dataConnection::safe($k) . "'");
+  $kws = array();
+  foreach ($result as $r)
+    array_push($kws, new ttkeyword($r));
+  return array_unique($kws);
 }
 
 function searchUsersByKeyword($keyword) {
@@ -215,7 +202,7 @@ function searchKeywordsByKeyword($keyword){
 				     . dataConnection::safe('%' . $keyword . '%') . "' and ttkws.ttid_id = tts.id");
   $tts = array();
   foreach ($result as $r)
-    array_push($tts, teachingtip::retrieve_teachingtip($r['ttid_id']));
+    array_push($tts, new teachingtip($r)); //::retrieve_teachingtip($r['ttid_id']));
   return $tts;
 }
 
@@ -258,7 +245,7 @@ function searchTTs($search_string, $search_school) {
     $query .= " tt.school like '" . dataConnection::safe($search_school) . "' and";
   $query .= " (match (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) against ('{$search_string}')
            or match (u.name, u.lastname) against ('{$search_string}')
-           or match (k.keyword) against ('{$search_string}'))
+           or concat(' ', k.keyword, ' ') like '% {$search_string} %')
            order by (kmatch + umatch * 2.25 + ttmatch) desc";
   $tts = array();
   foreach (dataConnection::runQuery($query) as $r)
@@ -293,7 +280,7 @@ function searchTTsByKeyword($search_keyword, $search_school) {
         where tt.archived = 0 and tt.draft = 0 and";
   if (!empty($search_school))
     $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
-  $query .= " k.keyword = '{$search_keyword}'";
+  $query .= " concat(' ', k.keyword, ' ') like '% {$search_keyword} %'";
   $result = dataConnection::runQuery($query);
   $tts = array();
   foreach($result as $r)
