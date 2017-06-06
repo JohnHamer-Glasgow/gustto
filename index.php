@@ -74,7 +74,7 @@ else
 if ($filterType == 'recent')
   $tips = getLatestTeachingTips(10);
 else
-  $tips = teachingtip::getPopularTeachingTips(5, 0, $filterType, $periodData[$period]['time']);
+  $tips = teachingtip::getPopularTeachingTips(10, 0, $filterType, $periodData[$period]['time']);
 
 $template->pageData['content'] .= 
   '<div class="col-xs-12 col-sm-9">

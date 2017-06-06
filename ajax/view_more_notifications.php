@@ -8,16 +8,15 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
+if (!$uinfo)
+  $response = 'done';
+else {
+  $dbUser = getUserRecord($uinfo);
+  $notifications = notification::getNotifications($dbUser->id, 15, 2, isset($_GET['offset']) ? intval($_GET['offset']) : 0);
+  if (empty($notifications))
+    $response = 'done';
+  else
+    $response = array('notifications' => htmlspecialchars(notificationsPrinting($notifications)));
+}
 
-if ($uinfo == false) exit();
-
-if (isset($_GET['offset']) && is_numeric($_GET['offset']) && $_GET['offset'] % 15 == 0 )
-  $offset = dataConnection::safe($_GET['offset']);
-else
-  exit();
-
-$dbUser = getUserRecord($uinfo);
-$loggedUserID = $dbUser->id;
-
-$data['notifications'] = htmlspecialchars(notificationsPrinting(notification::getNotifications($loggedUserID, 15, 2, $offset)));
-echo json_encode($data);
+echo json_encode($response);

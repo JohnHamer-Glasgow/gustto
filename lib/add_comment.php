@@ -62,7 +62,7 @@ class add_comment extends nbform {
     }
     
     if (strlen($this->comment) < 5)
-      $this->validateMessages['comment'] = "Comment needs to be at least 5 characters long..";
+      $this->validateMessages['comment'] = "Comment needs to be at least 5 characters.";
     return sizeof($this->validateMessages) == 0;
   }
 

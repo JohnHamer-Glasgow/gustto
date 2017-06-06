@@ -19,24 +19,24 @@ if (!empty($_GET['filterType']) && !empty($_GET['period']) && isset($_GET['offse
 
   if ($filterType == 'likes') {
     if ($period == 'alltime')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', 0);
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'likes', 0);
     elseif ($period == 'lastthree')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 90));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'likes', time() - (60 * 60 * 24 * 90));
     elseif ($period == 'lastmonth')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 30));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'likes', time() - (60 * 60 * 24 * 30));
     elseif ($period == 'lastweek')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'likes', time() - (60 * 60 * 24 * 7));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'likes', time() - (60 * 60 * 24 * 7));
   } elseif ($filterType == 'comments') {
     if ($period == 'alltime')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', 0);
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'comments', 0);
     elseif ($period == 'lastthree')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 90));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'comments', time() - (60 * 60 * 24 * 90));
     elseif ($period == 'lastmonth')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 30));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'comments', time() - (60 * 60 * 24 * 30));
     elseif ($period == 'lastweek')
-      $data = teachingtip::getPopularTeachingTips(5, $offset, 'comments', time() - (60 * 60 * 24 * 7));
+      $data = teachingtip::getPopularTeachingTips(10, $offset, 'comments', time() - (60 * 60 * 24 * 7));
   } elseif (isset($_GET['offset']))
-    $data = getLatestTeachingTips(5, intval($_GET['offset']), 'likes', 0);
+    $data = getLatestTeachingTips(10, intval($_GET['offset']), 'likes', 0);
 }
 
 $dbUser = getUserRecord($uinfo);

@@ -8,9 +8,9 @@ require_once(__DIR__ . '/../lib/sharedfunctions.php');
 require_once(__DIR__ . '/../corelib/dataaccess.php');
 
 $uinfo = checkLoggedInUser();
-if ($uinfo == false) exit();
+if (!$uinfo)
+  $tts = array();
+else
+  $tts = user::get_most_tts(10, isset($_GET['offset']) ? intval($_GET['offset']) : 0);
 
-if (!isset($_GET['offset']) || !is_numeric($_GET['offset']))
-  exit();
-
-echo json_encode(user::get_most_tts(10, $_GET['offset']));
+echo json_encode($tts);

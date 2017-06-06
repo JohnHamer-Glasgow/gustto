@@ -508,8 +508,18 @@ $(document).ready(function () {
 	var filterType = $(this).data('filtertype');
 	var period = $(this).data('period');
 	var offset = $(this).attr('value');
+	var finished = function () {
+	    var temp = "<div class='feed-tt'>" 
+	    temp+="<div class='row col-xs-12'>";
+	    temp+="<strong>There are no more Teaching Tips to display.</strong>";
+	    temp+="</div></div>";
+	    $('.feed-tts').append(temp);
+	    $('.homepage-view-more').hide();
+        };
         $.get("ajax/view_more_home.php", {filterType: filterType, period: period, offset: offset}, null, 'json')
             .done(function(data) {
+		if (data.length == 0)
+		    finished();
 		$(data).each(function(i, tt) {
 		    var temp = "<div class='feed-tt'>" 
 		    temp+="<div class='row'>";
@@ -556,16 +566,9 @@ $(document).ready(function () {
 		    temp+=" </div>      </div>      </div>";
 		    $('.feed-tts').append(temp);
 		})
-            }).fail(function () {
-		var temp = "<div class='feed-tt'>" 
-		temp+="<div class='row col-xs-12'>";
-		temp+="<strong>There are no more Teaching Tips to display.</strong>";
-		temp+="</div></div>";
-		$('.feed-tts').append(temp);
-		$('.homepage-view-more').hide();
-            });  
-	offset = parseInt(offset)+5;
-	$(this).attr('value',offset.toString());
+            }).fail(finished);  
+	offset = parseInt(offset) + 10;
+	$(this).attr('value', offset.toString());
     });
     
     // View more Notifications
@@ -575,19 +578,23 @@ $(document).ready(function () {
     };
     
     $('.notifications-view-more').click(function() {
+	var finished = function () {
+	    var temp ="<div class='row notification-wrapper no-more-notifications'>";
+	    temp+="<strong>There are no more Notifications to display.</strong>";
+	    temp+="</div>";
+	    $('.notifications-wrapper').append(temp);
+	    $('.notifications-view-more').hide();
+	};
 	var offset = parseInt($(this).attr('value'));
-	$(this).attr('value',offset+15);
-	$.get("ajax/view_more_notifications.php",{offset:offset}, null, 'json')
+	$(this).attr('value', offset + 10);
+	$.get("ajax/view_more_notifications.php", {offset: offset}, null, 'json')
             .done(function(data) {
-		var dataToPrint = htmlDecode(data['notifications']);
-                $('.notifications-wrapper').append(dataToPrint);
-            }).fail(function () {
-		var temp ="<div class='row notification-wrapper no-more-notifications'>";
-		temp+="<strong>There are no more Notifications to display.</strong>";
-		temp+="</div>";
-		$('.notifications-wrapper').append(temp);
-		$('.notifications-view-more').hide();
-	    });
+		if (data == 'done')
+		    finished();
+		else
+                    $('.notifications-wrapper').append(htmlDecode(data['notifications']));
+            })
+	    .fail(finished);
     });
 
     //initialize tooltip

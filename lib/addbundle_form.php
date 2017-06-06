@@ -98,7 +98,7 @@ class addbundle_form extends nbform
 		}
 		if(strlen($this->title)<5)
 		{
-		    $this->validateMessages['title'] = "Title needs to be at least 5 characters long..";
+		    $this->validateMessages['title'] = "Title needs to be at least 5 characters long.";
 		}
 		// Put custom code to validate $this->title here. Error message in $this->validateMessages['title']
 		// Put custom code to validate $this->id here (to stop hackers using this as a way in.)
