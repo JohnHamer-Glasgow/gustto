@@ -25,4 +25,4 @@ foreach ($keys as $k => $tt)
     unset($keys[$k]);
 echo json_encode(array('tts' => $tts,
 		       'users' => searchUsersByKeyword($keyword),
-		       'keywords' => $keys));
+		       'keywords' => array_values($keys)));
