@@ -8,11 +8,6 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
-function tt_seen($tt, $k) {
-  global $seen;
-  return !isset($seen[$tt['id']]);
-}
-
 $uinfo = checkLoggedInUser();
 
 if ($uinfo == false) exit();
@@ -24,7 +19,10 @@ global $seen;
 $seen = array();
 foreach ($tts as $tt)
   $seen[$tt['id']] = 1;
-$keys = array_values(array_filter(searchKeywordsByKeyword($keyword), 'tt_seen', ARRAY_FILTER_USE_BOTH));
+$keys = searchKeywordsByKeyword($keyword);
+foreach ($keys as $k => $tt)
+  if (isset($seen[$tt['id']]))
+    unset($keys[$k]);
 echo json_encode(array('tts' => $tts,
 		       'users' => searchUsersByKeyword($keyword),
 		       'keywords' => $keys));
