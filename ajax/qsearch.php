@@ -8,18 +8,23 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
+function tt_seen($tt, $k) {
+  global $seen;
+  return !isset($seen[$tt['id']]);
+}
+
 $uinfo = checkLoggedInUser();
 
 if ($uinfo == false) exit();
 if (!isset($_GET['keyword'])) exit();
 
 $keyword = sanitize_input($_GET['keyword']);
-$tts_matching = searchTitlesByKeyword($keyword);
-$tts_keywords = searchKeywordsByKeyword($keyword);
-$tts_keywords_new = array(); 
-foreach (array_diff($tts_keywords, array_intersect($tts_keywords, $tts_matching)) as $tt)
-  array_push($tts_keywords_new, teachingtip::retrieve_teachingtip($tt->id));
-
-echo json_encode(array('tts' => $tts_matching,
+$tts = searchTitlesByKeyword($keyword);
+global $seen;
+$seen = array();
+foreach ($tts as $tt)
+  $seen[$tt['id']] = 1;
+$keys = array_values(array_filter(searchKeywordsByKeyword($keyword), 'tt_seen', ARRAY_FILTER_USE_BOTH));
+echo json_encode(array('tts' => $tts,
 		       'users' => searchUsersByKeyword($keyword),
-		       'keywords' => $tts_keywords_new));
+		       'keywords' => $keys));

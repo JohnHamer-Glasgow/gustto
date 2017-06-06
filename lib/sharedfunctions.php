@@ -171,13 +171,9 @@ function searchTTKeywordsByKeyword($keyword) {
 
 function searchUsersByKeyword($keyword) {
   $kw = $keyword . '%';
-  $query = "select * from user where concat(name ,' ', lastname) like '" . dataConnection::safe('%' . $keyword . '%') . "'";
+  $query = "select id, name, lastname from user where concat(name ,' ', lastname) like '" . dataConnection::safe('%' . $keyword . '%') . "'";
   if (!preg_match('/\s/',$keyword)) $query .= " and (name like '" . dataConnection::safe($kw) . "' or lastname like '" . dataConnection::safe($kw) . "')";
-  $result = dataConnection::runQuery($query);
-  $users = array();
-  foreach ($result as $r)
-    array_push($users, new user($r));
-  return $users;
+  return dataConnection::runQuery($query);
 }
 
 function searchUsersByEmailKeyword($keyword) {
@@ -189,21 +185,17 @@ function searchUsersByEmailKeyword($keyword) {
 }
 
 function searchTitlesByKeyword($keyword) {
-  $result = dataConnection::runQuery("select * from teachingtip where title like '"
-				     . dataConnection::safe('%' . $keyword . '%') . "' and archived = 0 and draft = 0");
-  $tts = array();
-  foreach ($result as $r)
-    array_push($tts, new teachingtip($r));
-  return $tts;
+  return dataConnection::runQuery("
+select id, title
+ from teachingtip
+ where title like '" . dataConnection::safe('%' . $keyword . '%') . "' and archived = 0 and draft = 0");
 }
 
 function searchKeywordsByKeyword($keyword){
-  $result = dataConnection::runQuery("select * from teachingtip as tts, ttkeyword as ttkws where ttkws.keyword like '"
-				     . dataConnection::safe('%' . $keyword . '%') . "' and ttkws.ttid_id = tts.id");
-  $tts = array();
-  foreach ($result as $r)
-    array_push($tts, new teachingtip($r)); //::retrieve_teachingtip($r['ttid_id']));
-  return $tts;
+  return dataConnection::runQuery("
+select t.id, t.title
+ from teachingtip t left join ttkeyword k on k.ttid_id = t.id
+ where k.keyword like '" . dataConnection::safe('%' . $keyword . '%') . "'");
 }
 
 function myTeachingTips($userId) {

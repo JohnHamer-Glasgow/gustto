@@ -403,31 +403,22 @@ $(document).ready(function () {
 		    $('#tt-qsearch-results').show();
 		    $('#tts_result').html('');
 		    $('#users_result').html('');
-		    if (data['tts'].length>0 || data['users'].length>0 || data['keywords'].length > 0){
+		    if (data['tts'].length == 0 && data['users'].length == 0 && data['keywords'].length == 0)
+			$('#tt-qsearch-results').hide();
+		    else {
 			$(data['tts']).each(function(index, tt) {
-			    var ttMatching = "<li>";
-			    ttMatching += "<a class='tt-qsearch-title' href='teaching_tip.php?ttID="+tt.id+"'><span class='glyphicon glyphicon-file'></span>"+" "+ tt.title + "</a>";            
-			    ttMatching += "</li>";
-			    $('#tts_result').append(ttMatching);
+			    $('#tts_result')
+				.append("<li><a class='tt-qsearch-title' href='teaching_tip.php?ttID="+tt.id+"'><span class='glyphicon glyphicon-file'></span>"+" "+ tt.title + "</a></li>");
 			});
 			$(data['keywords']).each(function(index, tt) {
-			    var ttMatching = "<li>";
-			    ttMatching += "<a class='tt-qsearch-title' href='teaching_tip.php?ttID="+tt.id+"'><span class='glyphicon glyphicon-file'></span>"+" "+ tt.title + "</a>";            
-			    ttMatching += "</li>";
-			    $('#tts_result').append(ttMatching);
+			    $('#tts_result')
+				.append("<li><a class='tt-qsearch-title' href='teaching_tip.php?ttID="+tt.id+"'><span class='glyphicon glyphicon-file'></span>"+" "+ tt.title + "</a></li>");
 			});
 			$(data['users']).each(function(index, user) {
-			    var userMatching = "<li>";
-			    userMatching += "<a class='tt-qsearch-title' href='profile.php?usrID="+user.id+"'><span class='glyphicon glyphicon-user'></span>"+" "+user.name +" "+user.lastname+"</a>";
-			    userMatching += "</li>";
-			    $('#users_result').append(userMatching);
+			    $('#users_result')
+				.append("<li><a class='tt-qsearch-title' href='profile.php?usrID="+user.id+"'><span class='glyphicon glyphicon-user'></span>"+" "+user.name +" "+user.lastname+"</a></li>");
 			});
-		    } else {
-			$('#tt-qsearch-results').hide();
-			/*var noMatching = "<li>";
-			noMatching += "<div class='tt-qsearch-title no-results'>There are no Teaching Tips or users with this match.</div>";            
-			noMatching += "</li>";
-			$('#tts_result').append(noMatching);*/
+			$('#tt-qsearch-results').show();
 		    }
 		});
 	} else {
