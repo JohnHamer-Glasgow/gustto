@@ -584,12 +584,15 @@ function pageNotFound() {
     return $out;
 }
 
-function displayUserAwards($awards) {
+function displayUserAwards($awards, $cat, $type) {
     $out = '<div class="profile-stats-awards">';
-    foreach ($awards as $a) 
+    foreach ($awards as $a)
+      if ($a->type == $type && $a->cat == $cat) {
         $out .= '<img data-toggle="tooltip" data-placement="top" title="'. $a->name .'" class="profile-cat-award" src="'. $a->url .'" alt="'. $a->name .'"/>';
-    $out .= '</div>';
-    return $out;
+	$some = true;
+      }
+    
+    return isset($some) ? ($out . '</div>') : '';
 }
 
 function updateAdminSettings($esteem, $engagement, $awards) {

@@ -664,20 +664,17 @@ select count(ttv.id) as number_views from ttview as ttv inner join teachingtip a
 
   /* AWARDS */
 
-  // get all the awards for this user in category $cat of type $type ordered by rank
-  function get_awards($cat, $type) {
-    $query = "SELECT a.* FROM user_earns_award as uea
-			INNER JOIN award as a ON uea.award_id = a.id
-			WHERE uea.user_id = '".dataConnection::safe($this->id)."' AND uea.promoted = 0 AND a.category = '".dataConnection::safe($cat)."' AND a.type = '".dataConnection::safe($type)."'
-			ORDER BY a.rank";
+  function get_awards() {
+    $query = "
+select a.* from user_earns_award as uea
+ inner join award as a on uea.award_id = a.id
+ where uea.user_id = '" . dataConnection::safe($this->id) . "' and uea.promoted = 0
+ order by a.rank";
     $result = dataConnection::runQuery($query);
-    if (sizeof($result) != 0) {
-      $awards = array();
-      foreach ($result as $r)
-	array_push($awards, new award($r));
-      return $awards;
-    } else
-      return false;
+    $awards = array();
+    foreach ($result as $r)
+      array_push($awards, new award($r));
+    return $awards;
   }
 
   // get the number of active (unpromoted) $rank awards in category $cat of type $type for this user
@@ -762,8 +759,6 @@ select count(ttv.id) as number_views from ttview as ttv inner join teachingtip a
     
     $give_award = false;
     switch ($count) {
-    case 0:
-      return false;
     case 5:
       $rank = 1;
       break;

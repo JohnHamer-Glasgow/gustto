@@ -118,6 +118,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $as->log_actions = $log_actions;
 	    
     $as->update();
+
+    require_once(__DIR__ . '/Scores.php');
+    $scores = new Scores();
+    $scoreByUser = array();
+    foreach ($scores->esteem as $user_id => $data) {
+      if (!isset($scoreByUser[$user_id])) $scoreByUser[$user_id] = array('esteem' => 0, 'engagement' => 0);
+      $scoreByUser[$user_id]['esteem'] = Scores::score($scores->esteem, $user_id, $scores->esteemScores);
+    }
+    
+    foreach ($scores->engagement as $user_id => $data) {
+      if (!isset($scoreByUser[$user_id])) $scoreByUser[$user_id] = array('esteem' => 0, 'engagement' => 0);
+      $scoreByUser[$user_id]['engagement'] = Scores::score($scores->engagement, $user_id, $scores->engagementScores);
+    }
+
+    Debug($scoreByUser);
+    
+    foreach ($scoreByUser as $user_id => $ee)
+      dataConnection::runQuery("update user set esteem = " . $ee['esteem'] . ", engagement = " . $ee['engagement'] . " where id = $user_id");
   }
 }
 

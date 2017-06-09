@@ -72,7 +72,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 $users = user::get_all_users();
-    
+
+require_once(__DIR__ . '/Scores.php');
+
 $template->pageData['content'] = 
     '<style>
         .nav-bar-xs {display: none !important;} 
@@ -149,19 +151,22 @@ $template->pageData['content'] .=
 -->
                 <tbody>';
 
+$scores = new Scores();
 foreach ($users as $u) {
   $status = ($u->isadmin == 1) ? 'Admin' : 'User';
   $action = ($u->isadmin == 1) ? 'Demote' : 'Promote';
   $joined = date('Y-m-d', $u->joindate);
   $w = $u->get_most_recent_tip_date();
   $latest = $w == 0 ? '' : date('Y-m-d', $w);
+  $actualEsteem = $scores->esteemScore($u->id);
+  $actualEngagement = $scores->engagementScore($u->id);
   $template->pageData['content'] .= 
                 '<tr>
                     <td>' . $u->id .'</td>
                     <td>' . $joined .'</td>
                     <td title="' . $u->school . '"><a href="../profile.php?usrID=' . $u->id . '">'. $u->name . ' ' . $u->lastname . '</a></td>
-                    <td>' . $u->engagement . '</td>
-                    <td>' . $u->esteem . '</td>
+                    <td title="' . $scores->showEngagement($u->id) . '">' . $u->engagement . ($actualEngagement == $u->engagement ? '' : ' *') . '</td>
+                    <td title="' . $scores->showEsteem($u->id) . '">' . $u->esteem     . ($actualEsteem == $u->esteem ? '' : ' *') . '</td>
                     <td>' . $u->get_number_tts() . '</td>
                     <td>' . $latest . '</td>
                     <td>' . $status . '</td>

@@ -50,19 +50,7 @@ $template->pageData['navProfile'] = 'sidebar-current-page';
 $template->pageData['notificationNo'] = sizeof(notification::getNotifications($loggedUserID, false, 0));
 $template->pageData['notifications'] = notifications($dbUser);
 
-$esteem_la = $user->get_awards('likes', 'esteem');
-$esteem_va = $user->get_awards('views', 'esteem');
-$esteem_ca = $user->get_awards('comments', 'esteem');
-$esteem_sa = $user->get_awards('shares', 'esteem');
-$esteem_fa = $user->get_awards('follows', 'esteem');
-$esteem_overall = $user->get_awards('overall', 'esteem');
-
-$engagement_la = $user->get_awards('likes', 'engagement');
-$engagement_va = $user->get_awards('views', 'engagement');
-$engagement_ca = $user->get_awards('comments', 'engagement');
-$engagement_sa = $user->get_awards('shares', 'engagement');
-$engagement_fa = $user->get_awards('follows', 'engagement');
-$engagement_overall = $user->get_awards('overall', 'engagement');
+$awards = $user->get_awards();
 
 $template->pageData['content'] .= '
       <div class="col-sm-9 col-xs-12">
@@ -84,7 +72,7 @@ if ($loggedUserID != $user->id) {
     $template->pageData['content'] .= '<button type="submit" id="follow-btn" class="btn btn-default btn-followed" data-uid=' . $user->id . ' data-followed="1"><span class="glyphicon glyphicon-signal"></span> Following</button>';
   else
     $template->pageData['content'] .= '<button type="submit" id="follow-btn" class="follow-btn btn btn-default" data-uid=' . $user->id . ' data-followed="0"><span class="glyphicon glyphicon-signal"></span> Follow</button>';
-} elseif ($loggedUserID == $user->id) {
+} else
   $template->pageData['content'] .= 
        '<div class="modal fade" id="profilePicModal" tabindex="-1" role="dialog" aria-labelledby="changePicLabel">
           <div class="modal-dialog modal-sm">
@@ -111,7 +99,6 @@ if ($loggedUserID != $user->id) {
         </div>';
   $template->pageData['content'] .= 
     '<a role="button" class="profile-change-pic" data-toggle="modal" data-target="#profilePicModal"><span class="glyphicon glyphicon-edit"></span> Change profile picture</a>';
-}
 
 $template->pageData['content'] .=            	
            '</form>
@@ -144,8 +131,7 @@ $template->pageData['content'] .=
                           <div class="profile-stats-number">' . $user->esteem . '</div>
                           <div class="profile-stats-label">Esteem</div>';
 
-if (!empty($esteem_overall))
-  $template->pageData['content'] .= displayUserAwards($esteem_overall);
+$template->pageData['content'] .= displayUserAwards($awards, 'overall', 'esteem');
 
 $template->pageData['content'] .= '
                         </div>
@@ -159,8 +145,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-likes">
                         <div class="profile-stats-number">' . $user->get_number_received_likes() . ' Likes</div>';
                         
-if (!empty($esteem_la))
-  $template->pageData['content'] .= displayUserAwards($esteem_la);
+$template->pageData['content'] .= displayUserAwards($awards, 'likes', 'esteem');
 
 $template->pageData['content'] .= '
                       </div>                      
@@ -169,8 +154,8 @@ $template->pageData['content'] .= '
                       <div class="tree-line tl-middle"></div>
                       <div class="profile-stats-views">
                         <div class="profile-stats-number">' . $user->get_number_received_views_tts() . ' Views</div>';
-if (!empty($esteem_va))
-  $template->pageData['content'] .= displayUserAwards($esteem_va);
+
+$template->pageData['content'] .= displayUserAwards($awards, 'views', 'esteem');
 
 $template->pageData['content'] .= '
                       </div>                      
@@ -180,8 +165,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-shares">
                         <div class="profile-stats-number">' . $user->get_number_shares_of_tts() . ' Shares</div>';
 
-if (!empty($esteem_sa))
-  $template->pageData['content'] .= displayUserAwards($esteem_sa);
+$template->pageData['content'] .= displayUserAwards($awards, 'shares', 'esteem');
 
 $template->pageData['content'] .= '
                       </div>                      
@@ -191,8 +175,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-comments">
                         <div class="profile-stats-number">' . $user->get_number_received_comments() . ' Comments</div>';
 
-if (!empty($esteem_ca))
-  $template->pageData['content'] .= displayUserAwards($esteem_ca);
+$template->pageData['content'] .= displayUserAwards($awards, 'comments', 'esteem');
 
 $template->pageData['content'] .= '                    
                       </div>
@@ -202,8 +185,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-followers">
                         <div class="profile-stats-number">' . $user->get_number_followers() . ' Followers</div>';
 
-if (!empty($esteem_fa))
-  $template->pageData['content'] .= displayUserAwards($esteem_fa);
+$template->pageData['content'] .= displayUserAwards($awards, 'follows', 'esteem');
 
 $template->pageData['content'] .= '                    
                       </div>
@@ -216,8 +198,7 @@ $template->pageData['content'] .= '
                           <div class="profile-stats-number">' . $user->engagement . '</div>
                           <div class="profile-stats-label">Engagement</div>';
 
-if (!empty($engagement_overall))
-  $template->pageData['content'] .= displayUserAwards($engagement_overall);
+$template->pageData['content'] .= displayUserAwards($awards, 'overall', 'engagement');
 
 $template->pageData['content'] .= '
                         </div>
@@ -231,8 +212,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-likes">
                         <div class="profile-stats-number">' . $user->get_number_given_likes() . ' Likes</div>';
 
-if (!empty($engagement_la))
-  $template->pageData['content'] .= displayUserAwards($engagement_la);
+$template->pageData['content'] .= displayUserAwards($awards, 'likes', 'engagement');
 
 $template->pageData['content'] .= '                        
                       </div>
@@ -242,8 +222,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-views">
                         <div class="profile-stats-number">' . $user->get_number_given_views() . ' Views</div>';
 
-if (!empty($engagement_va))
-  $template->pageData['content'] .= displayUserAwards($engagement_va);
+$template->pageData['content'] .= displayUserAwards($awards, 'views', 'engagement');
 
 $template->pageData['content'] .= '                       
                       </div>
@@ -253,8 +232,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-shares">
                         <div class="profile-stats-number">' . $user->get_number_given_shares() . ' Shares</div>';
 
-if (!empty($engagement_sa))
-  $template->pageData['content'] .= displayUserAwards($engagement_sa);
+$template->pageData['content'] .= displayUserAwards($awards, 'shares', 'engagement');
 
 $template->pageData['content'] .= '                        
                       </div>
@@ -264,8 +242,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-comments">
                         <div class="profile-stats-number">' . $user->get_number_given_comments() . ' Comments</div>';
 
-if (!empty($engagement_ca))
-  $template->pageData['content'] .= displayUserAwards($engagement_ca);
+$template->pageData['content'] .= displayUserAwards($awards, 'comments', 'engagement');
 
 $template->pageData['content'] .= '                       
                       </div>
@@ -275,8 +252,7 @@ $template->pageData['content'] .= '
                       <div class="profile-stats-followers">
                         <div class="profile-stats-number">' . $user->get_number_following() . ' Following</div>';
 
-if (!empty($engagement_fa))
-  $template->pageData['content'] .= displayUserAwards($engagement_fa);
+$template->pageData['content'] .= displayUserAwards($awards, 'follows', 'engagement');
 
 $template->pageData['content'] .= '                    
                       </div>
