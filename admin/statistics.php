@@ -86,9 +86,9 @@ $template->pageData['content'] .= '
 
 $timeseries = array();
 $fmt = '%Y-%u'; // day of the year: %j, month: %c
-foreach (dataConnection::runQuery("select date_format(t.whencreated, '$fmt') as d, count(*) as c
- from teachingtip t inner join user u on t.author_id = u.id
- where t.draft = 0 and t.archived = 0 and u.isadmin = 0
+foreach (dataConnection::runQuery("select date_format(whencreated, '$fmt') as d, count(*) as c
+ from teachingtip
+ where draft = 0 and archived = 0
  group by d") as $v)
   $timeseries[$v['d']]['tips'] = $v['c'];
 foreach (dataConnection::runQuery("select date_format(t.time, '$fmt') as d, count(*) as c
@@ -96,19 +96,16 @@ foreach (dataConnection::runQuery("select date_format(t.time, '$fmt') as d, coun
  where u.isadmin = 0
  group by d") as $v)
   $timeseries[$v['d']]['views'] = $v['c'];
-foreach (dataConnection::runQuery("select date_format(f.time, '$fmt') as d, count(*) as c
- from user_follows_user f inner join user u on f.user_id = u.id
- where u.isadmin = 0
+foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(*) as c
+ from user_follows_user
  group by d") as $v)
   $timeseries[$v['d']]['follows'] = $v['c'];
-foreach (dataConnection::runQuery("select date_format(t.time, '$fmt') as d, count(*) as c
- from user_comments_tt t inner join user u on t.user_id = u.id
- where u.isadmin = 0
+foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(*) as c
+ from user_comments_tt
  group by d") as $v)
   $timeseries[$v['d']]['comments'] = $v['c'];
-foreach (dataConnection::runQuery("select date_format(l.time, '$fmt') as d, count(*) as c
- from user_likes_tt l inner join user u on l.user_id = u.id
- where u.isadmin = 0
+foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(*) as c
+ from user_likes_tt
  group by d") as $v)
   $timeseries[$v['d']]['likes'] = $v['c'];
 foreach (dataConnection::runQuery("select date_format(time, '$fmt') as d, count(*) as c
