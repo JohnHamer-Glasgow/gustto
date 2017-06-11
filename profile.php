@@ -72,7 +72,7 @@ if ($loggedUserID != $user->id) {
     $template->pageData['content'] .= '<button type="submit" id="follow-btn" class="btn btn-default btn-followed" data-uid=' . $user->id . ' data-followed="1"><span class="glyphicon glyphicon-signal"></span> Following</button>';
   else
     $template->pageData['content'] .= '<button type="submit" id="follow-btn" class="follow-btn btn btn-default" data-uid=' . $user->id . ' data-followed="0"><span class="glyphicon glyphicon-signal"></span> Follow</button>';
-} else
+} else {
   $template->pageData['content'] .= 
        '<div class="modal fade" id="profilePicModal" tabindex="-1" role="dialog" aria-labelledby="changePicLabel">
           <div class="modal-dialog modal-sm">
@@ -99,6 +99,7 @@ if ($loggedUserID != $user->id) {
         </div>';
   $template->pageData['content'] .= 
     '<a role="button" class="profile-change-pic" data-toggle="modal" data-target="#profilePicModal"><span class="glyphicon glyphicon-edit"></span> Change profile picture</a>';
+}
 
 $template->pageData['content'] .=            	
            '</form>
