@@ -195,7 +195,7 @@ function searchKeywordsByKeyword($keyword){
   return dataConnection::runQuery("
 select t.id, t.title
  from teachingtip t left join ttkeyword k on k.ttid_id = t.id
- where k.keyword like '" . dataConnection::safe('%' . $keyword . '%') . "'");
+ where k.keyword like '" . dataConnection::safe('%' . $keyword . '%') . "' and archived = 0 and draft = 0");
 }
 
 function myTeachingTips($userId) {
