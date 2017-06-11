@@ -49,8 +49,7 @@ $contributedTTs = $user->get_contr_teaching_tips();
 $existMyTT = 0;
 $template->pageData['content'] .= '<div class="my-tt-mytt-header"><h5>Published Teaching Tips</h5></div>';
 
-if(!empty($myTTs)){
-  foreach($myTTs as $myTT) {
+foreach($myTTs as $myTT) {
     $ttContributors = $myTT->get_contributors();
       
     if ($myTT->draft == 0) {
@@ -119,7 +118,6 @@ if(!empty($myTTs)){
       </div>
       </div>'; 
     }
-  }
 }
  
 if ($existMyTT == 0)
