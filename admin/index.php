@@ -132,8 +132,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $scoreByUser[$user_id]['engagement'] = Scores::score($scores->engagement, $user_id, $scores->engagementScores);
     }
 
-    Debug($scoreByUser);
-    
     foreach ($scoreByUser as $user_id => $ee)
       dataConnection::runQuery("update user set esteem = " . $ee['esteem'] . ", engagement = " . $ee['engagement'] . " where id = $user_id");
   }
