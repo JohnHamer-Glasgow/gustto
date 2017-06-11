@@ -587,7 +587,7 @@ function pageNotFound() {
 function displayUserAwards($awards, $cat, $type) {
     $out = '<div class="profile-stats-awards">';
     foreach ($awards as $a)
-      if ($a->type == $type && $a->cat == $cat) {
+      if ($a->type == $type && $a->category == $cat) {
         $out .= '<img data-toggle="tooltip" data-placement="top" title="'. $a->name .'" class="profile-cat-award" src="'. $a->url .'" alt="'. $a->name .'"/>';
 	$some = true;
       }
