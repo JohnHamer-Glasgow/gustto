@@ -49,18 +49,18 @@ function checkLogin($username, $password, &$error = false) {
 }
 
 function uinfoFromGULDAP($record) {
+  if(isset($record['homezipcode'][0]))
+    $uinfo['category'] = $record['homezipcode'][0];
+  elseif(strpos($record['dn'], 'ou=staff') !== false)
+    $uinfo['category'] = 'staff';
+  else
+    return false; //$uinfo['category'] = 'guest';
   $uinfo = array();
   $uinfo['uname'] = $record['uid'][0];
   $uinfo['gn'] = $record['givenname'][0];
   $uinfo['sn'] = $record['sn'][0];
   $uinfo['email'] = $record['mail'][0];
   $uinfo['isAdmin'] = false;
-  if(isset($record['homezipcode'][0]))
-    $uinfo['category'] = $record['homezipcode'][0];
-  elseif(strpos($record['dn'], 'ou=staff') !== false)
-    $uinfo['category'] = 'staff';
-  else
-    $uinfo['category'] = 'guest';
   if (isset($record['costcenterdescription'][0])) {
     if (strpos($record['costcenterdescription'][0], '-')) {
       list($cd, $nm) = explode('-', $record['costcenterdescription'][0]);
