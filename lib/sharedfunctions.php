@@ -590,6 +590,7 @@ function displayUserAwards($awards, $cat, $type) {
       if ($a->type == $type && $a->category == $cat) {
         $out .= '<img data-toggle="tooltip" data-placement="top" title="'. $a->name .'" class="profile-cat-award" src="'. $a->url .'" alt="'. $a->name .'"/>';
 	$some = true;
+	break;
       }
     
     return isset($some) ? ($out . '</div>') : '';
