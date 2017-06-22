@@ -117,15 +117,9 @@ if (isset($_GET['q'])) {
   }
 }
 
-if ($display_filter) {      
-  $schools = array();
-  foreach ($SCHOOLS as $s)
-    if ($s != '') {
-      $n = get_number_tts_from_school($s);
-      if ($n > 0)
-	$schools[] = array('school' => $s, 'count' => $n);
-    }
-      
+if ($display_filter) {
+  $schools = dataConnection::runQuery("select school, count(*) as count from teachingtip where status = 'active' group by school");
+  
   if ($school_filter || $class_size_filter || $env_filter || $sol_filter || $itc_filter)
     $results = teachingtip::get_tts_from_filters($schools_for_query, $sizes_for_query, $envs_for_query, $sol_for_query, $itc_for_query);
   else
@@ -361,48 +355,45 @@ if ($display_filter) {
     $template->pageData['content'] .= '</label></div>';
   }
                     
-  $template->pageData['content'] .= 
-    '<h4 class="filter-sub-header">School</h4>';
-      if ($schools) {
-        foreach ($schools as $s) {
-	  $school = $s['school'];
-           
-          $template->pageData['content'] .= '<div class="checkbox"><label>';
+  $template->pageData['content'] .= '<h4 class="filter-sub-header">School</h4>';
+  foreach ($schools as $s) {
+    $school = $s['school'];
+    $template->pageData['content'] .= '<div class="checkbox"><label>';
 
-          $cfs = '';
-          $cfa = array();
-          if (!empty($class_size_filter_string)) $cfa[] = 'size=' . $class_size_filter_string;
-          if (!empty($env_filter_string)) $cfa[] = 'env=' . $env_filter_string;
-          if (!empty($sol_filter_string)) $cfa[] = 'sol=' . $sol_filter_string;
-          if (!empty($itc_filter_string)) $cfa[] = 'itc=' . $itc_filter_string;
-          $cfs = implode('&', $cfa);
-          $schar = empty($cfs) ? '': '&';
-
-          if (!in_array($school, $schools_filter_array)) {
-            if (empty($schools_filter_string))
-	      $filter_string = '?' . $cfs . $schar . 'school=' . $school;
-            else
-	      $filter_string = '?' . $cfs . $schar . 'school=' . $schools_filter_string . '_' . $school;
-            $checked = '';
-          } else {
-            if (sizeof($schools_filter_array) == 1)
-	      $filter_string = '?' . $cfs;
-            else {
-              $filter_string = str_replace('_' . $school, '', $schools_filter_string); 
-              $filter_string = str_replace($school . '_', '', $filter_string);
-              $filter_string = '?' . $cfs . $schar . 'school=' . $filter_string;
-            }
-	    
-            $checked = 'checked';
-          }
-	  
-          $template->pageData['content'] .= '<input type="checkbox" value="" onclick="window.location.href='. "'search.php". $filter_string . '\'"'. $checked . '>
+    $cfs = '';
+    $cfa = array();
+    if (!empty($class_size_filter_string)) $cfa[] = 'size=' . $class_size_filter_string;
+    if (!empty($env_filter_string)) $cfa[] = 'env=' . $env_filter_string;
+    if (!empty($sol_filter_string)) $cfa[] = 'sol=' . $sol_filter_string;
+    if (!empty($itc_filter_string)) $cfa[] = 'itc=' . $itc_filter_string;
+    $cfs = implode('&', $cfa);
+    $schar = empty($cfs) ? '': '&';
+    
+    if (!in_array($school, $schools_filter_array)) {
+      if (empty($schools_filter_string))
+	$filter_string = '?' . $cfs . $schar . 'school=' . $school;
+      else
+	$filter_string = '?' . $cfs . $schar . 'school=' . $schools_filter_string . '_' . $school;
+      $checked = '';
+    } else {
+      if (sizeof($schools_filter_array) == 1)
+	$filter_string = '?' . $cfs;
+      else {
+	$filter_string = str_replace('_' . $school, '', $schools_filter_string); 
+	$filter_string = str_replace($school . '_', '', $filter_string);
+	$filter_string = '?' . $cfs . $schar . 'school=' . $filter_string;
+      }
+      
+      $checked = 'checked';
+    }
+    
+    $template->pageData['content'] .= '<input type="checkbox" value="" onclick="window.location.href='. "'search.php". $filter_string . '\'"'. $checked . '>
                       <a href="search.php'. $filter_string . '">'. $school . ' (' . $s['count'] . ')</a>
                     </label>
                   </div>';
-        }
-      }
-      $template->pageData['content'] .= '</div></div>';
+  }
+  
+  $template->pageData['content'] .= '</div></div>';
 }
 
 if ($display_filter) {
@@ -450,12 +441,11 @@ if ($display_filter) {
   $template->pageData['content'] .= '<div class="search-results col-xs-12">';
 }
 
-if (!empty($results)) {
-  foreach ($results as $tt) {
-    $author = $tt->get_author();
-    $tt_time = date('d M Y', $tt->whencreated);
-    $template->pageData['content'] .= 
-      '<div class="search-result">
+foreach ($results as $tt) {
+  $author = $tt->get_author();
+  $tt_time = date('d M Y', $tt->whencreated);
+  $template->pageData['content'] .= 
+    '<div class="search-result">
                     <div class="row">
                       <div class="search-result-title col-sm-9 col-xs-12"><h4><a href="teaching_tip.php?ttID='. $tt->id . '">'. $tt->title . '</a></h4></div>
                       <div class="search-result-date col-sm-3 col-xs-12">'. $tt_time . '</div>
@@ -468,8 +458,9 @@ if (!empty($results)) {
                       </div>
                     </div>                  
                 </div>';
-  }
-} else
+}
+
+if (count($results) == 0)
   $template->pageData['content'] .= '<div class="no-search-results">There are no results matching your query.</div>';
 
 if (!$display_filter)

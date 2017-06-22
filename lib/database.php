@@ -76,8 +76,7 @@ CREATE TABLE teachingtip(
    doesntworkunless TEXT,
    essence TEXT,
    school text,
-   archived INTEGER,
-   draft INTEGER,
+   status enum('draft', 'active', 'deleted') not null default 'active',
    FULLTEXT(title,rationale,description,practice,worksbetter,doesntworkunless,essence));",
 	  "
 CREATE TABLE ttcomment(
@@ -368,7 +367,7 @@ class user {
 
   static function get_most_tts($limit, $offset) {
     $query = "select u.*, count(tt.id) as number_tts from user as u inner join teachingtip as tt on u.id = tt.author_id
- where tt.draft = 0 and tt.archived = 0
+ where tt.status = 'active'
  group by u.id
  order by number_tts desc, u.id
  limit $limit offset $offset";
@@ -399,38 +398,38 @@ class user {
     $result = dataConnection::runQuery("
 select count(id) as number_tts
  from teachingtip as tt
- where tt.time > '" . dataConnection::time2db($since) . "' and archived = 0 and draft = 0");
+ where tt.time > '" . dataConnection::time2db($since) . "' and status = 'active'");
     return $result[0]['number_tts'];
   }
 
   function getLikes() {
     $likes = array();
-    foreach (dataConnection::runQuery("select * from user_likes_tt where user_id ='" . dataConnection::safe($this->id)."' and archived='0' ") as $r)
+    foreach (dataConnection::runQuery("select * from user_likes_tt where user_id ='" . dataConnection::safe($this->id)."' and archived = 0 ") as $r)
       array_push($likes, new user_likes_tt($r));
     return $likes;
   }
 
   function getComments() {
     $comments = array();
-    foreach(dataConnection::runQuery("select * from user_comments_tt where user_id ='" . dataConnection::safe($this->id)."' and archived='0'") as $r)
+    foreach(dataConnection::runQuery("select * from user_comments_tt where user_id ='" . dataConnection::safe($this->id)."' and archived = 0") as $r)
       array_push($comments, new user_comments_tt($r));
     return $comments;
   }
 
   function getShares() {
     $shares = array();
-    foreach (dataConnection::runQuery("select * from user_shares_tt where sender ='" . dataConnection::safe($this->email) . "' and archived='0'") as $r)
+    foreach (dataConnection::runQuery("select * from user_shares_tt where sender ='" . dataConnection::safe($this->email) . "' and archived = 0") as $r)
       array_push($shares, new user_shares_tt($r));
     return $shares;
   }
 
   function get_number_tts() {
-    $result = dataConnection::runQuery("select count(id) as number_tts from teachingtip where archived = 0 and draft = 0 and author_id = '" . dataConnection::safe($this->id) . "'");
+    $result = dataConnection::runQuery("select count(id) as number_tts from teachingtip where status = 'active' and author_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_tts'];
   }
 
   function get_most_recent_tip_date() {
-    $result = dataConnection::runQuery("select unix_timestamp(max(whencreated)) as w from teachingtip where archived = 0 and draft = 0 and author_id = '" . dataConnection::safe($this->id) . "'");
+    $result = dataConnection::runQuery("select unix_timestamp(max(whencreated)) as w from teachingtip where status = 'active' and author_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['w'];
   }
   
@@ -438,28 +437,28 @@ select count(id) as number_tts
     $result = dataConnection::runQuery("
 select count(ultt.id) as number_likes
  from user_likes_tt as ultt inner join teachingtip as tt on ultt.teachingtip_id = tt.id
- where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and ultt.user_id <> '" . dataConnection::safe($this->id) . "'");
+ where tt.status = 'active' and tt.author_id = '" . dataConnection::safe($this->id) . "' and ultt.user_id <> '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_likes'];
   }
 
   function get_number_received_comments() {
     $result = dataConnection::runQuery("
 select count(uctt.id) as number_comments from user_comments_tt as uctt inner join teachingtip as tt on uctt.teachingtip_id = tt.id
- where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and uctt.user_id <> '" . dataConnection::safe($this->id). "'");
+ where tt.status = 'active' and tt.author_id = '" . dataConnection::safe($this->id) . "' and uctt.user_id <> '" . dataConnection::safe($this->id). "'");
     return $result[0]['number_comments'];
   }
 
   function get_number_shares_of_tts() {
     $result = dataConnection::runQuery("
 select count(ustt.id) as number_shares from user_shares_tt as ustt inner join teachingtip as tt on ustt.teachingtip_id = tt.id
- where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "' and ustt.sender <> '".dataConnection::safe($this->email). "'");
+ where tt.status = 'active' and tt.author_id = '" . dataConnection::safe($this->id) . "' and ustt.sender <> '".dataConnection::safe($this->email). "'");
     return $result[0]['number_shares'];
   }
 
   function get_number_received_views_tts() {
     $result = dataConnection::runQuery("
 select count(ttv.id) as number_views from ttview as ttv inner join teachingtip as tt on ttv.teachingtip_id = tt.id
- where tt.archived = 0 and tt.draft = 0 and tt.author_id = '" . dataConnection::safe($this->id) . "'");
+ where tt.status = 'active' and tt.author_id = '" . dataConnection::safe($this->id) . "'");
     return $result[0]['number_views'];
   }
 
@@ -469,25 +468,25 @@ select count(ttv.id) as number_views from ttview as ttv inner join teachingtip a
   }
 
   function get_number_given_likes() {
-    $query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ultt.user_id = '".dataConnection::safe($this->id). "'";
+    $query = "SELECT COUNT(ultt.id) AS number_likes FROM user_likes_tt as ultt INNER JOIN teachingtip as tt ON ultt.teachingtip_id = tt.id WHERE tt.status = 'active' AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ultt.user_id = '".dataConnection::safe($this->id). "'";
     $result = dataConnection::runQuery($query);
     return $result[0]['number_likes'];
   }
 
   function get_number_given_views() {
-    $query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND ttv.user_id = '".dataConnection::safe($this->id). "' AND tt.author_id <> '".dataConnection::safe($this->id). "'";
+    $query = "SELECT COUNT(ttv.id) AS number_views FROM ttview as ttv INNER JOIN teachingtip as tt ON ttv.teachingtip_id = tt.id WHERE tt.status = 'active' AND ttv.user_id = '".dataConnection::safe($this->id). "' AND tt.author_id <> '".dataConnection::safe($this->id). "'";
     $result = dataConnection::runQuery($query);
     return $result[0]['number_views'];
   }
   
   function get_number_given_shares() {
-    $query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ustt.sender = '".dataConnection::safe($this->email). "'";
+    $query = "SELECT COUNT(ustt.id) AS number_shares FROM user_shares_tt as ustt INNER JOIN teachingtip as tt ON ustt.teachingtip_id = tt.id WHERE tt.status = 'active' AND tt.author_id <> '".dataConnection::safe($this->id)."' AND ustt.sender = '".dataConnection::safe($this->email). "'";
     $result = dataConnection::runQuery($query);
     return $result[0]['number_shares'];
   }
   
   function get_number_given_comments() {
-    $query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.archived = 0 AND tt.draft = 0 AND tt.author_id <> '".dataConnection::safe($this->id)."' AND uctt.user_id = '".dataConnection::safe($this->id). "'";
+    $query = "SELECT COUNT(uctt.id) AS number_comments FROM user_comments_tt as uctt INNER JOIN teachingtip as tt ON uctt.teachingtip_id = tt.id WHERE tt.status = 'active' AND tt.author_id <> '".dataConnection::safe($this->id)."' AND uctt.user_id = '".dataConnection::safe($this->id). "'";
     $result = dataConnection::runQuery($query);
     return $result[0]['number_comments'];
   }
@@ -500,7 +499,7 @@ select count(ttv.id) as number_views from ttview as ttv inner join teachingtip a
 
   function get_teaching_tips() {
     $tts = array();
-    foreach(dataConnection::runQuery("select * from teachingtip where author_id = '".dataConnection::safe($this->id) . "' and archived = '0'") as $r)
+    foreach(dataConnection::runQuery("select * from teachingtip where author_id = '".dataConnection::safe($this->id) . "' and status <> 'deleted'") as $r)
       array_push($tts, new teachingtip($r));
     return $tts;
   }
@@ -515,7 +514,7 @@ select count(ttv.id) as number_views from ttview as ttv inner join teachingtip a
   function get_top_teaching_tips($limit = false) {
     $query = "select tt.*, count(ultt.id) as count_likes from teachingtip as tt left join user_likes_tt as ultt on tt.id = ultt.teachingtip_id where tt.author_id = '"
       . dataConnection::safe($this->id)
-      . "' and tt.archived = '0' and tt.draft = '0' group by tt.id order by count_likes desc";
+      . "' and tt.status = 'active' group by tt.id order by count_likes desc";
     if ($limit)
       $query .= " limit ". dataConnection::safe($limit);
     $tts = array();
@@ -1535,8 +1534,7 @@ class teachingtip {
 	var $doesntworkunless;
 	var $essence;
 	var $school;
-	var $archived;
-	var $draft;
+	var $status;
 
 	function teachingtip($asArray=null)
 	{
@@ -1552,8 +1550,7 @@ class teachingtip {
 		$this->doesntworkunless = "";
 		$this->essence = "";
 		$this->school = '';
-		$this->archived = "0";
-		$this->draft = "0";
+		$this->status = "draft";
 		if($asArray!==null)
 			$this->fromArray($asArray);
 	}
@@ -1572,8 +1569,7 @@ class teachingtip {
 		$this->doesntworkunless = $asArray['doesntworkunless'];
 		$this->essence = $asArray['essence'];
 		$this->school = $asArray['school'];
-		$this->archived = $asArray['archived'];
-		$this->draft = $asArray['draft'];
+		$this->status = $asArray['status'];
 	}
 
 	static function retrieve_teachingtip($id)
@@ -1613,7 +1609,7 @@ class teachingtip {
 	function insert()
 	{
 		//#Any required insert methods for foreign keys need to be called here.
-		$query = "INSERT INTO teachingtip(author_id, title, time, rationale, description, practice, worksbetter, doesntworkunless, essence, school, archived, draft) VALUES(";
+		$query = "INSERT INTO teachingtip(author_id, title, time, rationale, description, practice, worksbetter, doesntworkunless, essence, school, status) VALUES(";
 		if($this->author_id!==null)
 			$query .= "'".dataConnection::safe($this->author_id)."', ";
 		else
@@ -1627,8 +1623,7 @@ class teachingtip {
 		$query .= "'".dataConnection::safe($this->doesntworkunless)."', ";
 		$query .= "'".dataConnection::safe($this->essence)."', ";
 		$query .= "'".dataConnection::safe($this->school)."', ";
-		$query .= "'".dataConnection::safe($this->archived)."', ";
-		$query .= "'".dataConnection::safe($this->draft)."');";
+		$query .= "'".dataConnection::safe($this->status)."')";
 		dataConnection::runQuery("BEGIN;");
 		$result = dataConnection::runQuery($query);
 		$result2 = dataConnection::runQuery("SELECT LAST_INSERT_ID() AS id;");
@@ -1650,8 +1645,7 @@ class teachingtip {
 		$query .= ", doesntworkunless='".dataConnection::safe($this->doesntworkunless)."' ";
 		$query .= ", essence='".dataConnection::safe($this->essence)."' ";
 		$query .= ", school='".dataConnection::safe($this->school)."' ";
-		$query .= ", archived='".dataConnection::safe($this->archived)."' ";
-		$query .= ", draft='".dataConnection::safe($this->draft)."' ";
+		$query .= ", status='".dataConnection::safe($this->status)."' ";
 		$query .= "WHERE id='".dataConnection::safe($this->id)."';";
 		return dataConnection::runQuery($query);
 	}
@@ -1684,8 +1678,7 @@ class teachingtip {
 		$out .= '<doesntworkunless>'.htmlentities($this->doesntworkunless)."</doesntworkunless>\n";
 		$out .= '<essence>'.htmlentities($this->essence)."</essence>\n";
 		$out .= '<school>'.htmlentities($this->school)."</school>\n";
-		$out .= '<archived>'.htmlentities($this->archived)."</archived>\n";
-		$out .= '<draft>'.htmlentities($this->draft)."</draft>\n";
+		$out .= '<status>'.htmlentities($this->status)."</status>\n";
 		$out .= "</teachingtip>\n";
 		return $out;
 	}
@@ -1697,14 +1690,13 @@ class teachingtip {
 
 	// get the number of published teaching tips in the system
 	static function get_number_tts() {
-		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip WHERE draft = 0 AND archived = 0";
+		$query = "SELECT COUNT(id) AS number_tts FROM teachingtip WHERE status = 'active'";
 		$result = dataConnection::runQuery($query);
 		return $result[0]['number_tts'];
 	}
 
-	// get all teaching tips in the database (except for drafts)
 	static function get_all_teaching_tips() {
-	  $result = dataConnection::runQuery("select * from teachingtip where draft = 0 order by id asc");
+	  $result = dataConnection::runQuery("select * from teachingtip order by id asc");
 	  $tts = array();
 	  foreach($result as $r)
 	    array_push($tts, new teachingtip($r));
@@ -1717,7 +1709,7 @@ class teachingtip {
 select tt.*, count(u.id) as n
  from teachingtip as tt
  left join user_{$table}_tt u on tt.id = u.teachingtip_id
- where tt.archived = '0' and tt.draft = '0' $andTime
+ where tt.status = 'active' $andTime
  group by tt.id
  order by n desc
  limit " . dataConnection::safe($limit) . " offset " . dataConnection::safe($offset));
@@ -1728,7 +1720,7 @@ select tt.*, count(u.id) as n
 	}
 
 	static function get_latest_teaching_tips($limit = false) {
-	  $query = "select * from teachingtip where archived='0' and draft='0' order by time desc";
+	  $query = "select * from teachingtip where status = 'active' order by time desc";
 	  if ($limit) $query .= " limit $limit";
 	  $result = dataConnection::runQuery($query);
 	  if (sizeof($result) != 0) {
@@ -1848,7 +1840,7 @@ select count(*) as number_comments
 	}
 
 	static function get_tts_from_schools($schools) {
-	  $query = "select tt.* from teachingtip as tt inner join user as u on tt.author_id = u.id where archived = 0 and draft = 0 and (tt.school = '$schools[0]'";
+	  $query = "select tt.* from teachingtip as tt inner join user as u on tt.author_id = u.id where tt.status = 'active' and (tt.school = '$schools[0]'";
 	  if (sizeof($schools > 1)) {
 	    foreach (array_slice($schools, 1) as $school)
 	      $query .= " or tt.school = '$school'";
@@ -1863,17 +1855,15 @@ select count(*) as number_comments
 	}
 
 	static function get_tts_from_filters($schools, $sizes, $envs, $sol, $itc) {
-	  $result = array();
+	  $results = array();
 	  if ($schools) {
-	    $schools_map = array_map(function($s) { return 'tt.school = ' . "'" . $s . "'"; }, $schools);
+	    $schools_map = array_map(function($s) { return 'school = ' . "'" . $s . "'"; }, $schools);
 	    if (!empty($schools_map)) {
-	      $schools_string = implode(' or ', $schools_map);
-	      $result = dataConnection::runQuery("select distinct tt.* from teachingtip as tt"
-						 . " inner join user as u on tt.author_id = u.id"
-						 . " where archived = 0 and draft = 0 and (" . $schools_string
+	      $result = dataConnection::runQuery("select * from teachingtip as tt"
+						 . " where status = 'active' and (" . implode(' or ', $schools_map)
 						 . ") order by time desc");
 	      foreach($result as $r)
-		$result[] = new teachingtip($r);
+		$results[] = new teachingtip($r);
 	    }
 	  }
 	  
@@ -1881,7 +1871,7 @@ select count(*) as number_comments
 	    $sizes_map = array_map(function($cs) { return 'f.opt = ' . "'" . $cs . "'"; }, $sizes);
 	    if (!empty($sizes_map)) {
 	      foreach (getTTsWithFilters("f.category = 'class_size' AND (" . implode(' OR ', $sizes_map) . ") ") as $tt)
-		$result[] = $tt;
+		$results[] = $tt;
 	    }
 	  }
 	  
@@ -1889,21 +1879,21 @@ select count(*) as number_comments
 	    $envs_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $envs);
 	    if (!empty($envs_map))
 	      foreach (getTTsWithFilters("f.category = 'environment' AND (" . implode(' OR ', $envs_map) . ") ") as $tt)
-		$result[] = $tt;
+		$results[] = $tt;
 	  }
 
 	  if ($sol) {
 	    $sol_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $sol);
 	    if (!empty($sol_map))
 	      foreach (getTTsWithFilters("f.category = 'suitable_ol' AND (" . implode(' OR ', $sol_map) . ") ") as $tt)
-		$result[] = $tt;
+		$results[] = $tt;
 	  }
 	  
 	  if ($itc) {
 	    $itc_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $itc);
 	    if (!empty($itc_map))
 	      foreach (getTTsWithFilters("f.category = 'it_competency' AND (" . implode(' OR ', $itc_map) . ") ") as $tt)
-		$result[] = $tt;
+		$results[] = $tt;
 	  }
 	  
 	  return $results;

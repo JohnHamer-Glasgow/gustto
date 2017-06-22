@@ -37,13 +37,13 @@ $ttID = $_GET['ttID'];
 $tt = teachingtip::retrieve_teachingtip($ttID);
 $isDraft = false;
     
-if (!$tt || ($user->isadmin == 0 && $tt->archived == 1)) {
+if (!$tt || ($user->isadmin == 0 && $tt->status == 'deleted')) {
   $template->pageData['content'] .= pageNotFound();
   echo $template->render();
   exit();
 } 
 
-if ($tt->draft == 1) {
+if ($tt->status == 'draft') {
   $contrTTs = $user->get_contr_teaching_tips();
   $contr = false;
     foreach($contrTTs as $cTT)
@@ -52,7 +52,7 @@ if ($tt->draft == 1) {
 	break;
       }
       
-    if ($tt->author_id == $loggedUserID || $contr)
+    if ($tt->author_id == $loggedUserID || $contr || $user->isadmin == 1)
       $isDraft = true;
     else {
       $template->pageData['content'] .= pageNotFound();
@@ -183,32 +183,9 @@ if ($isDraft)
     '<div class="alert alert-info alert-dismissible alert-tt-draft" role="alert">
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                   <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                  <strong>This Teaching Tip is a Draft!</strong> Only the author and the co-authors can see this page.
+                  <strong>This Teaching Tip is a draft</strong>. Only the author and the co-authors can see this page.
                 </div>';
 
-
-if ($loggedUserID == $tt->author_id) {
-  $deleteText = $tt->draft ? 'Archive' : 'Unpublish';
-  $template->pageData['content'] .= "
-                  <div class='btn-group pull-right col-xs-3'>
-                    <a role='button' class='glyphicon glyphicon-option-horizontal teachingtip-options-button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-                    </a>
-                    <div class='dropdown-menu teachingtip-options-menu'>
-                      <ul>
-                        <li>
-                          <a href='teaching_tip_add.php?ttID={$tt->id}' class='teachingtip-options-Edit'>Edit</a>
-                        </li>
-                        <li>
-                          <form class='deleteTTView' action='ajax/deleteTT.php' method='post'>
-                            <input type='hidden' name='csrf_token' value='{$_SESSION['csrf_token']}' />
-                            <input type='hidden' name='ttId' value='{$tt->id}' />
-                            <button type='submit' class='teachingtip-options-Dbutton'>$deleteText</button>
-                          </form>
-                        </li>             
-                      </ul>
-                    </div>                      
-                  </div> ";
-}
 
 $template->pageData['content'] .= "<h3 class='tt-name'>{$tt->title}</h3>";
 if (!empty($contributors)) {

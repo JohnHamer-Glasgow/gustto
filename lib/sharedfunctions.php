@@ -47,7 +47,7 @@ function getUserRecord($uinfo) {
 // NEW DATABASE FUNCTIONS
 
 function getLatestTeachingTips($limit = false, $lowerL = 0) {
-  $query = "select * from teachingtip where archived = '0' and draft = '0' order by id desc";
+  $query = "select * from teachingtip where status = 'active' order by id desc";
   if ($limit) $query.= " limit " .dataConnection::safe($limit);
   $query .= " offset " . dataConnection::safe($lowerL);
   $result = dataConnection::runQuery($query);
@@ -154,7 +154,7 @@ function getFilterCategory($opt) {
 
 function getTTsWithFilters($filter_string) {
   $tts = array();
-  $result = dataConnection::runQuery("select distinct tt.* from ttfilter as f inner join teachingtip as tt on f.teachingtip_id = tt.id where archived = 0 and draft = 0 and " . $filter_string . " order by time desc");
+  $result = dataConnection::runQuery("select distinct tt.* from ttfilter as f inner join teachingtip as tt on f.teachingtip_id = tt.id where status = 'active' and " . $filter_string . " order by time desc");
   foreach($result as $r)
     array_push($tts, new teachingtip($r));
   return $tts;
@@ -188,18 +188,18 @@ function searchTitlesByKeyword($keyword) {
   return dataConnection::runQuery("
 select id, title
  from teachingtip
- where title like '" . dataConnection::safe('%' . $keyword . '%') . "' and archived = 0 and draft = 0");
+ where title like '" . dataConnection::safe('%' . $keyword . '%') . "' and status = 'active'");
 }
 
 function searchKeywordsByKeyword($keyword){
   return dataConnection::runQuery("
 select t.id, t.title
  from teachingtip t left join ttkeyword k on k.ttid_id = t.id
- where k.keyword like '" . dataConnection::safe('%' . $keyword . '%') . "' and t.archived = 0 and t.draft = 0");
+ where k.keyword like '" . dataConnection::safe('%' . $keyword . '%') . "' and t.status = 'active'");
 }
 
 function myTeachingTips($userId) {
-  return dataConnection::runQuery("select * from teachingtip where author_id = $userId and archived = '0'");
+  return dataConnection::runQuery("select * from teachingtip where author_id = $userId and status <> 'deleted'");
 }
 
 function deleteComment($cID, $loggedUserId) {
@@ -232,7 +232,7 @@ function searchTTs($search_string, $search_school) {
         left join teachingtip as tt ON tt.id = k.ttid_id
         left join user u on u.id = tt.author_id
         where
-        tt.archived = 0 and tt.draft = 0 and";
+        tt.status = 'active' and";
   if (!empty($search_school))
     $query .= " tt.school like '" . dataConnection::safe($search_school) . "' and";
   $query .= " (match (tt.title, tt.rationale, tt.description, tt.practice, tt.worksbetter, tt.doesntworkunless, tt.essence) against ('{$search_string}')
@@ -252,7 +252,7 @@ function searchTTsByAuthor($search_author, $search_school){
         from teachingtip as tt
         left join user as u ON u.id = tt.author_id
         where
-        tt.archived = 0 AND tt.draft = 0 and";
+        tt.status = 'active' and";
   if (!empty($search_school))
     $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
   $query .= " match (u.name, u.lastname) against ('{$search_author}') order by umatch desc";
@@ -269,7 +269,7 @@ function searchTTsByKeyword($search_keyword, $search_school) {
         from teachingtip as tt
         inner join ttkeyword as k on tt.id = k.ttid_id
         inner join user as u on tt.author_id = u.id
-        where tt.archived = 0 and tt.draft = 0 and";
+        where tt.status = 'active' and";
   if (!empty($search_school))
     $query .= " tt.school = '" . dataConnection::safe($search_school) . "' and";
   $query .= " concat(' ', k.keyword, ' ') like '% {$search_keyword} %'";
@@ -278,11 +278,6 @@ function searchTTsByKeyword($search_keyword, $search_school) {
   foreach($result as $r)
     array_push($tts, new teachingtip($r));
   return $tts;
-}
-
-function get_number_tts_from_school($school) {
-  $result = dataConnection::runQuery("select count(*) as n from teachingtip where archived = 0 and draft = 0 and school = '{$school}'");
-  return $result[0]['n'];
 }
 
 function checkUserFollowsUser($followerID, $userID) {

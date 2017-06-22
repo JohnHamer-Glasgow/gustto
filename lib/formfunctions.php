@@ -16,9 +16,9 @@ function teachingtip_add($ttdata, $userID, $draft=false) {
   $tt->school = $ttdata['school'];
 
   if ($draft)
-    $tt->draft = 1;
+    $tt->status = 'draft';
   else
-    $tt->draft = 0;
+    $tt->status = 'active';
 
   $ttID = $tt->insert();
   if (!$ttID)
@@ -97,9 +97,9 @@ function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
   $tt->school = $ttdata['school'];
 
   if ($draft)
-    $tt->draft = 1;
+    $tt->status = 'draft';
   else { 
-    $tt->draft = 0;
+    $tt->status = 'active';
     $tt->time = time();
   }
   

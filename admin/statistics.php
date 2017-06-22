@@ -88,7 +88,7 @@ $timeseries = array();
 $fmt = '%Y-%u'; // day of the year: %j, month: %c
 foreach (dataConnection::runQuery("select date_format(whencreated, '$fmt') as d, count(*) as c
  from teachingtip
- where draft = 0 and archived = 0
+ where status = 'active'
  group by d") as $v)
   $timeseries[$v['d']]['tips'] = $v['c'];
 foreach (dataConnection::runQuery("select date_format(t.time, '$fmt') as d, count(*) as c

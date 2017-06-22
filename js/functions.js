@@ -36,21 +36,20 @@ $(document).ready(function () {
     });
 
     $('.deleteFormTT').submit(function (e) {
-	var formData = {
-	    'csrf_token': $('input[name="csrf_token"]').val(),
-            'ttId': $(this).find('input[name="ttId"]').val()
-	};
+	var $this = $(this);
+	var ttId = $this.find('input[name="ttId"]').val();
 	$.ajax({
             type        : 'POST', 
             url         : 'ajax/deleteTT.php', 
-            data        : formData,
+            data        : {
+		'csrf_token': $this.find('input[name="csrf_token"]').val(),
+		'ttId': ttId
+	    },
             dataType    : 'json',       
         }).done(function(data) {
-            var ttInfo = $('.my-tt-info[value="' + data.ttId + '"]').parent();
-            $('.my-tt-info[value="' + data.ttId + '"]').remove();
-            ttInfo.html("<div class='col-xs-12 alert alert-danger'>Teaching Tip deleted.</div>");
-            $('body').removeClass();
-            $('body').css('padding-right','');
+            var ttInfo = $('.my-tt-info[value="' + ttId + '"]').parent();
+            $('.my-tt-info[value="' + ttId + '"]').remove();
+            ttInfo.html("<div class='col-xs-12 alert alert-danger'>Teaching Tip " + data + ".</div>");
 	});
 	e.preventDefault();
 	$('.modal-backdrop').hide(); //for hiding the modal after deleting
@@ -643,7 +642,7 @@ $(document).ready(function () {
 		colorChange();
                 $('.notification-menu').html(htmlDecode(notifications));
             })
-    }, 1000 * 60);
+    }, 1000 * 60 * 5);
 
     $('#allRead').click(function(){
 	$.get("ajax/markNotificationsRead.php")

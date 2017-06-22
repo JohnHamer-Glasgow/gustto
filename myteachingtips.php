@@ -52,71 +52,47 @@ $template->pageData['content'] .= '<div class="my-tt-mytt-header"><h5>Published 
 foreach($myTTs as $myTT) {
     $ttContributors = $myTT->get_contributors();
       
-    if ($myTT->draft == 0) {
+    if ($myTT->status == 'active') {
       $existMyTT = 1;
       $template->pageData['content'] .= '
-      <div class="row my-tt-wrapper">
-      <div class="col-xs-12 my-tt-info" value="'.$myTT->id.'" >
-      <div class="col-xs-12 feed-title">
+<div class="row my-tt-wrapper">
+  <div class="col-xs-12 my-tt-info" value="'.$myTT->id.'" >
+    <div class="col-xs-12 feed-title">
       <h4 class="col-sm-8 col-xs-12 my-tt-title"><a href="teaching_tip.php?ttID='.$myTT->id.'">'.$myTT->title.'</a></h4>
       <span class="col-sm-4 col-xs-12 my-tt-time">'.date('d M Y', $myTT->whencreated).'</span>
-      </div>';
+    </div>';
 
       if (!empty($ttContributors)) {
         $tempContr = ' ';
         foreach ($ttContributors as $ttContr)
           $tempContr .= $ttContr->name . ' ' . $ttContr->lastname . ', ';
-        
         $template->pageData['content'] .= '<div class="col-xs-12 my-tt-contributors">Co-authors:<span class=" my-tt-contributor">' . substr($tempContr, 0, -2) . '</span></div>';
       }
 
       $template->pageData['content'] .= '
-      <div class="col-xs-12 feed-text-wrapper">
-      <p class="feed-text">'.$myTT->description.' 
-      </p>
-      </div> 
-      </div> 
+    <div class="col-xs-12 feed-text-wrapper">
+      <p class="feed-text">' . $myTT->description . ' </p>
+    </div>
+  </div> 
 
-      <div class="col-xs-12 my-tt-button-wrapper">
-      <div class="col-sm-6 col-xs-12 my-tt-icons-wrapper">
+  <div class="col-xs-12 my-tt-button-wrapper">
+    <div class="col-sm-6 col-xs-12 my-tt-icons-wrapper">
       <div class="feed-icons">
-      <a class="glyphicon glyphicon-thumbs-up feed-likebutton"></a> ' . $myTT->get_number_likes() . '
-      </div>
-      <div class="feed-icons">
-      <a class="glyphicon glyphicon-comment"></a> ' . $myTT->get_number_comments() . '
+        <a class="glyphicon glyphicon-thumbs-up feed-likebutton"></a> ' . $myTT->get_number_likes() . '
       </div>
       <div class="feed-icons">
-      <a class="glyphicon glyphicon-share-alt"></a> ' . $myTT->get_number_shares() . '
+        <a class="glyphicon glyphicon-comment"></a> ' . $myTT->get_number_comments() . '
       </div>
+      <div class="feed-icons">
+        <a class="glyphicon glyphicon-share-alt"></a> ' . $myTT->get_number_shares() . '
       </div>
-      <div class="col-sm-6 col-xs-12 my-tt-buttons">
+    </div>
+    <div class="col-sm-6 col-xs-12 my-tt-buttons">
       <a href="teaching_tip.php?ttID=' . $myTT->id . '" class="btn btn-success">View</a>
       <a href="teaching_tip_add.php?ttID=' . $myTT->id . '" class="btn btn-info">Edit</a>
-
-      <div class="modal fade delete-modal-tt target-uniqueId' . $myTT->id . '" id="deleteTTModal" tabindex="-1" role="dialog">
-      <div class="modal-dialog">
-      <div class="modal-content">
-      <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title">Delete Teaching Tip</h4>
-      </div>
-      <div>
-      <h4 class="delete-modal-message">Are you sure you want to delete this Teaching Tip?</h4>
-      </div>
-      <div class="modal-footer delete-modal-buttons">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <form class="deleteFormTT" action="ajax/deleteTT.php" method="post">
-      <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '">
-      <input type="hidden" name="ttId" value="' . $myTT->id . '">
-      <button type="submit" class="btn btn-danger">Delete</button>
-      </form>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>'; 
+    </div>
+  </div>
+</div>'; 
     }
 }
  
@@ -127,16 +103,16 @@ $existDraftTT = 0;
 $template->pageData['content'].='<div class="my-tt-draft-header"><h5>Draft Teaching Tips</h5></div>';
     
 foreach ($myTTs as $myTT) {
-  $ttContributors = $myTT->get_contributors();
-  if ($myTT->draft == 1) {
+  if ($myTT->status == 'draft') {
+    $ttContributors = $myTT->get_contributors();
     $existDraftTT = 1;
     $template->pageData['content'].='
-      <div class="row my-tt-wrapper">
-      <div class="col-xs-12 my-tt-info" value="' . $myTT->id . '" >
-      <div class="col-xs-12 feed-title">
+<div class="row my-tt-wrapper">
+  <div class="col-xs-12 my-tt-info" value="' . $myTT->id . '" >
+    <div class="col-xs-12 feed-title">
       <h4 class="col-sm-8 col-xs-12 my-tt-title"><a href="teaching_tip.php?ttID=' . $myTT->id . '">' . $myTT->title . '</a></h4>
       <span class="col-sm-4 col-xs-12 my-tt-time">' . date('d M Y', $myTT->whencreated) . '</span>
-      </div>';
+    </div>';
       
     if (!empty($ttContributors)) {
       $tempContr = ' ';
@@ -145,47 +121,47 @@ foreach ($myTTs as $myTT) {
       $template->pageData['content'] .= '<div class="col-xs-12 my-tt-contributors">Co-authors:<span class=" my-tt-contributor">' . substr($tempContr, 0, -2) . '</span></div>';
     }
 
-    $template->pageData['content'] .= '<div class="col-xs-12 feed-text-wrapper">
+    $template->pageData['content'] .= '
+    <div class="col-xs-12 feed-text-wrapper">
       <p class="feed-text">' . $myTT->description . '</p>
-      </div> 
-      </div> 
-      <div class="col-xs-12 my-tt-button-wrapper">
-      <div class="col-sm-6 col-xs-12 my-tt-icons-wrapper">
-      </div>
-      <div class="col-sm-6 col-xs-12 my-tt-buttons">
+    </div> 
+  </div> 
+  <div class="col-xs-12 my-tt-button-wrapper">
+    <div class="col-sm-6 col-xs-12 my-tt-icons-wrapper"></div>
+    <div class="col-sm-6 col-xs-12 my-tt-buttons">
       <a href="teaching_tip.php?ttID=' . $myTT->id . '" class="btn btn-success">View</a>
       <a href="teaching_tip_add.php?ttID=' . $myTT->id . '" class="btn btn-info">Edit</a>
-      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="target-uniqueId' . $myTT->id . '">Delete</button>
-      <div class="modal fade delete-modal-tt target-uniqueId' . $myTT->id . '" id="deleteTTModal" tabindex="-1" role="dialog">
-      <div class="modal-dialog">
-      <div class="modal-content">
-      <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title">Delete Teaching Tip</h4>
+      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#target-uniqueId' . $myTT->id . '">Delete</button>
+      <div class="modal fade delete-modal-tt" id="target-uniqueId' . $myTT->id . '" id="deleteTTModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	      <h4 class="modal-title">Delete Teaching Tip</h4>
+	    </div>
+	    <div>
+	      <h4 class="delete-modal-message">Are you sure you want to delete this Teaching Tip?</h4>
+	    </div>
+	    <div class="modal-footer delete-modal-buttons">
+	      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	      <form class="deleteFormTT">
+		<input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '">
+		<input type="hidden" name="ttId" value="' . $myTT->id . '">
+		<button type="submit" class="btn btn-danger">Delete</button>
+	      </form>
+	    </div>
+	  </div>
+	</div>
       </div>
-      <div>
-      <h4 class="delete-modal-message">Are you sure you want to delete this Teaching Tip?</h4>
-      </div>
-      <div class="modal-footer delete-modal-buttons">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <form class="deleteFormTT" action="ajax/deleteTT.php" method="post">
-      <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '">
-      <input type="hidden" name="ttId" value="' . $myTT->id . '">
-      <button type="submit" class="btn btn-danger">Delete</button>
-      </form>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>
-      </div>'; 
+    </div>
+  </div>
+</div>'; 
   }
 }
 
 $existContrTT = 0;
 foreach ($contributedTTs as $cTT) {
-  if ($cTT->draft == 1) {
+  if ($cTT->status == 'draft') {
     $author = user::retrieve_user($cTT->author_id);
     $existContrTT = 1;
     $template->pageData['content'] .= '
@@ -223,7 +199,7 @@ if ($existDraftTT == 0 && $existContrTT == 0)
 $existContrTT = 0;
 $template->pageData['content'].='<div class="my-tt-contr-header"><h5>Co-authored Teaching Tips</h5></div>';
 foreach ($contributedTTs as $cTT){
-  if($cTT->draft==0){
+  if ($cTT->status == 'active') {
     $author = user::retrieve_user($cTT->author_id);
     $existContrTT = 1;
     $template->pageData['content'] .= '

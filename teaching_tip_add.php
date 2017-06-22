@@ -22,12 +22,16 @@ $user = user::retrieve_user($loggedUserID);
 $template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online';
 
-$template->pageData['customCSS'] = '<script src="tinymce/js/tinymce/tinymce.min.js"></script>
-                                    <script>tinymce.init({ 
-                                        selector: "textarea#inputTTPractice",
-                                        theme: "modern",
-                                        plugins: "link autolink image"                                         
-                                    });</script>';
+$template->pageData['customCSS'] = '
+<script src="tinymce/js/tinymce/tinymce.min.js"></script>
+<script src="js/placeholder.js"></script>
+<script>
+tinymce.init({ 
+  selector: "textarea#inputTTPractice",
+  theme: "modern",
+  plugins: "link autolink image placeholder"
+  });
+</script>';
 
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
@@ -49,8 +53,14 @@ if (!isset($_SESSION['csrf_token']))
 
 $errors = array();
 $title = $rationale = $description = $practice = $cond1 = $cond2 = $essence = $kwsString = ''; 
-$class_size = $environment = $suitable_ol = $it_competency = array(); 
+$suitable_ol = array();
+$it_competency = array(); 
 $keywords = array();
+$class_size = array();
+$contributorsIDs = array();
+$contributorsEmails = array();
+$environment = array();
+$it_competency = array();
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
   if (isset($_GET['ttID']) && is_numeric($_GET['ttID']) && $_GET['ttID'] >= 0){
@@ -58,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $tt = teachingtip::retrieve_teachingtip($ttID);
     $author = $tt->get_author();
 
-    if ($tt->archived == 1) {
+    if ($tt->status == 'deleted' && $user->isadmin == 0) {
       $template->pageData['content'] .= pageNotFound();
       echo $template->render();
       exit();
@@ -95,7 +105,8 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 	  $keywords[] = trim($kw->keyword);
 	$kwsString = implode(',', $keywords);
                 
-	$saved_as_draft = $tt->draft == 1;
+	$saved_as_draft = true; //*** CHECK THIS
+	$tt->status = 'draft';
 	if ($saved_as_draft) {
 	  $ttcontributors = $tt->get_contributors();
 	  $contributorsEmail = array();
@@ -110,11 +121,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $ttSchool = $user->get_school_for_tt($SCHOOLS);
 }
 
-$class_size = array();
-$contributorsIDs = array();
-$contributorsEmails = array();
-$environment = array();
-$it_competency = array();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
     exit();
@@ -215,7 +221,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors['class_size'] = 'Please select an option/multiple options for the class size';
   else {
     $post_class_size = $_POST['class_size'];
-    foreach ($post_class_size as $key=>$val) {
+    foreach ($post_class_size as $key => $val) {
       $cs = sanitize_input($val);
       if (array_key_exists($cs, $CLASS_SIZES))
 	$class_size[] = $cs;
@@ -273,12 +279,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	    header("Location: myteachingtips.php");
 	    exit();
 	  }
-	}
-	else {
+	} else {
 	  if (teachingtip_update($ttdata, $ttID, $loggedUserID)) {
 	    $school = $user->school;
 	    $usersIdSchool = getSameSchoolUsers($school, $loggedUserID);
-
 	    foreach ($usersIdSchool as $userId)
 	      createNotification($userId['id'], $ttID, 'post', 'school_posts');
                               
@@ -347,7 +351,7 @@ if ($saved_as_draft)
     '<div class="alert alert-info alert-dismissible alert-tt-draft" role="alert">
                   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                   <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                  <strong>This Teaching Tip is a Draft!</strong> Only the author and the co-authors can edit it.
+                  <strong>This Teaching Tip is a Draft.</strong> Only the author and the co-authors can edit it.
                 </div>';
 					
 if ($errors)
@@ -366,15 +370,15 @@ if ($saved_as_draft)
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTName" class="control-label"><span class="mandatory">*</span>Name of Teaching Tip (representing the essence of the Teaching Tip)</label>';
+                    <label for="inputTTName" class="control-label"><span class="mandatory">*</span>Name of Teaching Tip (representing the crux of the Teaching Tip)</label>';
 if ($errors['name'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['name'] . '</span>';
-$template->pageData['content'] .= '<input type="text" class="form-control" id="inputTTName" name="title" placeholder="Name of the Teaching Tip..." value="' . $title . '">';
+$template->pageData['content'] .= '<input type="text" class="form-control" id="inputTTName" name="title" placeholder="Name..." value="' . $title . '">';
 $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTRationale" class="control-label"><span class="mandatory">*</span>Rationale statement (the reason for adopting the Teaching Tip)</label>';
+                    <label for="inputTTRationale" class="control-label"><span class="mandatory">*</span>Rationale (the reason for adopting the Teaching Tip)</label>';
 if ($errors['rationale'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['rationale'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTRatioanle" name="rationale" placeholder="Rationale...">' . $rationale . '</textarea>';
@@ -382,7 +386,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTDescription" class="control-label"><span class="mandatory">*</span>Description (one sentence description of the essence of the Teaching Tip)</label>';
+                    <label for="inputTTDescription" class="control-label"><span class="mandatory">*</span>Description (one sentence description of the Teaching Tip)</label>';
 if ($errors['description'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['description'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTDescription" name="description" placeholder="This Teaching Tip...">' . $description . '</textarea>';
@@ -390,34 +394,39 @@ $template->pageData['content'] .= '</div>';
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTPractice" class="control-label"><span class="mandatory">*</span>Practice of Teaching Tip (description of the actual practice)</label>
-                    <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Here you may include references or links to other material if appropriate. If you want to include any images, they must first be uploaded to an online image hosting service (such as imgur.com)."><span class="glyphicon glyphicon-question-sign"></span></button>';
+                    <label for="inputTTPractice" class="control-label"><span class="mandatory">*</span>What I did (the actual practice of the Teaching Tip)</label>
+                    <button type="button"
+                            class="tt-add-form-tooltip"
+                            data-toggle="tooltip"
+                            data-placement="right"
+                            title="Here you may include references or links to other material if appropriate. If you want to include any images, they must first be uploaded to an online image hosting service (such as imgur.com).">
+<span class="glyphicon glyphicon-question-sign"></span></button>';
 if ($errors['practice'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['practice'] . '</span>';
-$template->pageData['content'] .= '<textarea rows="8" cols="50" class="form-control" id="inputTTPractice" name="practice" placeholder="What we did...">' . $practice . '</textarea>';
+$template->pageData['content'] .= '<textarea rows="8" cols="50" class="form-control" id="inputTTPractice" name="practice" placeholder="What I/we did...">' . $practice . '</textarea>';
 $template->pageData['content'] .= '</div>';		
 
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTConditional1" class="control-label">Conditional statement (<q>this tends to work better if</q>)</label>
-                    <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"><span class="glyphicon glyphicon-question-sign"></span></button>';
+                    <label for="inputTTConditional1" class="control-label">This tends to work better if...</label>
+                    <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"></button>';
 if ($errors['cond1'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['cond1'] . '</span>';
-$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional1" name="cond1" placeholder="This tends to work better if...">' . $cond1 . '</textarea>';	
+$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional1" name="cond1">' . $cond1 . '</textarea>';	
 $template->pageData['content'] .= '</div>';     			
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTConditional2" class="control-label">Conditional statement (<q>this doesn\'t work unless</q>)</label>
-                    <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"><span class="glyphicon glyphicon-question-sign"></span></button>';
+                    <label for="inputTTConditional2" class="control-label">This doesn\'t work unless...</label>
+                    <button type="button" class="tt-add-form-tooltip" data-toggle="tooltip" data-placement="right" title="Write about the necessary and optimum conditions for practicing the TT"></button>';
 if ($errors['cond2'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['cond2'] . '</span>';
-$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional2" name="cond2" placeholder="<q>this doesn\'t work unless...</q>">' . $cond2 . '</textarea>';
+$template->pageData['content'] .= '<textarea rows="2" cols="50" class="form-control" id="inputTTConditional2" name="cond2">' . $cond2 . '</textarea>';
 $template->pageData['content'] .= '</div>';     
 				
 $template->pageData['content'] .= 
   '<div class="form-group">
-                    <label for="inputTTEssence" class="control-label"><span class="mandatory">*</span>Essence statement (sum up the nature of the problem and the solution)</label>';
+                    <label for="inputTTEssence" class="control-label"><span class="mandatory">*</span>Essence statement (sum up the crux of the problem and the solution)</label>';
 if ($errors['essence'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['essence'] . '</span>';
 $template->pageData['content'] .= '<textarea rows="4" cols="50" class="form-control" id="inputTTEssence" name="essence" placeholder="So...">' . $essence . '</textarea>';
@@ -443,7 +452,7 @@ $template->pageData['content'] .=
 if ($errors['class_size'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['class_size'] . '</span>';
 
-foreach ($CLASS_SIZES as $key=>$val)
+foreach ($CLASS_SIZES as $key => $val)
   $template->pageData['content'] .= 
     '<div class="checkbox">
                                   <label>
@@ -535,10 +544,10 @@ if ((!$edit && !$update) || ($saved_as_draft && $isAuthor)) {
                 
 if ($edit || $update)
   if ($saved_as_draft) {
-    if ($isAuthor)
+    if ($isAuthor || $user->isadmin)
       $template->pageData['content'] .= '<button type="submit" id="addTTFormSubmit" name="publish" class="btn btn-default">Publish Teaching Tip</button>';
-    $template->pageData['content'] .= '<button type="submit" id="draftTTFormSubmit" name="draft" class="btn btn-default">Save as Draft</button>';}
-  else
+    $template->pageData['content'] .= '<button type="submit" id="draftTTFormSubmit" name="draft" class="btn btn-default">Save as Draft</button>';
+  } else
     $template->pageData['content'] .= '<button type="submit" name="publish" id="addTTFormSubmit" class="btn btn-default">Save Changes</button>';
 else
   $template->pageData['content'] .= 

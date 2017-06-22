@@ -19,7 +19,7 @@ if (!$uinfo) {
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
 $user = user::retrieve_user($loggedUserID);
-if ($user->isadmin != '1') {
+if (!$user->isadmin) {
   header("Location: ../index.php");
   exit();
 }
@@ -65,9 +65,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $tt = teachingtip::retrieve_teachingtip($ttID);
   if ($tt) {
     if ($ttAction == 'delete')
-      $tt->archived = 1;
+      $tt->status = 'deleted';
     elseif ($ttAction == 'republish')
-      $tt->archived = 0;
+      $tt->status = 'active';
     $tt->update();
   }
 }
@@ -145,44 +145,61 @@ $template->pageData['content'] .= '
 -->
   <tbody>';
 
+$statusName = array('draft' => 'Draft',  'active' => 'Active',    'deleted' => 'Deleted');
+$actionName = array('draft' => 'Delete', 'active' => 'Unpublish', 'deleted' => 'Undelete');
 foreach ($tts as $tt) {
   $author = $tt->get_author();
-  $status = ($tt->archived == 1) ? 'Archived' : 'Active';
-  $action = ($tt->archived == 1) ? 'Republish' : 'Delete';
-  $time = date('Y-m-d', $tt->whencreated);
   $template->pageData['content'] .= '
         <tr>
-		<td>'. $tt->id .'</td>
-		<td>'. $time .'</td>
-		<td><a href="../profile.php?usrID='. $author->id .'">'. $author->name . ' ' . $author->lastname .'</a></td>
-		<td><a href="../teaching_tip.php?ttID='. $tt->id .'">'. $tt->title .'</a></td>
-		<td>'. $status .'</td>
-		<td>
-                  <a href="../teaching_tip_add.php?ttID='. $tt->id .'">Edit</a> | 
-                  <form onsubmit="return confirm(\'Are you sure you want to '.$action.' this Teaching Tip?\');" class="admin-panel-delete-tt-form" id="apdeltt-'.$tt->id.'" action="" method="post">
-		    <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] .'" />
-		    <input type="hidden" name="ttID" value="' . $tt->id .'" />
-		    <input type="hidden" name="ttAction" value="' . strtolower($action) .'" />
-		    <a href="#" type="submit" onclick="$(\'#apdeltt-'.$tt->id.'\').submit()">'. $action .'</a>
-		   </form>
-                 </td>
+	  <td>'. $tt->id .'</td>
+	  <td>'. date('Y-m-d', $tt->whencreated) .'</td>
+	  <td><a href="../profile.php?usrID='. $author->id .'">'. $author->name . ' ' . $author->lastname .'</a></td>
+	  <td><a href="../teaching_tip.php?ttID='. $tt->id .'">'. $tt->title .'</a></td>
+	  <td id="status' . $tt->id . '">'. $statusName[$tt->status] .'</td>
+	  <td>
+             <a href="../teaching_tip_add.php?ttID='. $tt->id .'">Edit</a><br/>
+             <a class="changeStatusTT" id="action' . $tt->id . '" data-ttid="' . $tt->id . '">'
+             . $actionName[$tt->status] . '</a>
+          </td>
 	</tr>';
 }
-					
 
 $template->pageData['content'] .= '
-  </tbody>
-</table>';
+      </tbody>
+    </table>
+  </div>
+</div>';
 
-$template->pageData['content'] .= '</div></div>';	
+$template->pageData['customJS'] .= '
+<script type="text/javascript">
+var statusName = ' . json_encode($statusName) . ';
+var actionName = ' . json_encode($actionName) . ';
+$(".changeStatusTT").click(function (e) {
+  var $this = $(this);
+  var ttId = $this.data("ttid");
+  $.ajax({
+        type        : "POST", 
+        url         : "../ajax/deleteTT.php", 
+        data        : {
+          csrf_token: "' . $_SESSION['csrf_token'] . '",
+          ttId: ttId
+        },
+        dataType    : "json",       
+  }).done(function(newStatus) {
+      $("#status" + ttId).text(statusName[newStatus]);
+      $("#action" + ttId).text(actionName[newStatus]);
+  });
+  e.preventDefault();
+});
+</script>';
+
 
 $template->pageData['logoutLink'] = loginBox($uinfo);
 
-// have to include these here again since they can't be loaded from the template
+// Include these again since they can't be loaded from the template
 // because this page is in a different folder and the paths in the template are hardocded
 $template->pageData['customJS'] .= '<script src="../js/bootstrap.min.js"></script>';
 
-// JS for tablesorter
 $template->pageData['customJS'] .= '<script src="../js/jquery.tablesorter.min.js"></script>
 				<script src="../js/jquery.tablesorter.widgets.min.js"></script>
 				<script src="../js/jquery.tablesorter.pager.min.js"></script>';
