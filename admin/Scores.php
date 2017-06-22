@@ -55,7 +55,7 @@ select t.author_id as user_id, count(*) as n
 select t.author_id as user_id, count(*) as n
  from user_comments_tt c
  inner join teachingtip t on c.teachingtip_id = t.id
- where c.user_id <> t.author_id t.status = 'active'
+ where c.user_id <> t.author_id and t.status = 'active'
  group by t.author_id", 'C');
     Scores::update($this->esteem, "
 select t.author_id as user_id, count(*) as n
