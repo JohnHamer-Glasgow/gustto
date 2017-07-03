@@ -5,9 +5,10 @@ require_once(__DIR__ . '/../config.php');
 function checkLoggedInUser($allowLogin = true) {
   session_start();
 
-  if ($allowLogin && isset($_REQUEST['uname']) && isset($_REQUEST['pwd']))
-    $uinfo = checkLogin($_REQUEST['uname'], $_REQUEST['pwd']);
-  elseif (!isset($_REQUEST['logout']) && isset($_SESSION['uinfo']))
+  if ($allowLogin && isset($_REQUEST['uname']) && isset($_REQUEST['pwd'])) {
+    $uinfo = checkLogin($_REQUEST['uname'], $_REQUEST['pwd'], $error);
+    Debug('checkLoggedInUser', $_REQUEST['uname'], $uinfo, "Error code: $error");
+  } elseif (!isset($_REQUEST['logout']) && isset($_SESSION['uinfo']))
     $uinfo = $_SESSION['uinfo'];
   else
     $uinfo = false;
