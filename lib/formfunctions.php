@@ -83,8 +83,8 @@ function teachingtip_add($ttdata, $userID, $draft=false) {
 function teachingtip_update($ttdata, $ttID, $userID, $draft=false) {
   $tt = teachingtip::retrieve_teachingtip($ttID);
   $cids = $tt->get_contributors_ids();
-
-  if ($userID != $tt->author_id && !in_array($userID, $cids))
+  $user = user::retrieve_user($userID);
+  if ($userID != $tt->author_id && !in_array($userID, $cids) && !$user->isadmin)
     return false;
 
   $tt->title = $ttdata['title'];

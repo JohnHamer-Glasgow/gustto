@@ -60,7 +60,6 @@ $class_size = array();
 $contributorsIDs = array();
 $contributorsEmails = array();
 $environment = array();
-$it_competency = array();
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
   if (isset($_GET['ttID']) && is_numeric($_GET['ttID']) && $_GET['ttID'] >= 0){
@@ -161,8 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	    else
 	      $errors['contributor'][$index] = 'You entered the same co-author multiple times';
 	  }
-	}
-	else {
+	} else {
 	  if (!in_array($contributorEmail, $contributorsEmails))
 	    $contributorsEmails[] = $contributorEmail;
 	  else
@@ -174,7 +172,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   }
 
   if (empty($_POST['title']))
-    $errors['name'] = 'Please provide a name for the Teaching Tip';
+      $errors['name'] = 'Please provide a name for the Teaching Tip';
   else {
     $title = sanitize_input($_POST['title']);
     if (strlen($title) > 128)
@@ -217,9 +215,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
   }
 
-  if (empty($_POST['class_size']) && !$draft)
-    $errors['class_size'] = 'Please select an option/multiple options for the class size';
-  else {
+  if (empty($_POST['class_size'])) {
+    if(!$draft)
+      $errors['class_size'] = 'Please select an option/multiple options for the class size';
+  } else {
     $post_class_size = $_POST['class_size'];
     foreach ($post_class_size as $key => $val) {
       $cs = sanitize_input($val);
@@ -228,31 +227,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
   }
 
-  if (empty($_POST['environment']) && !$draft)
-    $errors['environment'] = 'Please select an option for the environment';
-  else {
-    $post_environment = $_POST['environment'];
-    foreach ($post_environment as $key=>$val) {
+  if (empty($_POST['environment'])) {
+    if (!$draft)
+      $errors['environment'] = 'Please select an option for the environment';
+  } else {
+    foreach ($_POST['environment'] as $key => $val) {
       $e = sanitize_input($val);
       if (array_key_exists($e, $ENVS))
 	$environment[] = $e;
     }
   }
   
-  if (empty($_POST['suitable_ol']) && !$draft)
-    $errors['suitable_ol'] = 'Please specify if this Teaching Tip is suitable for online learning';
-  else {
-    $suitable_ol = sanitize_input($_POST['suitable_ol']);
-    if ($suitable_ol != "yes" && $suitable_ol != "no") $suitable_ol = "";
+  if (empty($_POST['suitable_ol'])) {
+    if (!$draft)
+      $errors['suitable_ol'] = 'Please specify if this Teaching Tip is suitable for online learning';
+  } else {
+    $sol = sanitize_input($_POST['suitable_ol']);
+    if (in_array($sol, array('yes', 'no')))
+      $suitable_ol[] = $sol;
   }
   
-  if (empty($_POST['it_competency']) && !$draft)
-    $errors['it_competency'] = 'Please select an option for the IT competency required';
-  else {
-    $post_it_competency = $_POST['it_competency'];
-    foreach ($post_it_competency as $key=>$val) {
+  if (empty($_POST['it_competency'])) {
+    if (!$draft)
+      $errors['it_competency'] = 'Please select an option for the IT competency required';
+  } else {
+    foreach ($_POST['it_competency'] as $key => $val) {
       $itc = sanitize_input($val);
-      if (array_key_exists($itc, $ITC)) $it_competency[] = $itc;
+      if (array_key_exists($itc, $ITC))
+	$it_competency[] = $itc;
     }
   }
 
@@ -485,10 +487,11 @@ $template->pageData['content'] .=
      <label for="inputTTSuitableOnlineLearning" class="control-label"><span class="mandatory">*</span>Suitable for online learning</label>';
 if ($errors['suitable_ol'])
   $template->pageData['content'] .= '<span class="tt-add-form-error"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ' . $errors['suitable_ol'] . '</span>';
+
 $template->pageData['content'] .= 
   '<div class="radio">
-     <label><input type="radio" value="yes" ' . ($suitable_ol[0] == "yes" ? 'checked="checked"' : '') . ' name="suitable_ol" />Yes</label>
-     <label><input type="radio" value="no" '  . ($suitable_ol[0] == "no" ? 'checked="checked"' : '') . ' name="suitable_ol" />No</label>
+     <label><input type="radio" value="yes" ' . (in_array('yes', $suitable_ol) ? 'checked="checked"' : '') . ' name="suitable_ol" />Yes</label>
+     <label><input type="radio" value="no" '  . (in_array('no', $suitable_ol) ? 'checked="checked"' : '') . ' name="suitable_ol" />No</label>
    </div>';
 
 $template->pageData['content'] .= '</div>';
@@ -508,6 +511,7 @@ $template->pageData['content'] .= '</div>';
 
 $template->pageData['content'] .= '<div class="form-group"><label for="inputTTschool" class="control-label">Please indicate your school or unit, for easier search.</label>';
 $template->pageData['content'] .= '<select class="form-control" id="inputTTschool" name="school">';
+$template->pageData['content'] .= '<option value="Other"' . ('' == $ttSchool ? " selected='selected'" : '') . '></option>';
 foreach ($SCHOOLS as $s)
   $template->pageData['content'] .= '<option value="' . $s . '"' . ($s == $ttSchool ? " selected='selected'" : '') . '>' . $s . '</option>';
 $template->pageData['content'] .= '</select></div>';

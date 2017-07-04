@@ -1,8 +1,7 @@
 <?php
 // Used for filtering on search page
 $SCHOOLS =
-    array('',
-	  'Adam Smith Business School',
+    array('Adam Smith Business School',
 	  'Chemistry',
 	  'Computing Science',
 	  'Critical Studies',

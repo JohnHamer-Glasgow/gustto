@@ -118,7 +118,7 @@ if (isset($_GET['q'])) {
 }
 
 if ($display_filter) {
-  $schools = dataConnection::runQuery("select school, count(*) as count from teachingtip where status = 'active' group by school");
+  $schools = dataConnection::runQuery("select school, count(*) as count from teachingtip where status = 'active' and school <> '' group by school");
   
   if ($school_filter || $class_size_filter || $env_filter || $sol_filter || $itc_filter)
     $results = teachingtip::get_tts_from_filters($schools_for_query, $sizes_for_query, $envs_for_query, $sol_for_query, $itc_for_query);

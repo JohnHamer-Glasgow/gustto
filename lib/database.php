@@ -1768,7 +1768,7 @@ select c.* from ttcomment as c
 
 	function get_filters($cat) {
 	  $result = dataConnection::runQuery("
-select f.*
+select f.opt
  from ttfilter as f
  inner join teachingtip as tt on f.teachingtip_id = tt.id
  where tt.id ='" . dataConnection::safe($this->id) . "' and f.category = '" . dataConnection::safe($cat)."'");
