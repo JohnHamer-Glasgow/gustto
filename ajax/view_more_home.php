@@ -8,7 +8,7 @@ require_once(__DIR__ . '/../lib/sharedfunctions.php');
 require_once(__DIR__ . '/../corelib/dataaccess.php');
 require_once(__DIR__ . '/../lib/formfunctions.php');
 
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(false, $error);
 if ($uinfo == false) exit();
 
 $data = array();

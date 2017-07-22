@@ -11,7 +11,7 @@ require_once(__DIR__.'/../lib/formfunctions.php');
 require_once(__DIR__.'/../lib/constants.php');
 
 $newStatus = 'deleted';
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(false, $error);
 if ($uinfo) {
   $dbUser = getUserRecord($uinfo);
   $loggedUserID = $dbUser->id;

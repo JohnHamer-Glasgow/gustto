@@ -8,16 +8,14 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
-session_start();
+$uinfo = checkLoggedInUser(false, $error);
+if (!$uinfo)
+  exit();
 
-$uinfo = checkLoggedInUser();
 $dbUser = getUserRecord($uinfo);
 $userID = $dbUser->id;
 
-if ($uinfo == false) {
-  header("Location: ../login.php");
-  exit();
-}
+session_start();
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token'])
   exit();

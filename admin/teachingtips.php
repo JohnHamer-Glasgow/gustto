@@ -10,7 +10,7 @@ require_once(__DIR__.'/../lib/constants.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 $template = new templateMerge('../html/template.html');
 
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(false, $error);
 if (!$uinfo) {
   header("Location: ../login.php?redirect=" . urlencode($_SERVER['REQUEST_URI']));
   exit();

@@ -7,7 +7,7 @@ require_once(__DIR__ . '/lib/database.php');
 require_once(__DIR__ . '/lib/sharedfunctions.php');
 require_once(__DIR__ . '/corelib/dataaccess.php');
 
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(true, $error);
 if ($uinfo) {
   session_start();
 
@@ -33,7 +33,7 @@ $template = new templateMerge($TEMPLATE);
 $template->pageData['pagetitle'] = 'GUSTTO Teaching Tips Online'; 
 $template->pageData['homeURL'] = 'index.php';
 $template->pageData['logoURL'] = 'images/logo/logo.png';
-$template->pageData['loginBox'] = loginBox(false);
+$template->pageData['loginBox'] = loginBox(false, $error);
 $template->pageData['content'] = 
   '<style>
 	.nav-bar-xs { display: none !important; } 

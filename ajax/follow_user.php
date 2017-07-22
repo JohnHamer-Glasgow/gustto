@@ -7,12 +7,9 @@ require_once(__DIR__.'/../lib/database.php');
 require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 
-$uinfo = checkLoggedInUser();
-
-if ($uinfo == false) {
-  header("Location: ../login.php");
+$uinfo = checkLoggedInUser(false, $error);
+if ($uinfo == false)
   exit();
-}
 
 session_start();
 

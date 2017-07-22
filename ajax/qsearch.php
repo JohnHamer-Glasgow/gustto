@@ -8,9 +8,9 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
-$uinfo = checkLoggedInUser();
-
+$uinfo = checkLoggedInUser(false, $error);
 if ($uinfo == false) exit();
+
 if (!isset($_GET['keyword'])) exit();
 
 $keyword = sanitize_input($_GET['keyword']);

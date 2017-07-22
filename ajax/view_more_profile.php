@@ -7,7 +7,7 @@ require_once(__DIR__ . '/../lib/database.php');
 require_once(__DIR__ . '/../lib/sharedfunctions.php');
 require_once(__DIR__ . '/../corelib/dataaccess.php');
 
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(false, $error);
 if ($uinfo == false) exit();
 
 if (!isset($_GET['userId']) || !is_numeric($_GET['userId']))

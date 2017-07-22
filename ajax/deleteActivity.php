@@ -8,14 +8,12 @@ require_once(__DIR__.'/../lib/sharedfunctions.php');
 require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 
-$uinfo = checkLoggedInUser();
+$uinfo = checkLoggedInUser(false, $error);
+if (!$uinfo)
+  exit();
+
 $dbUser = getUserRecord($uinfo);
 $loggedUserID = $dbUser->id;
-
-if ($uinfo == false){
-  header("Location: ../index.php");
-  exit();
-}
 
 session_start();
 

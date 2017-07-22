@@ -1,33 +1,32 @@
 <?php
-function checkLogin($username, $password, &$error = false) {
+function checkLogin($username, $password, &$error) {
   global $CFG;
-  if (strlen(trim($password)) == 0)
+  if (strlen(trim($password)) == 0) {
+    $error = 'Please enter your password';
     return false;
-  $error = false;
+  }
+  
   $ldap_host = $CFG['ldaphost'];
 
   $ds = @ldap_connect($ldap_host);
   if (isset($CFG['ldapbinduser']))
-    ldap_bind($ds, $CFG['ldapbinduser'], $CFG['ldapbindpass']);
+    @ldap_bind($ds, $CFG['ldapbinduser'], $CFG['ldapbindpass']);
   
   if (!$ds) {
-    $error = 'Failed to contact LDAP server';
-    Debug($error);
+    $error = 'Failed to contact the authentication server. Please try again later.';
     return false;
   }
   
   $sr = @ldap_search($ds, $CFG['ldapcontext'], "cn=$username");
   if (!$sr) {
-    $error = 'Failed to contact LDAP server';
-    Debug($error);
+    $error = 'Failed to contact the authentication server. Please try again later.';
     return false;
   }
   
   $entry = ldap_first_entry($ds, $sr);
   if (!$entry) {
     sleep(5);
-    $error = 'Incorrect username or password';
-    Debug($error);
+    $error = 'Incorrect username or password.';
     return false;
   }
 
@@ -35,15 +34,13 @@ function checkLogin($username, $password, &$error = false) {
   $ok = @ldap_bind( $ds, $user_dn, $password);
   if (!$ok) {
     sleep(5);
-    $error = 'Incorrect username or password';
-    Debug($error);
+    $error = 'Incorrect username or password.';
     return false;
   }
 
   $sr = ldap_search($ds, $CFG['ldapcontext'], "cn=$username");
   if (ldap_count_entries($ds, $sr) == 0) {
-    $error = "No identity vault entry found.<br/>";
-    Debug($error);
+    $error = "No identity vault entry found.";
     ldap_free_result($sr);
     return false;
   }
@@ -52,11 +49,8 @@ function checkLogin($username, $password, &$error = false) {
   ldap_free_result($sr);
   $record = $records[0];
 
-  Debug($record['dn']);
-
   if (strpos($record['dn'], 'ou=staff') === false) {
-    $error = 'No permission';
-    Debug($error);
+    $error = 'You do not have permission to access this site.';
     return false;
   }
 
@@ -69,6 +63,7 @@ function checkLogin($username, $password, &$error = false) {
   } else
     $school = '';
 
+  $error = '';
   return array('uname' => $record['uid'][0],
                'gn' => $record['givenname'][0],
                'sn' => $record['sn'][0],

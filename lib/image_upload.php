@@ -9,16 +9,15 @@ require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 require_once(__DIR__.'/../lib/constants.php');
 
-session_start();
-
-$uinfo = checkLoggedInUser();
-$dbUser = getUserRecord($uinfo);
-$loggedUserID = $dbUser->id;
-
+$uinfo = checkLoggedInUser(false, $error);
 if ($uinfo == false) {
   header("Location: ../login.php");
   exit();
 }
+
+$dbUser = getUserRecord($uinfo);
+$loggedUserID = $dbUser->id;
+session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_FILES["profilePicture"])) {
   if (!(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']))

@@ -9,12 +9,9 @@ require_once(__DIR__.'/../corelib/dataaccess.php');
 require_once(__DIR__.'/../lib/formfunctions.php');
 require_once(__DIR__.'/../lib/constants.php');
 
-$uinfo = checkLoggedInUser();
-
-if ($uinfo == false) {
-  header("Location: ../login.php");
+$uinfo = checkLoggedInUser(false, $error);
+if ($uinfo == false)
   exit();
-}
 
 session_start();
 $data = array();
