@@ -38,12 +38,15 @@ $user = user::retrieve_user($loggedUserID);
 session_start();
 $new_tts_number = $user->get_number_new_tts(isset($_SESSION['last_visit']) ? $_SESSION['last_visit'] : $user->last_visit);
 
-$filterData = array('recent'   => array('text' => 'Most Recent',
-					'id'   => 'recent',
+$filterData = array('random'   => array('text' => 'Random',
+					'id'   => 'random',
 					'icon' => 'refresh'),
+		    'recent'   => array('text' => 'Most Recent',
+					'id'   => 'recent',
+					'icon' => 'time'),
 		    'likes'    => array('text' => 'Most Liked',
 					'id'   => 'top-likes',
-					'icon' => 'fire'),
+					'icon' => 'thumbs-up'),
 		    'comments' => array('text' => 'Most Commented',
 					'id'   => 'top-commented',
 					'icon' => 'pencil'));
@@ -64,14 +67,16 @@ $periodData = array('alltime'   => array('time' => 0,
 if (isset($_GET['filterType']) && isset($filterData[$_GET['filterType']]))
   $filterType = $_GET['filterType'];
 else
-  $filterType = 'recent';
+  $filterType = 'random';
 
 if (isset($_GET['period']) && isset($periodData[$_GET['period']]))
   $period = $_GET['period'];
 else
   $period = 'alltime';
 
-if ($filterType == 'recent')
+if ($filterType == 'random')
+  $tips = getRandomTeachingTips(10);
+else if ($filterType == 'recent')
   $tips = getLatestTeachingTips(10);
 else
   $tips = teachingtip::getPopularTeachingTips(10, 0, $filterType, $periodData[$period]['time']);

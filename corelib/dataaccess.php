@@ -2,21 +2,22 @@
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 class dataConnection {
-  private static $dbconn;
-  private static $dblink = null;
+  private static $db = null;
 
   public static function connect() {
-    global $DBCFG;
-    self::$dblink = mysql_connect($DBCFG['host'], $DBCFG['username'], $DBCFG['password']) or die("cannot connect");
-    self::$dbconn = mysql_select_db($DBCFG['db_name'], self::$dblink) or die(mysql_error());
+    if (self::$db == null) {
+      global $DBCFG;
+      self::$db = new mysqli($DBCFG['host'], $DBCFG['username'], $DBCFG['password'], $DBCFG['db_name']);
+      if (self::$db->connect_errno) die("cannot connect");
+    }
   }
 
   public static function runQuery($query) {
-    if (self::$dblink == null)
-      dataConnection::connect();
-    $result = mysql_query($query, self::$dblink);
+    dataConnection::connect();
+    Debug($query);
+    $result = self::$db->query($query);
     if (!$result) {
-      $message  = 'Invalid query: ' . mysql_error() . "\n";
+      $message  = 'Invalid query: ' . self::$db->error . "\n";
       $message .= 'Whole query: ' . $query;
       die($message);
     }
@@ -25,7 +26,7 @@ class dataConnection {
       $output = true;
     else {
       $output = array();
-      while ($row = mysql_fetch_array($result, MYSQL_ASSOC))
+      while ($row = $result->fetch_assoc())
 	$output[] = $row;
     }
     
@@ -33,16 +34,15 @@ class dataConnection {
   }
 
   public static function close() {
-    if (self::$dblink!=null)
-      mysql_close(self::$dblink);
-    self::$dblink = null;
+    if (self::$db != null)
+      self::$db->close();
+    self::$db = null;
   }
 
   public static function safe($in) {
-    if (self::$dblink == NULL)
-      dataConnection::connect();
+    dataConnection::connect();
     
-    return mysql_real_escape_string($in);
+    return self::$db->real_escape_string($in);
   }
 
   public static function db2date($in) {

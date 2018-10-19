@@ -46,6 +46,17 @@ function getUserRecord($uinfo) {
 
 // NEW DATABASE FUNCTIONS
 
+function getRandomTeachingTips($limit = false, $lowerL = 0) {
+  $query = "select * from teachingtip where status = 'active' order by rand() desc";
+  if ($limit) $query.= " limit " .dataConnection::safe($limit);
+  $query .= " offset " . dataConnection::safe($lowerL);
+  $result = dataConnection::runQuery($query);
+  $tts = array();
+  foreach($result as $r)
+    array_push($tts, new teachingtip($r));
+  return $tts;
+}
+
 function getLatestTeachingTips($limit = false, $lowerL = 0) {
   $query = "select * from teachingtip where status = 'active' order by id desc";
   if ($limit) $query.= " limit " .dataConnection::safe($limit);

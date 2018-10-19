@@ -158,7 +158,7 @@ class ChangeTracker {
   var $_original;
   var $_changes;
     
-  function ChangeTracker($original) {
+  function __construct($original) {
     $this->_changes = array();
     $this->_original = $original;
   }
@@ -198,7 +198,7 @@ class user {
   var $last_visit;
   var $isadmin;
   
-  function user($asArray=null) {
+  function __construct($asArray=null) {
     $this->id = null;
     $this->name = "";
     $this->lastname = "";
@@ -871,7 +871,7 @@ class user_settings {
   var $followers_posts;
   var $awards;
   
-  function user_settings($asArray=null) {
+  function __construct($asArray=null) {
     $this->id = null; //primary key
     $this->user_id = null; // foreign key, needs dealt with.
     $this->school_posts = "0";
@@ -994,7 +994,7 @@ class admin
 	var $id; //primary key
 	var $role;
 
-	function admin($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->role = "";
@@ -1105,7 +1105,7 @@ class admin_settings
 	var $engagement_follow;
 	var $log_actions;
 
-	function admin_settings($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->esteem_like = "0";
@@ -1269,7 +1269,7 @@ class award
 	var $rank;
 	var $about;
 
-	function award($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->name = "";
@@ -1405,7 +1405,7 @@ class user_earns_award
 	var $time;
 	var $promoted;
 
-	function user_earns_award($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->user_id = null; // foreign key, needs dealt with.
@@ -1536,7 +1536,7 @@ class teachingtip {
 	var $school;
 	var $status;
 
-	function teachingtip($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->author_id = null; // foreign key, needs dealt with.
@@ -1907,7 +1907,7 @@ class ttcomment
 	var $comment;
 	var $archived;
 
-	function ttcomment($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->time = time();
@@ -2027,7 +2027,7 @@ class ttkeyword
 	var $keyword;
 	var $archived;
 
-	function ttkeyword($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->ttid_id = null; // foreign key, needs dealt with.
@@ -2147,7 +2147,7 @@ class ttfilter
 	var $category;
 	var $opt;
 
-	function ttfilter($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->teachingtip_id = null; // foreign key, needs dealt with.
@@ -2263,7 +2263,7 @@ class ttview
 	var $user_id; //foreign key
 	var $time;
 
-	function ttview($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->teachingtip_id = null; // foreign key, needs dealt with.
@@ -2390,7 +2390,7 @@ class contributors
 	var $email;
 	var $seen;
 
-	function contributors($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->user_id = null; // foreign key, needs dealt with.
@@ -2511,7 +2511,7 @@ class user_comments_tt
 	var $time;
 	var $archived;
 
-	function user_comments_tt($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->user_id = null; // foreign key, needs dealt with.
@@ -2655,7 +2655,7 @@ class user_likes_tt
 	var $time;
 	var $archived;
 
-	function user_likes_tt($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->user_id = null; // foreign key, needs dealt with.
@@ -2793,7 +2793,7 @@ class user_shares_tt
 	var $message;
 	var $archived;
 
-	function user_shares_tt($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->sender = "";
@@ -2935,7 +2935,7 @@ class user_follows_user
 	var $user_id; //foreign key
 	var $time;
 
-	function user_follows_user($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->follower_id = null; // foreign key, needs dealt with.
@@ -3057,7 +3057,7 @@ class notification
 	var $time;
 	var $seen;
 
-	function notification($asArray=null)
+	function __construct($asArray=null)
 	{
 		$this->id = null; //primary key
 		$this->user_id = null; // foreign key, needs dealt with.
