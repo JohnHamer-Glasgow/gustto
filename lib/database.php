@@ -1855,47 +1855,44 @@ select count(*) as number_comments
 	}
 
 	static function get_tts_from_filters($schools, $sizes, $envs, $sol, $itc) {
-	  $results = array();
+	  $filters = array();
+	  
 	  if ($schools) {
 	    $schools_map = array_map(function($s) { return 'school = ' . "'" . $s . "'"; }, $schools);
-	    if (!empty($schools_map)) {
-	      $result = dataConnection::runQuery("select * from teachingtip as tt"
-						 . " where status = 'active' and (" . implode(' or ', $schools_map)
-						 . ") order by time desc");
-	      foreach($result as $r)
-		$results[] = new teachingtip($r);
-	    }
+	    if (!empty($schools_map))
+	      $filters[] = '(' . implode(' or ', $schools_map) . ')';
 	  }
-	  
+
 	  if ($sizes) {
 	    $sizes_map = array_map(function($cs) { return 'f.opt = ' . "'" . $cs . "'"; }, $sizes);
-	    if (!empty($sizes_map)) {
-	      foreach (getTTsWithFilters("f.category = 'class_size' AND (" . implode(' OR ', $sizes_map) . ") ") as $tt)
-		$results[] = $tt;
-	    }
+	    if (!empty($sizes_map))
+	      $filters[] = '(' . implode(' or ', $sizes_map) . ')';
 	  }
 	  
 	  if ($envs) {
 	    $envs_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $envs);
 	    if (!empty($envs_map))
-	      foreach (getTTsWithFilters("f.category = 'environment' AND (" . implode(' OR ', $envs_map) . ") ") as $tt)
-		$results[] = $tt;
+	      $filters[] = '(' . implode(' or ', $envs_map) . ')';
 	  }
-
+	  
 	  if ($sol) {
 	    $sol_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $sol);
 	    if (!empty($sol_map))
-	      foreach (getTTsWithFilters("f.category = 'suitable_ol' AND (" . implode(' OR ', $sol_map) . ") ") as $tt)
-		$results[] = $tt;
+	      $filters[] = '(' . implode(' or ', $sol_map) . ')';
 	  }
-	  
+
 	  if ($itc) {
 	    $itc_map = array_map(function($e) { return 'f.opt = ' . "'" . $e . "'"; }, $itc);
 	    if (!empty($itc_map))
-	      foreach (getTTsWithFilters("f.category = 'it_competency' AND (" . implode(' OR ', $itc_map) . ") ") as $tt)
-		$results[] = $tt;
+	      $filters[] = '(' . implode(' or ', $itc_map) . ')';
 	  }
-	  
+
+	  $rs = dataConnection::runQuery(
+	    "select distinct tt.* from ttfilter as f inner join teachingtip as tt on f.teachingtip_id = tt.id where status = 'active' and (" . implode(' and ', $filters) . ") order by time desc");
+
+	  $results = array();
+	  foreach($rs as $r)
+	    $results[] = new teachingtip($r);
 	  return $results;
 	}
 }
