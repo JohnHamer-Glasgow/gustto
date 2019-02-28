@@ -123,7 +123,7 @@ $template->pageData['content'] .= '
                 </div>
               </div>';
 
-if ($filterType != 'recent') {
+if ($filterType != 'recent' && $filterType != 'random') {
   $template->pageData['content'] .= "<div class='col-xs-12 feed-period-header'>";
   foreach ($periodData as $p => $data) {
     $sel = $period == $p ? "period-selected" : '';
