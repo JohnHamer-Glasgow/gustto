@@ -116,9 +116,9 @@ ksort($timeseries);
 
 $dt = new DateTime();
 // Add any missing weeks
-list ($y0, $w0) = split('-', key($timeseries));
+list ($y0, $w0) = explode('-', key($timeseries));
 end($timeseries);
-list ($y1, $w1) = split('-', key($timeseries));
+list ($y1, $w1) = explode('-', key($timeseries));
 for ($y = $y0; $y <= $y1; $y++) {
   if ($y == $y1)
     $lastw = $w1;
@@ -132,7 +132,7 @@ for ($y = $y0; $y <= $y1; $y++) {
 krsort($timeseries);
 $template->pageData['content'] .= '<tbody>';
 foreach ($timeseries as $d => $t) {
-  list ($year, $week) = split('-', $d);
+  list ($year, $week) = explode('-', $d);
   $monday = $dt->setISODate(intval($year), intval($week))->format('d M');
   $template->pageData['content'] .= '
 <tr>
